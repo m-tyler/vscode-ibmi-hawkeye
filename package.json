@@ -1,0 +1,224 @@
+{
+  "name": "vscode-ibmi-hawkeye",
+  "displayName": "Hawkeye Pathfinder",
+  "description": "Hawkeye cross reference research",
+  "version": "0.0.2",
+  "preview": true,
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.71.0"
+  },
+  "author": {
+    "name": "Matt Tyler",
+    "url": "https://github.com/HawkeyeTools"
+  },
+  "publisher": "WinCo",
+  "repository": {
+    "url": "https://github.com/m-tyler/vscode-ibmi-hawkeye"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "HalcyonTechLtd.code-for-ibmi"
+  ],
+  "main": "./dist/extension.js",
+  "l10n": "./l10n",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+				{
+					"id": "Hawkeye-search",
+					"title": "Hawkeye Pathfinder",
+					"icon": "$(references)"
+				}
+      ]
+    },
+    "views": {
+      "Hawkeye-search": [
+        {
+          "id": "hawkeyeSearchView",
+          "name": "Results fs",
+          "when": "Hawkeye-Pathfinder:searchViewVisible"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "Hawkeye-Pathfinder.Tools.menu",
+        "label": "Hawkeye tools"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "Hawkeye-Pathfinder.closeSearchView",
+          "group": "navigation@2",
+          "when": "view == hawkeyeSearchView",
+          "icon": "$(close)"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.collapseSearchView",
+          "group": "navigation@1",
+          "when": "view == hawkeyeSearchView",
+          "icon": "$(collapse-all)"
+        }
+      ],
+      "Hawkeye-Pathfinder.Tools.menu": [
+        {
+          "command": "Hawkeye-Pathfinder.displayFileSetsUsed"
+          ,"when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/"
+          ,"group": "1_pathfinderTools@2"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProgramObjects"
+          ,"when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/"
+          ,"group": "1_pathfinderTools@2"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayObjectUsed"
+          ,"when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/"
+          ,"group": "1_pathfinderTools@2"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.runPRTRPGPRT"
+          ,"when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/"
+          ,"group": "1_pathfinderTools@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "Hawkeye-Pathfinder.searchSourceFiles",
+          "when": "viewItem =~ /^SPF.*$/",
+          "group": "4_sourceFileStuff@2"
+        },
+        {
+          "submenu": "Hawkeye-Pathfinder.Tools.menu",
+          "when": "view === objectBrowser"
+        }
+      ],
+      "commandPalette": [
+        {
+					"command": "Hawkeye-Pathfinder.searchSourceFiles",
+					"when": "code-for-ibmi:connected"
+				},
+        {
+					"command": "Hawkeye-Pathfinder.displayFileSetsUsed",
+					"when": "code-for-ibmi:connected"
+				},
+        {
+          "command": "Hawkeye-Pathfinder.displayProgramObjects",
+          "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.closeSearchView",
+          "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.collapseSearchView",
+          "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayObjectUsed",
+          "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
+          "when": "never"
+        }
+      ]
+    },
+    "customEditors": [
+    ],
+    "commands": [
+      {
+        "command": "Hawkeye-Pathfinder.searchSourceFiles",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Hawkeye Scan Source Files ",
+        "category": "hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display File Set Where Used ",
+        "category": "hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.displayProgramObjects",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display Program Objects ",
+        "category": "hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.closeSearchView",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Close Hawkeye Results View",
+        "category": "hawkeye",
+        "icon": "$(close)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.collapseSearchView",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Collapse all Hawkeye Results",
+        "category": "hawkeye",
+        "icon": "$(collapse-all)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.displayObjectUsed",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display Object Where Used",
+        "category": "hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Spacing Chart-RPG Print File",
+        "category": "hawkeye"
+      }
+    ],
+    "keybindings": [
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "nls": "npx @vscode/l10n-dev export --outDir ./l10n ./src",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@halcyontech/vscode-ibmi-types": "^2.7.0",
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.71.0",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "esbuild": "^0.19.2",
+    "esbuild-loader": "^3.0.1",
+    "eslint": "^8.20.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "ts-loader": "^9.3.1",
+    "typescript": "^4.8.2",
+    "webpack": "^5.76.0",
+    "webpack-cli": "^4.5.0"
+  },
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^1.4.0",
+    "i": "^0.3.7",
+    "npm": "^10.4.0"
+  }
+}

@@ -41,7 +41,7 @@
       "Hawkeye-search": [
         {
           "id": "hawkeyeSearchView",
-          "name": "Results fs",
+          "name": "Results",
           "when": "Hawkeye-Pathfinder:searchViewVisible"
         }
       ]

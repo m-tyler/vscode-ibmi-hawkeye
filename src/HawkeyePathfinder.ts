@@ -3,6 +3,7 @@ import vscode, { l10n, } from 'vscode';
 import { Code4i, getInstance } from "./tools";
 import { HawkeyeSearch } from "./api/HawkeyeSearch";
 import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
+import { getMemberCount } from "./api/IBMiTools";
 import { IBMiMember, MemberItem } from '@halcyontech/vscode-ibmi-types';
 // import IBMiContent from '@halcyontech/vscode-ibmi-types/api/IBMiContent';
 
@@ -109,21 +110,25 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
                 progress.report({
                   message: l10n.t(`Fetching member list for {0}`, ww.path)
                 });
-                const members: IBMiMember[] = await content.getMemberList({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name });
+                const memberCount = await getMemberCount({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name, extensions: ww.extension});
+                // const members: IBMiMember[] = await content.getMemberList({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name });
 
-                if (members.length > 0) {
+                // if (members.length > 0) {
+                if (memberCount > 0) {
                   // NOTE: if more messages are added, lower the timeout interval
                   const timeoutInternal = 9000;
                   const searchMessages = [
                     l10n.t(`Using Hawkeye Pathfinder's DSPSCNSRC to search source members`),
                     l10n.t(`'{0}' in {1}.`, searchTerm, ww.path),
-                    l10n.t(`This is taking a while because there are {0} members. Searching '{1}' in {2} still.`, members.length, searchTerm, ww.path),
+                    // l10n.t(`This is taking a while because there are {0} members. Searching '{1}' in {2} still.`, members.length, searchTerm, ww.path),
+                    l10n.t(`This is taking a while because there are {0} members. Searching '{1}' in {2} still.`, memberCount, searchTerm, ww.path),
                     l10n.t(`What's so special about '{0}' anyway?`, searchTerm),
                     l10n.t(`Still searching '{0}' in {1}...`, searchTerm, ww.path),
                     l10n.t(`While you wait, why not make some tea?`),
                     l10n.t(`Wow. This really is taking a while. Let's hope you get the result you want.`),
                     l10n.t(`Why was six afraid of seven?`),
-                    l10n.t(`How does one end up with {0} members?`, members.length),
+                    l10n.t(`How does one end up with {0} members?`, memberCount),
+                    // l10n.t(`How does one end up with {0} members?`, members.length),
                     l10n.t(`'{0}' in {1}.`, searchTerm, ww.path),
                   ];
 
@@ -150,8 +155,10 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
                     results = results.filter(result => {
                       const resultPath = result.path.split(`/`);
                       const resultName = resultPath[resultPath.length - 1].split(`.`)[0];
-                      const member = members.find(member => member.name === resultName);
-                      return (member && patternExt.test(member.extension));
+                      const resultExt = resultPath[resultPath.length - 1].split(`.`)[1];
+                      // const member = members.find(member => member.name === resultName);
+                      const member = resultName;
+                      return (member && patternExt.test(resultExt));
                     });
                   }
 

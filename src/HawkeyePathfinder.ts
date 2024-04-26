@@ -4,7 +4,7 @@ import { Code4i, getInstance } from "./tools";
 import { HawkeyeSearch } from "./api/HawkeyeSearch";
 import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
 import { getMemberCount } from "./api/IBMiTools";
-import { IBMiMember, MemberItem } from '@halcyontech/vscode-ibmi-types';
+import { MemberItem, } from '@halcyontech/vscode-ibmi-types';
 // import IBMiContent from '@halcyontech/vscode-ibmi-types/api/IBMiContent';
 
 interface wItem {
@@ -13,11 +13,11 @@ interface wItem {
   library: string,
   name: string,
   sourceFile: string,
-  extension: string,
+  type: string,
 };
 
 export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
-  hawkeyeSearchViewContext = new HawkeyeSearchView(context);
+  hawkeyeSearchViewProvider = new HawkeyeSearchView(context);
   context.subscriptions.push(
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFiles`, async (memberItem: MemberItem) => {
       const connection = getConnection();
@@ -29,8 +29,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.library = memberItem.filter.library;
         ww.sourceFile = memberItem.filter.object;
         ww.name = memberItem.filter.member;
-        ww.extension = memberItem.filter.memberType;
-        promptedValue = `${ww.library}/${ww.sourceFile}/${ww.name}.${ww.extension}`;
+        ww.type = memberItem.filter.memberType;
+        promptedValue = `${ww.library}/${ww.sourceFile}/${ww.name}.${ww.type}`;
       }
       else {
         ww.library = ``;
@@ -82,7 +82,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.library = wpath[0];
         ww.sourceFile = wpath[1];
         ww.name = wmember[0];
-        ww.extension = wmember[1];
+        ww.type = wmember[1];
         // connection.currentUser
       }
       ww.library = scrubLibrary(ww.library, `DSPSCNSRC`);
@@ -108,9 +108,9 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
                 title: l10n.t(`Searching`),
               }, async progress => {
                 progress.report({
-                  message: l10n.t(`Fetching member list for {0}`, ww.path)
+                  message: l10n.t(`Fetching member count for {0}`, ww.path)
                 });
-                const memberCount = await getMemberCount({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name, extensions: ww.extension});
+                const memberCount = await getMemberCount({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name, extensions: ww.type});
                 // const members: IBMiMember[] = await content.getMemberList({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name });
 
                 // if (members.length > 0) {
@@ -146,12 +146,12 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
                   // Hawkeye-Pathfinder-DSPSCNSRC
                   // returns results member name with member type as extension
                   let results = await HawkeyeSearch.hwksearchMembers(ww.library, ww.sourceFile
-                    , `${ww.name || `*`}.${ww.extension || `*`}`
+                    , `${ww.name || `*`}.${ww.type || `*`}`
                     , searchTerm, ww.protected);
 
                   // Filter search result by member type filter.
-                  if (results.length > 0 && ww.extension) {
-                    const patternExt = new RegExp(`^` + ww.extension.replace(/[*]/g, `.*`).replace(/[$]/g, `\\$`) + `$`);
+                  if (results.length > 0 && ww.type) {
+                    const patternExt = new RegExp(`^` + ww.type.replace(/[*]/g, `.*`).replace(/[$]/g, `\\$`) + `$`);
                     results = results.filter(result => {
                       const resultPath = result.path.split(`/`);
                       const resultName = resultPath[resultPath.length - 1].split(`.`)[0];
@@ -203,17 +203,27 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         //Running from command.
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (memberItem: MemberItem) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (Item) => {
       let ww = <wItem>{};
       let promptedValue;
-      if (memberItem) {
-        ww.path = memberItem.path;
-        ww.protected = memberItem.filter.protected;
-        ww.library = memberItem.member.library;
+      if (Item.object) {
+        ww.path = Item.path;
+        ww.protected = Item.filter.protected;
+        ww.library = Item.object.library;
         ww.library = scrubLibrary(ww.library, `DSPFILSETU`);
-        ww.name = memberItem.member.name;
-        ww.extension = memberItem.member.extension;
+        ww.name = Item.object.name;
+        ww.type = Item.object.attribute;
         promptedValue = `${ww.library}/${ww.name}`;
+      }
+      else if (Item.member) {
+        ww.path = Item.path;
+        ww.protected = Item.member.protected;
+        ww.library = Item.member.library;
+        ww.library = scrubLibrary(ww.library, `DSPFILSETU`);
+        ww.name = Item.member.name;
+        ww.type = Item.member.extension;
+          promptedValue = `${ww.library}/${ww.name}`;
+        
       }
       else {
         ww.library = ``;
@@ -222,8 +232,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.protected = true;
       }
       if (ww.path) {
-        if (ww.extension === 'SQL' && (/.*(tb|pf|v.*)/.test(ww.name))
-          || ww.extension === 'PF') {
+        if (ww.type === 'SQL' && (/.*(tb|pf|v.*)/gi.test(ww.name))
+          || ww.type === 'PF') {
         } else {
           // if (ww && !(/.*(tb.*\.sql|pf.*\.pf|v.*\.sql)/.test(ww.path))) {
           vscode.window.showErrorMessage(l10n.t(`Display File Set Used is only value for database tables or views.`));
@@ -343,17 +353,27 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         //Running from command.
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (memberItem: MemberItem) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (Item) => {
       let ww = <wItem>{};
       let promptedValue;
-      if (memberItem) {
-        ww.path = memberItem.path;
-        ww.protected = memberItem.filter.protected;
-        ww.library = memberItem.member.library;
+      if (Item.object) {
+        ww.path = Item.path;
+        ww.protected = Item.filter.protected;
+        ww.library = Item.object.library;
         ww.library = scrubLibrary(ww.library, `DSPPGMOBJ`);
-        ww.name = memberItem.member.name;
-        ww.extension = memberItem.member.extension;
+        ww.name = Item.object.name;
+        ww.type = Item.object.type;
         promptedValue = `${ww.library}/${ww.name}`;
+      }
+      else if (Item.member) {
+        ww.path = Item.path;
+        ww.protected = Item.member.protected;
+        ww.library = Item.member.library;
+        ww.library = scrubLibrary(ww.library, `DSPPGMOBJ`);
+        ww.name = Item.member.name;
+        ww.type = Item.member.extension;
+          promptedValue = `${ww.library}/${ww.name}`;
+        
       }
       else {
         ww.library = ``;
@@ -361,7 +381,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         promptedValue = ``;
         ww.protected = true;
       }
-      if (memberItem && (/.*(tb.*\.sql|pf.*\.pf|v.*\.sql|\.txt)/.test(ww.extension))) {
+      if (Item.member && (/.*(tb|pf|v.*|cmd)/gi.test(ww.type)) ||Item.object && !(/(\*PGM|\*SRVPGM)/gi.test(ww.type))) {
         vscode.window.showErrorMessage(l10n.t(`Display Program Objects is only value for *PGM or *SRVPGM types.`));
         return;
       }
@@ -385,7 +405,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.path = [wpath[0], wpath[1]].join('/');
         ww.library = wpath[0];
         ww.name = wpath[1];
-        ww.extension = `*`;
+        ww.type = `*`;
       }
 
       // Hawkeye-Pathfinder
@@ -473,17 +493,27 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         //Running from command.
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (memberItem: MemberItem) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (Item) => {
       let ww = <wItem>{};
       let promptedValue;
-      if (memberItem) {
-        ww.path = memberItem.path;
-        ww.protected = memberItem.filter.protected;
-        ww.library = memberItem.member.library;
+      if (Item.object) {
+        ww.path = Item.path;
+        ww.protected = Item.filter.protected;
+        ww.library = Item.object.library;
         ww.library = scrubLibrary(ww.library, `DSPOBJU`);
-        ww.name = memberItem.member.name;
-        ww.extension = memberItem.member.extension;
-        promptedValue = `${ww.library}/${ww.name}.*`;
+        ww.name = Item.object.name;
+        ww.type = Item.object.attribute;
+        promptedValue = `${ww.library}/${ww.name}`;
+      }
+      else if (Item.member) {
+        ww.path = Item.path;
+        ww.protected = Item.member.protected;
+        ww.library = Item.member.library;
+        ww.library = scrubLibrary(ww.library, `DSPOBJU`);
+        ww.name = Item.member.name;
+        ww.type = Item.member.extension;
+          promptedValue = `${ww.library}/${ww.name}`;
+        
       }
       else {
         ww.library = ``;
@@ -515,7 +545,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.library = wpath[0];
         wpath = wpath[1].split(`.`);// split wpath[1] into obj + type
         ww.name = wpath[0];
-        ww.extension = wpath[1]?wpath[1]:`*`;
+        ww.type = wpath[1]?wpath[1]:`*`;
       }
 
       // Hawkeye-Pathfinder
@@ -572,7 +602,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
                   }, timeoutInternal);
                   // Hawkeye-Pathfinder-DSPSCNSRC
                   // returns results member name with member type as extension
-                  let results = await HawkeyeSearch.hwkdisplayObjectUsed(ww.library, ww.name, ww.extension
+                  let results = await HawkeyeSearch.hwkdisplayObjectUsed(ww.library, ww.name, ww.type
                     , searchTerm, howUsed, ww.protected);
 
                   if (results.length > 0) {
@@ -618,7 +648,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
 
       //Run SQL, upload/download stuff
       // const content = Code4i.getContent();
-      if (memberItem && !(/.*(RPG).*/.test(memberItem.path))) {
+      if (memberItem && !(/.*(RPG).*/gi.test(memberItem.path))) {
         vscode.window.showErrorMessage(l10n.t(`Spacing Chart-RPG Print File is only value for *RPG* programs.`));
         return;
       }
@@ -649,7 +679,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
-    vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewContext),
+    vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewProvider),
   );
   getInstance()?.onEvent(`connected`, create_HWK_getObjectSourceInfo_Tools);
 }
@@ -684,9 +714,9 @@ function getContent() {
   }
 }
 
-let hawkeyeSearchViewContext: HawkeyeSearchView;
+let hawkeyeSearchViewProvider: HawkeyeSearchView;
 export function setSearchResultsHwk(actionCommand: string, term: string, results: HawkeyeSearch.Result[]) {
-  hawkeyeSearchViewContext.setResults(actionCommand, term, results);
+  hawkeyeSearchViewProvider.setResults(actionCommand, term, results);
 }
 
 // function create_HWK_getObjectSourceInfo_Tools(context: vscode.ExtensionContext) {
@@ -783,7 +813,7 @@ function getHWK_getObjectSourceInfo_func_src(library: string): string {
  * @returns a true or false value
  */
 function scrubLibrary(lib: string, command: string): string {
-  if (/.*(SRC).*/.test(lib)) {
+  if (/.*(SRC).*/gi.test(lib)) {
     switch (command) {
     case `DSPSCNSRC`:
       break;

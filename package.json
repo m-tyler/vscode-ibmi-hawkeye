@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "preview": true,
   "license": "MIT",
   "engines": {
@@ -138,7 +138,7 @@
         "command": "Hawkeye-Pathfinder.searchSourceFiles",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Hawkeye Scan Source Files ",
-        "category": "hawkeye",
+        "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {

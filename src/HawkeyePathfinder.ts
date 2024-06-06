@@ -5,7 +5,6 @@ import { HawkeyeSearch } from "./api/HawkeyeSearch";
 import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
 import { getMemberCount } from "./api/IBMiTools";
 import { MemberItem, } from '@halcyontech/vscode-ibmi-types';
-// import IBMiContent from '@halcyontech/vscode-ibmi-types/api/IBMiContent';
 
 interface wItem {
   path: string,
@@ -206,7 +205,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (Item) => {
       let ww = <wItem>{};
       let promptedValue;
-      if (Item.object) {
+      if (Item && Item.object) {
         ww.path = Item.path;
         ww.protected = Item.filter.protected;
         ww.library = Item.object.library;
@@ -215,7 +214,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.type = Item.object.attribute;
         promptedValue = `${ww.library}/${ww.name}`;
       }
-      else if (Item.member) {
+      else if (Item && Item.member) {
         ww.path = Item.path;
         ww.protected = Item.member.protected;
         ww.library = Item.member.library;
@@ -356,7 +355,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (Item) => {
       let ww = <wItem>{};
       let promptedValue;
-      if (Item.object) {
+      if (Item && Item.object) {
         ww.path = Item.path;
         ww.protected = Item.filter.protected;
         ww.library = Item.object.library;
@@ -365,7 +364,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.type = Item.object.type;
         promptedValue = `${ww.library}/${ww.name}`;
       }
-      else if (Item.member) {
+      else if (Item && Item.member) {
         ww.path = Item.path;
         ww.protected = Item.member.protected;
         ww.library = Item.member.library;
@@ -381,7 +380,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         promptedValue = ``;
         ww.protected = true;
       }
-      if (Item.member && (/.*(tb|pf|v.*|cmd)/gi.test(ww.type)) ||Item.object && !(/(\*PGM|\*SRVPGM)/gi.test(ww.type))) {
+      if (Item && ((/.*(tb|pf|v.*|cmd)/gi.test(ww.type)) || !(/(\*PGM|\*SRVPGM)/gi.test(ww.type)))) {
         vscode.window.showErrorMessage(l10n.t(`Display Program Objects is only value for *PGM or *SRVPGM types.`));
         return;
       }
@@ -496,7 +495,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (Item) => {
       let ww = <wItem>{};
       let promptedValue;
-      if (Item.object) {
+      if (Item && Item.object) {
         ww.path = Item.path;
         ww.protected = Item.filter.protected;
         ww.library = Item.object.library;
@@ -505,7 +504,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.type = Item.object.attribute;
         promptedValue = `${ww.library}/${ww.name}`;
       }
-      else if (Item.member) {
+      else if (Item && Item.member) {
         ww.path = Item.path;
         ww.protected = Item.member.protected;
         ww.library = Item.member.library;

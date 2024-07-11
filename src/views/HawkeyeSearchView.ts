@@ -18,11 +18,9 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.refreshSearchView`, async () => {
         this.refresh();
       }),
-
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.closeSearchView`, async () => {
         vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:searchViewVisible`, false);
       }),
-
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.collapseSearchView`, async () => {
         this.collapse();
       }),

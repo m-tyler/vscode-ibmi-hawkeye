@@ -718,7 +718,6 @@ export function setSearchResultsHwk(actionCommand: string, term: string, results
   hawkeyeSearchViewProvider.setResults(actionCommand, term, results);
 }
 
-// function create_HWK_getObjectSourceInfo_Tools(context: vscode.ExtensionContext) {
 async function create_HWK_getObjectSourceInfo_Tools(): Promise<void> {
   const library = Code4i.getTempLibrary();
   // let obj_exists = await getContent()?.checkObject({ library: library, name: "VSC00AFN86", type: "*PGM" });

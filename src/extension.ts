@@ -11,7 +11,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	initializeHawkeyePathfinder(context);
 
-	console.log('Congratulations, your extension "vscode-ibmi-hawkeye" is now active!');
+	console.log('Congratulations, extension "vscode-ibmi-hawkeye" is now active!');
 }
 
 // this method is called when your extension is deactivated

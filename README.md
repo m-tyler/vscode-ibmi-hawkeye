@@ -27,5 +27,7 @@ All commands report results into a separate search view panel
   <img src="menu_selections.png">
 
   <img src="source scan.png">
-  
+
   <img src="DSPFILSETU.png">
+  
+  <img src="SpaceingCharts.png">

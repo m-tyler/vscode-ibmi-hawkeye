@@ -26,7 +26,7 @@ export async function getMemberCount(filter: { library: string, sourceFile?: str
     statement =
     `select count(*) MEMBER_COUNT from QSYS2.SYSPARTITIONSTAT
       where SYSTEM_TABLE_SCHEMA = '${library}'
-        ${sourceFile !== `*ALL` ? `and SYSTEM_TABLE_NAME = '${sourceFile}'` : ``}
+        ${sourceFile !== `*ALL` ? `and SYSTEM_TABLE_NAME like '${sourceFile}'` : ``}
         ${singleMember ? `and SYSTEM_TABLE_MEMBER like '${singleMember}'` : ''}
         ${singleMemberExtension ? `and SOURCE_TYPE like '${singleMemberExtension}'` : ''}
       `

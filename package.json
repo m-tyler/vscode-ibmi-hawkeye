@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "preview": true,
   "license": "MIT",
   "engines": {
@@ -115,11 +115,11 @@
         },
         {
           "command": "Hawkeye-Pathfinder.closeSearchView",
-          "when": "code-for-ibmi:connected"
+          "when": "never"
         },
         {
           "command": "Hawkeye-Pathfinder.collapseSearchView",
-          "when": "code-for-ibmi:connected"
+          "when": "never"
         },
         {
           "command": "Hawkeye-Pathfinder.displayObjectUsed",
@@ -144,42 +144,42 @@
         "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Display File Set Where Used ",
-        "category": "hawkeye",
+        "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayProgramObjects",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Display Program Objects ",
-        "category": "hawkeye",
+        "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.closeSearchView",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Close Hawkeye Results View",
-        "category": "hawkeye",
+        "category": "Hawkeye",
         "icon": "$(close)"
       },
       {
         "command": "Hawkeye-Pathfinder.collapseSearchView",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Collapse all Hawkeye Results",
-        "category": "hawkeye",
+        "category": "Hawkeye",
         "icon": "$(collapse-all)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayObjectUsed",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Display Object Where Used",
-        "category": "hawkeye",
+        "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Spacing Chart-RPG Print File",
-        "category": "hawkeye"
+        "category": "Hawkeye"
       }
     ],
     "keybindings": []

@@ -12,7 +12,7 @@
     "name": "Matt Tyler",
     "url": "https://github.com/HawkeyeTools"
   },
-  "publisher": "WinCo",
+  "publisher": "m-tyler",
   "repository": {
     "url": "https://github.com/m-tyler/vscode-ibmi-hawkeye"
   },
@@ -30,11 +30,11 @@
   "contributes": {
     "viewsContainers": {
       "activitybar": [
-				{
-					"id": "Hawkeye-search",
-					"title": "Hawkeye Pathfinder",
-					"icon": "$(references)"
-				}
+        {
+          "id": "Hawkeye-search",
+          "title": "Hawkeye Pathfinder",
+          "icon": "$(references)"
+        }
       ]
     },
     "views": {
@@ -69,24 +69,24 @@
       ],
       "Hawkeye-Pathfinder.Tools.menu": [
         {
-          "command": "Hawkeye-Pathfinder.displayFileSetsUsed"
-          ,"when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/"
-          ,"group": "1_pathfinderTools@2"
+          "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "group": "1_pathfinderTools@2"
         },
         {
-          "command": "Hawkeye-Pathfinder.displayProgramObjects"
-          ,"when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/"
-          ,"group": "1_pathfinderTools@2"
+          "command": "Hawkeye-Pathfinder.displayProgramObjects",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "group": "1_pathfinderTools@2"
         },
         {
-          "command": "Hawkeye-Pathfinder.displayObjectUsed"
-          ,"when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/"
-          ,"group": "1_pathfinderTools@2"
+          "command": "Hawkeye-Pathfinder.displayObjectUsed",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "group": "1_pathfinderTools@2"
         },
         {
-          "command": "Hawkeye-Pathfinder.runPRTRPGPRT"
-          ,"when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/"
-          ,"group": "1_pathfinderTools@2"
+          "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "group": "1_pathfinderTools@2"
         }
       ],
       "view/item/context": [
@@ -102,13 +102,13 @@
       ],
       "commandPalette": [
         {
-					"command": "Hawkeye-Pathfinder.searchSourceFiles",
-					"when": "code-for-ibmi:connected"
-				},
+          "command": "Hawkeye-Pathfinder.searchSourceFiles",
+          "when": "code-for-ibmi:connected"
+        },
         {
-					"command": "Hawkeye-Pathfinder.displayFileSetsUsed",
-					"when": "code-for-ibmi:connected"
-				},
+          "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
+          "when": "code-for-ibmi:connected"
+        },
         {
           "command": "Hawkeye-Pathfinder.displayProgramObjects",
           "when": "code-for-ibmi:connected"
@@ -131,8 +131,7 @@
         }
       ]
     },
-    "customEditors": [
-    ],
+    "customEditors": [],
     "commands": [
       {
         "command": "Hawkeye-Pathfinder.searchSourceFiles",
@@ -183,8 +182,7 @@
         "category": "hawkeye"
       }
     ],
-    "keybindings": [
-    ]
+    "keybindings": []
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

@@ -117,14 +117,14 @@ class LineHit extends vscode.TreeItem {
   constructor(term: string, readonly path: string, line: HawkeyeSearch.Line, readonly?: boolean) {
     const highlights: [number, number][] = [];
 
-    const upperContent = line.content.trim().toUpperCase();
+    const upperContent = line.content.trimEnd().toUpperCase();
     const upperTerm = term.toUpperCase();
     const openOptions: OpenEditableOptions = { readonly };
     let index = 0;
 
     // Calculate the highlights
     if (term.length > 0) {
-      const positionLine = line.number - 1;
+      const positionLine = line.number>= 1 ? line.number-1 :0;
       while (index >= 0) {
         index = upperContent.indexOf(upperTerm, index);
         if (index >= 0) {

@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "preview": true,
   "license": "MIT",
   "engines": {
@@ -86,7 +86,12 @@
         {
           "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
           "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
-          "group": "1_pathfinderTools@2"
+          "group": "2_pathfinderTools@1"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.runPRTDDSPRT",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "group": "2_pathfinderTools@2"
         }
       ],
       "view/item/context": [
@@ -127,6 +132,10 @@
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
+          "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.runPRTDDSPRT",
           "when": "never"
         }
       ]
@@ -179,6 +188,12 @@
         "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Spacing Chart-RPG Print File",
+        "category": "Hawkeye"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.runPRTDDSPRT",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Spacing Chart-DDS Print File",
         "category": "Hawkeye"
       }
     ],

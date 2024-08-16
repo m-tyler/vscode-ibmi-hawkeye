@@ -40,7 +40,7 @@ export namespace Code4i {
     }
 
     export async function runSQL(sqlStatement: string): Promise<Tools.DB2Row[]> {
-        return getContent().runSQL(sqlStatement);
+        return getContent().ibmi.runSQL(sqlStatement);
     }
 
     export async function runCommand(command: RemoteCommand) : Promise<CommandResult>  {

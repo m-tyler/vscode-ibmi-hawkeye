@@ -109,7 +109,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
                 progress.report({
                   message: l10n.t(`Fetching member count for {0}`, ww.path)
                 });
-                const memberCount = await getMemberCount({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name, extensions: ww.type});
+                const memberCount = await getMemberCount({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name, extensions: ww.type });
                 // const members: IBMiMember[] = await content.getMemberList({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name });
 
                 // if (members.length > 0) {
@@ -221,8 +221,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.library = scrubLibrary(ww.library, `DSPFILSETU`);
         ww.name = Item.member.name;
         ww.type = Item.member.extension;
-          promptedValue = `${ww.library}/${ww.name}`;
-        
+        promptedValue = `${ww.library}/${ww.name}`;
+
       }
       else {
         ww.library = ``;
@@ -371,8 +371,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.library = scrubLibrary(ww.library, `DSPPGMOBJ`);
         ww.name = Item.member.name;
         ww.type = Item.member.extension;
-          promptedValue = `${ww.library}/${ww.name}`;
-        
+        promptedValue = `${ww.library}/${ww.name}`;
+
       }
       else {
         ww.library = ``;
@@ -511,8 +511,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.library = scrubLibrary(ww.library, `DSPOBJU`);
         ww.name = Item.member.name;
         ww.type = Item.member.extension;
-          promptedValue = `${ww.library}/${ww.name}`;
-        
+        promptedValue = `${ww.library}/${ww.name}`;
+
       }
       else {
         ww.library = ``;
@@ -544,7 +544,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         ww.library = wpath[0];
         wpath = wpath[1].split(`.`);// split wpath[1] into obj + type
         ww.name = wpath[0];
-        ww.type = wpath[1]?wpath[1]:`*`;
+        ww.type = wpath[1] ? wpath[1] : `*`;
       }
 
       // Hawkeye-Pathfinder
@@ -758,7 +758,7 @@ export function setSearchResultsHwk(actionCommand: string, term: string, results
 async function create_HWK_getObjectSourceInfo_Tools(): Promise<void> {
   const library = Code4i.getTempLibrary();
   // let obj_exists = await getContent()?.checkObject({ library: library, name: "VSC00AFN86", type: "*PGM" });
-  if ((await getContent().runSQL(`select 1 as PROC_EXISTS from QSYS2.SYSPROCS where ROUTINE_NAME = 'VSC00AFN86'`)).length = 0) { // PROC not found
+  if ((await Code4i.runSQL(`select 1 as PROC_EXISTS from QSYS2.SYSPROCS where ROUTINE_NAME = 'VSC00AFN86'`)).length = 0) { // PROC not found
     // }
     // if (!obj_exists) {
     Code4i.runCommand({

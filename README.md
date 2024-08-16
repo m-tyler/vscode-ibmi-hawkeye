@@ -20,7 +20,7 @@ All commands report results into a separate search view panel
 * DSPJOBEXP
 * DSPJOBIMP
 * Add top tree level indicating the Hawkeye command used.
-* Add ability to add to search results.
+* Add ability to add to search within results.
 * Add right click options to the search results
 
 ## PICS

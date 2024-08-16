@@ -15,6 +15,12 @@ export async function getMemberCount(filter: { library: string, sourceFile?: str
   sourceFile = (sourceFile !== '%' ? sourceFile : ``);
   singleMember = (singleMember !== '%' ? singleMember : ``);
   singleMemberExtension = (singleMemberExtension !== '%' ? singleMemberExtension : ``);
+  if (sourceFile && (/.*%.*/gi.test(sourceFile))) {
+    sourceFile = ` like '${sourceFile}'`;
+  }
+  else {
+    sourceFile = ` = '${sourceFile}'`;
+  }
   let statement = ``;
   if (!sourceFile && !singleMember && !singleMemberExtension) {
     statement =
@@ -26,7 +32,7 @@ export async function getMemberCount(filter: { library: string, sourceFile?: str
     statement =
     `select count(*) MEMBER_COUNT from QSYS2.SYSPARTITIONSTAT
       where SYSTEM_TABLE_SCHEMA = '${library}'
-        ${sourceFile !== `*ALL` ? `and SYSTEM_TABLE_NAME like '${sourceFile}'` : ``}
+        ${sourceFile !== `*ALL` ? `and SYSTEM_TABLE_NAME ${sourceFile}` : ``}
         ${singleMember ? `and SYSTEM_TABLE_MEMBER like '${singleMember}'` : ''}
         ${singleMemberExtension ? `and SOURCE_TYPE like '${singleMemberExtension}'` : ''}
       `

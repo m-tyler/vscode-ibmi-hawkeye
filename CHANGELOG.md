@@ -1,4 +1,8 @@
 # Change log
+## Version 0.0.9
+  * Replace deprecated functionality 
+  * Enhanced Hawkeye commands to include the `How Used` in the hover text
+  * Hawkeye command results appear collapsed.
 ## Version 0.0.8
   * Fixed issue with searching when supplying generic patterns to source
   * Removed deprecated references.

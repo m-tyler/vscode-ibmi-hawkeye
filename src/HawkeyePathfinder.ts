@@ -664,13 +664,6 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
           console.log(result.stdout);
           vscode.window.showInformationMessage(l10n.t("Command PRTRPGPRT successful, check your spooled files"));
 
-          //get the spooled output data
-          // const job = "the job"; //get the job info, maybe with SPOOLED_FILE_INFO ?
-          // const [output] = await content.runSQL(`SELECT SPOOLED_DATA FROM TABLE(SYSTOOLS.SPOOLED_FILE_DATA(JOB_NAME => '${job}', SPOOLED_FILE_NAME =>'QSYSPRT'))`);
-          // if (output.SPOOLED_DATA) {
-          //   const data = String(output.SPOOLED_DATA);
-          //   //do something with the data
-          // }
         }
         else {
           //failure
@@ -701,13 +694,6 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
           console.log(result.stdout);
           vscode.window.showInformationMessage(l10n.t("Command PRTDDSPRT successful, check your spooled files"));
 
-          //get the spooled output data
-          // const job = "the job"; //get the job info, maybe with SPOOLED_FILE_INFO ?
-          // const [output] = await content.runSQL(`SELECT SPOOLED_DATA FROM TABLE(SYSTOOLS.SPOOLED_FILE_DATA(JOB_NAME => '${job}', SPOOLED_FILE_NAME =>'QSYSPRT'))`);
-          // if (output.SPOOLED_DATA) {
-          //   const data = String(output.SPOOLED_DATA);
-          //   //do something with the data
-          // }
         }
         else {
           //failure
@@ -717,7 +703,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     }),
     vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewProvider),
   );
-  getInstance()?.onEvent(`connected`, create_HWK_getObjectSourceInfo_Tools);
+  getInstance()?.subscribe(context, `connected`, "Hawkeye Extension Setup" , create_HWK_getObjectSourceInfo_Tools);
 }
 
 function getConfig() {

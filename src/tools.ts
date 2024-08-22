@@ -73,8 +73,8 @@ export function nthIndex(aString: string, pattern: string, n: number) {
     }
     return index;
 }  
-export async function getLibraryAspInfo( library: string) :Promise<string> {
-    let asp =``;
+export async function getLibraryAspInfo( library: string) :Promise<string|undefined> {
+    let asp :string | undefined;
     const [row] = await Code4i.runSQL(`SELECT IASP_NUMBER FROM TABLE(QSYS2.LIBRARY_INFO('${library}'))`);
     const iaspNumber = row?.IASP_NUMBER;
     if (iaspNumber && typeof iaspNumber === 'number' && Code4i.getConnection().aspInfo[iaspNumber]) {

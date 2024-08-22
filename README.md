@@ -14,15 +14,6 @@ This extension provides additional functionality for the source cross reference 
 All commands report results into a separate search view panel
 
 
-## TODO:
-* Create a webtool kit interface for each command
-  * See if the actions prompting can be used for this.
-* DSPJOBEXP
-* DSPJOBIMP
-* Add top tree level indicating the Hawkeye command used.
-* Add ability to add to search within results.
-* Add right click options to the search results
-
 ## PICS
   <img src="menu_selections.png">
 

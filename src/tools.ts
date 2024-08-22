@@ -1,6 +1,7 @@
 import { CodeForIBMi, CommandResult, RemoteCommand } from '@halcyontech/vscode-ibmi-types';
 import Instance from "@halcyontech/vscode-ibmi-types/api/Instance";
 import { Tools } from '@halcyontech/vscode-ibmi-types/api/Tools';
+import { CachedServerSettings, GlobalStorage } from '@halcyontech/vscode-ibmi-types/api/Storage';
 import * as vscode from 'vscode';
 import { Extension, extensions } from "vscode";
 
@@ -72,3 +73,12 @@ export function nthIndex(aString: string, pattern: string, n: number) {
     }
     return index;
 }  
+export async function getLibraryAspInfo( library: string) :Promise<string> {
+    let asp =``;
+    const [row] = await Code4i.runSQL(`SELECT IASP_NUMBER FROM TABLE(QSYS2.LIBRARY_INFO('${library}'))`);
+    const iaspNumber = row?.IASP_NUMBER;
+    if (iaspNumber && typeof iaspNumber === 'number' && Code4i.getConnection().aspInfo[iaspNumber]) {
+      asp = `/${Code4i.getConnection().aspInfo[iaspNumber]}`;
+    }
+    return asp;
+}

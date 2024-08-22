@@ -1,4 +1,6 @@
 # Change log
+## Version 0.0.10
+  * Fixed bug with hardcoded iASP reference to variable iASP reference
 ## Version 0.0.9
   * Replace deprecated functionality 
   * Enhanced Hawkeye commands to include the `How Used` in the hover text

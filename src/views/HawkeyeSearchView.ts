@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
 import path from 'path';
 import { HawkeyeSearch } from "../api/HawkeyeSearch";
 import { QsysFsOptions } from '@halcyontech/vscode-ibmi-types/';
-import { generateTooltipHtmlTable } from '../tools';
 export type OpenEditableOptions = QsysFsOptions & { position?: Range };
 
 export class HawkeyeSearchView implements TreeDataProvider<any> {
@@ -157,3 +156,18 @@ class LineHit extends vscode.TreeItem {
     };
   }
 }
+
+/*
+Tree Item map for lowest level (HwkXrefItem)
+path/uri
+object/member
+object/source file
+object/source library
+object/source type (if *NONE then no look up using double click from tree)
+howUSed
+text
+
+Second lowest to second highest level (HwkXref)
+path/uri for this level, no command to double click and open things.
+array of `HwkXrefIem`s of type treeItem
+*/

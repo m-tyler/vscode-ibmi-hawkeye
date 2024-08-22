@@ -5,6 +5,7 @@ import { HawkeyeSearch } from "./api/HawkeyeSearch";
 import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
 import { getMemberCount } from "./api/IBMiTools";
 import { MemberItem, } from '@halcyontech/vscode-ibmi-types';
+import { GlobalStorage, } from '@halcyontech/vscode-ibmi-types/api/Storage';
 
 interface wItem {
   path: string,
@@ -19,7 +20,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
   hawkeyeSearchViewProvider = new HawkeyeSearchView(context);
   context.subscriptions.push(
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFiles`, async (memberItem: MemberItem) => {
-      const connection = getConnection();
+      // const connection = getConnection();
       let ww = <wItem>{};
       let promptedValue = ``;
       if (memberItem) {
@@ -89,14 +90,11 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
 
       // Hawkeye-Pathfinder
       if (ww.path) {
-        const config = getConfig();
-        const content = getContent();
 
         if (ww.sourceFile !== ` `) {
-          const aspText = ((config.sourceASP && config.sourceASP.length > 0) ? l10n.t(`(in ASP {0})`, config.sourceASP) : ``);
 
           const searchTerm = await vscode.window.showInputBox({
-            prompt: l10n.t(`Use command DSPSCNSRC to search {0}.`, ww.path, aspText),
+            prompt: l10n.t(`Use command DSPSCNSRC to search {0}.`, ww.path),
             placeHolder: l10n.t(`Enter the search for term`),
           });
 
@@ -175,7 +173,6 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
                     results = results.sort((a, b) => {
                       return a.path.localeCompare(b.path);
                     });
-                    // TODO: make this stand alone for HWK commands
                     setSearchResultsHwk(`DSPSCNSRC`, searchTerm, results);
 
                   } else {
@@ -353,6 +350,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (Item) => {
+      const config = getConfig();
       let ww = <wItem>{};
       let promptedValue;
       if (Item && Item.object) {
@@ -493,6 +491,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (Item) => {
+      const config = getConfig();
       let ww = <wItem>{};
       let promptedValue;
       if (Item && Item.object) {

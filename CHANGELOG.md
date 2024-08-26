@@ -1,4 +1,7 @@
 # Change log
+## Version 0.0.12
+  * Fixed bug where search term highlighted wrong position.  
+  * Fixed bug when only library used for commands, wrong SQL statement used.
 ## Version 0.0.11
   * Fix for version .0.0.10 get getting server config iASP value when iASP look up for library returned no iASP.  No longer look at the server config for iASP information. 
 ## Version 0.0.10

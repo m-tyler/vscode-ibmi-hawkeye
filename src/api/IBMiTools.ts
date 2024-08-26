@@ -15,11 +15,17 @@ export async function getMemberCount(filter: { library: string, sourceFile?: str
   sourceFile = (sourceFile !== '%' ? sourceFile : ``);
   singleMember = (singleMember !== '%' ? singleMember : ``);
   singleMemberExtension = (singleMemberExtension !== '%' ? singleMemberExtension : ``);
-  if (sourceFile && (/.*%.*/gi.test(sourceFile))) {
-    sourceFile = ` like '${sourceFile}'`;
-  }
-  else {
-    sourceFile = ` = '${sourceFile}'`;
+  if (sourceFile) {
+    if ((/.*%.*/gi.test(sourceFile))) {
+      sourceFile = ` like '${sourceFile}'`;
+    }
+    else if (sourceFile.length === 0) {
+      // sourceFile = `*ALL`;
+      sourceFile = undefined;
+    }
+    else {
+      sourceFile = ` = '${sourceFile}'`;
+    }
   }
   let statement = ``;
   if (!sourceFile && !singleMember && !singleMemberExtension) {
@@ -30,7 +36,7 @@ export async function getMemberCount(filter: { library: string, sourceFile?: str
   }
   else {
     statement =
-    `select count(*) MEMBER_COUNT from QSYS2.SYSPARTITIONSTAT
+      `select count(*) MEMBER_COUNT from QSYS2.SYSPARTITIONSTAT
       where SYSTEM_TABLE_SCHEMA = '${library}'
         ${sourceFile !== `*ALL` ? `and SYSTEM_TABLE_NAME ${sourceFile}` : ``}
         ${singleMember ? `and SYSTEM_TABLE_MEMBER like '${singleMember}'` : ''}
@@ -38,11 +44,11 @@ export async function getMemberCount(filter: { library: string, sourceFile?: str
       `
   }
 
-    const results = await Code4i!.runSQL(statement);
-    if (results.length) {
-      return Number(results[0].MEMBER_COUNT);
-    }
-    else {
-      return 0;
-    }
+  const results = await Code4i!.runSQL(statement);
+  if (results.length) {
+    return Number(results[0].MEMBER_COUNT);
   }
+  else {
+    return 0;
+  }
+}

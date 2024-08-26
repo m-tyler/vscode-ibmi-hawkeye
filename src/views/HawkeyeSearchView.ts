@@ -140,7 +140,7 @@ class LineHit extends vscode.TreeItem {
     }
 
     super({
-      label: line.content.trim(),
+      label: line.content.trimEnd(),
       highlights
     });
 
@@ -156,18 +156,3 @@ class LineHit extends vscode.TreeItem {
     };
   }
 }
-
-/*
-Tree Item map for lowest level (HwkXrefItem)
-path/uri
-object/member
-object/source file
-object/source library
-object/source type (if *NONE then no look up using double click from tree)
-howUSed
-text
-
-Second lowest to second highest level (HwkXref)
-path/uri for this level, no command to double click and open things.
-array of `HwkXrefIem`s of type treeItem
-*/

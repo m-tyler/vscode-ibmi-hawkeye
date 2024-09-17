@@ -38,10 +38,10 @@ export async function getMemberCount(filter: { library: string, sourceFile?: str
     statement =
       `select count(*) MEMBER_COUNT from QSYS2.SYSPARTITIONSTAT
       where SYSTEM_TABLE_SCHEMA = '${library}'
-        ${sourceFile !== `*ALL` ? `and SYSTEM_TABLE_NAME ${sourceFile}` : ``}
-        ${singleMember ? `and SYSTEM_TABLE_MEMBER like '${singleMember}'` : ''}
+        ${sourceFile ? `and SYSTEM_TABLE_NAME ${sourceFile}` : ``}
+        ${singleMember ? `and SYSTEM_TABLE_MEMBER like '${singleMember}'` : ``}
         ${singleMemberExtension ? `and SOURCE_TYPE like '${singleMemberExtension}'` : ''}
-      `
+      `;
   }
 
   const results = await Code4i!.runSQL(statement);

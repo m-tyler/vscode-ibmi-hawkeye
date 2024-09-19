@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "preview": true,
   "license": "MIT",
   "engines": {

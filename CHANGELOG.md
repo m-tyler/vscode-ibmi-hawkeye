@@ -1,4 +1,6 @@
 # Change log
+## Version 0.0.13
+  * Fixed issue when using generic patterns for srouce file and source member with a specific extension
 ## Version 0.0.12
   * Fixed bug where search term highlighted wrong position.  
   * Fixed bug when only library used for commands, wrong SQL statement used.

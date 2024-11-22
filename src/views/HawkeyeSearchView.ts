@@ -117,7 +117,7 @@ class HitSource extends vscode.TreeItem {
 }
 class LineHit extends vscode.TreeItem {
   constructor(term: string, readonly path: string, line: HawkeyeSearch.Line, readonly?: boolean) {
-    const highlights: [number, number][] = [];
+    let highlights: [number, number][] = [];
 
     const upperContent = line.content.trimEnd().toUpperCase();
     const upperTerm = term.toUpperCase();
@@ -130,7 +130,6 @@ class LineHit extends vscode.TreeItem {
       while (index >= 0) {
         index = upperContent.indexOf(upperTerm, index);
         if (index >= 0) {
-          highlights.push([index, index + term.length]);
           if (!openOptions.position) {
             openOptions.position = new vscode.Range(positionLine, index, positionLine, index + term.length);
           }
@@ -139,8 +138,9 @@ class LineHit extends vscode.TreeItem {
       }
     }
 
+    highlights = computeHighlights(upperTerm ,upperContent.trim());
     super({
-      label: line.content.trimEnd(),
+      label: line.content.trim(),
       highlights
     });
 
@@ -150,9 +150,24 @@ class LineHit extends vscode.TreeItem {
     this.description = String(line.number);
 
     this.command = {
-      command: `code-for-ibmi.openEditable`,
+      command: `code-for-ibmi.openWithDefaultMode`,
       title: `Open`,
-      arguments: [this.path, openOptions]
+      arguments: [this, openOptions.readonly , openOptions.position]
     };
   }
+}
+/**
+ * Computes where to highlight the search result label text
+ */
+function computeHighlights (term: string, line: string) :[number, number][]{
+  let index = 0;
+  let HI :[number,number][] = [];
+  while (index >= 0) {
+    index = line.indexOf(term, index);
+    if (index >= 0) {
+      HI.push([index, index +term.length]);
+      index += term.length;
+    }
+  }
+  return HI;
 }

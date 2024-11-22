@@ -1,4 +1,7 @@
 # Change log
+## Version 0.1.0 
+  * Fixed search result highlighting
+  * Fixed erroneous search results when no matches exists. Showing a notification instead.
 ## Version 0.0.13
   * Fixed issue when using generic patterns for source file and source member with a specific extension
 ## Version 0.0.12

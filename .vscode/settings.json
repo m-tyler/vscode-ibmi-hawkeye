@@ -12,5 +12,8 @@
     "typescript.tsc.autoDetect": "off",
     "autoHide.hideSideBarsOnDebug": false,
     "autoHide.hidePanelOnDebug": false,
-    "cSpell.enabled": true
+    "cSpell.enabled": true,
+    "cSpell.enabledFileTypes": {
+        "typescript": false
+    }
 }

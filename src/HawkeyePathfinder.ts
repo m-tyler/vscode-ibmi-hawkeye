@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import vscode, { l10n, } from 'vscode';
-import { Code4i, getInstance } from "./tools";
+import { Code4i } from "./tools";
 import { HawkeyeSearch } from "./api/HawkeyeSearch";
 import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
 import { getMemberCount } from "./api/IBMiTools";
 import { MemberItem, } from '@halcyontech/vscode-ibmi-types';
-import { GlobalStorage, } from '@halcyontech/vscode-ibmi-types/api/Storage';
 
 interface wItem {
   path: string,
@@ -142,7 +141,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
                   }, timeoutInternal);
                   // Hawkeye-Pathfinder-DSPSCNSRC
                   // returns results member name with member type as extension
-                  let results = await HawkeyeSearch.hwksearchMembers(ww.library, ww.sourceFile
+                  let results = await HawkeyeSearch.searchMembers(ww.library, ww.sourceFile
                     , `${ww.name || `*`}.${ww.type || `*`}`
                     , searchTerm, ww.protected);
 
@@ -702,7 +701,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     }),
     vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewProvider),
   );
-  getInstance()?.subscribe(context, `connected`, "Hawkeye Extension Setup" , create_HWK_getObjectSourceInfo_Tools);
+  Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup" , create_HWK_getObjectSourceInfo_Tools);
 }
 
 function getConfig() {

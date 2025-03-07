@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "preview": true,
   "license": "MIT",
   "engines": {
@@ -37,6 +37,18 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "hawkeyeSearchView",
+        "contents": "No connection to IBM i found.  \nConnect before using this tool.",
+        "when": "code-for-ibmi:connected == false"
+      },
+      {
+        "view": "hawkeyeSearchView",
+        "contents": "No search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)",
+        "when": "code-for-ibmi:connected == true"
+      }
+    ],
     "views": {
       "Hawkeye-search": [
         {
@@ -144,21 +156,21 @@
       {
         "command": "Hawkeye-Pathfinder.searchSourceFiles",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Hawkeye Scan Source Files ",
+        "title": "Hawkeye Scan Source Files",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Display File Set Where Used ",
+        "title": "Display File Set Where Used",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayProgramObjects",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Display Program Objects ",
+        "title": "Display Program Objects",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
@@ -211,7 +223,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@halcyontech/vscode-ibmi-types": "^2.12",
+    "@halcyontech/vscode-ibmi-types": "^2.15.3",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "16.x",
@@ -231,6 +243,6 @@
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "i": "^0.3.7",
-    "npm": "^10.4.0"
+    "npm": "^10.9.2"
   }
 }

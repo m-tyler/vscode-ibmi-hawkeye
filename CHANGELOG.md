@@ -1,4 +1,7 @@
 # Change log
+## Version 0.1.1
+  * Synchronize to updates to Code for IBM i
+  * Minor updates 
 ## Version 0.1.0 
   * Fixed search result highlighting
   * Fixed erroneous search results when no matches exists. Showing a notification instead.

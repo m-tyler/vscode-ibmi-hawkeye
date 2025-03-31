@@ -15,5 +15,6 @@
     "cSpell.enabled": true,
     "cSpell.enabledFileTypes": {
         "typescript": false
-    }
+    },
+    "CodeGPT.apiKey": "CodeGPT Plus Beta"
 }

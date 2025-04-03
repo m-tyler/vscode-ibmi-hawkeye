@@ -2,7 +2,8 @@ import { l10n } from 'vscode';
 import { Code4i, sanitizeSearchTerm, nthIndex,  checkObject } from '../tools';
 import { CommandResult } from '@halcyontech/vscode-ibmi-types';
 export namespace HawkeyeSearch {
-  const QSYS_PATTERN = /(?:\/\w{1,10}\/QSYS\.LIB\/)|(?:\/QSYS\.LIB\/)|(?:\.LIB)|(?:\.FILE)|(?:\.MBR)/g;
+  // const QSYS_PATTERN = /(?:\/\w{1,10}\/QSYS\.LIB\/)|(?:\/QSYS\.LIB\/)|(?:\.LIB)|(?:\.FILE)|(?:\.MBR)/g;
+  const QSYS_PATTERN = /^(?:\/)|(?:QSYS\.LIB\/)|(?:\.LIB)|(?:\.FILE)|(?:\.MBR)/g;
   const NEWLINE = `\r\n`;
 
   export interface Result {
@@ -31,7 +32,8 @@ export namespace HawkeyeSearch {
 
     if (connection) {
       await Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName} MBR(HWKSEARCH)`, noLibList: true });
-      let asp = await Code4i.getLibraryIAsp(library);
+      // let asp = await Code4i.getLibraryIAsp(library);
+      let asp = await Code4i.lookupLibraryIAsp(library);
       let arrayofSearchTokens = searchTerm.split(',').map(term => `'` + term.substring(0, 30).replace(/['"]/g, '').trim() + `'`);// wrapped in single quotes for DSPSCNSRC SCAN() keyword
       let stringofSearchTokens = sanitizeSearchTerm(arrayofSearchTokens.join(`,`));
 
@@ -46,7 +48,7 @@ export namespace HawkeyeSearch {
       else {
       // if (resultsExist) {
         const result = await connection.sendQsh({
-          command: `db2 -s "select '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'||(case when SP.SOURCE_TYPE is not null then SP.SOURCE_TYPE when SP.SOURCE_TYPE is null and SCDFIL = 'QSQDSRC' then 'SQL' else 'MBR' end)||'~'||'~'||char(SCDSEQ)||'~'||varchar(rtrim(SCDSTM),112) from ${tempLibrary}.${tempName} left join QSYS2.SYSPARTITIONSTAT SP on SP.SYSTEM_TABLE_SCHEMA=SCDLIB and SP.SYSTEM_TABLE_NAME=SCDFIL and SP.SYSTEM_TABLE_MEMBER=SCDMBR" | sed -e '1,3d' -e 's/\(.*\)/&/' -e '/^$/d' -e '/RECORD.*.*.* SELECTED/d' ;`,
+          command: `db2 -s "select '/${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'||(case when SP.SOURCE_TYPE is not null then SP.SOURCE_TYPE when SP.SOURCE_TYPE is null and SCDFIL = 'QSQDSRC' then 'SQL' else 'MBR' end)||'~'||'~'||char(SCDSEQ)||'~'||varchar(rtrim(SCDSTM),112) from ${tempLibrary}.${tempName} left join QSYS2.SYSPARTITIONSTAT SP on SP.SYSTEM_TABLE_SCHEMA=SCDLIB and SP.SYSTEM_TABLE_NAME=SCDFIL and SP.SYSTEM_TABLE_MEMBER=SCDMBR" | sed -e '1,3d' -e 's/\(.*\)/&/' -e '/^$/d' -e '/RECORD.*.*.* SELECTED/d' ;`,
         }); // add to end of list in future => -e 's/:/~/' -e 's/:/~/'
 
         if (!result.stderr) {

@@ -1,4 +1,6 @@
 # Change log
+## Version 0.1.2
+  * Fixed bug where search results line path was formatted incorrectly.
 ## Version 0.1.1
   * Synchronize to updates to Code for IBM i
   * Minor updates 

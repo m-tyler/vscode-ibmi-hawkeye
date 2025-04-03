@@ -54,6 +54,9 @@ export namespace Code4i {
     export async function getLibraryIAsp( library: string) :Promise<string|undefined> {
         return getConnection().getLibraryIAsp(library);
     }
+    export async function lookupLibraryIAsp( library: string) :Promise<string|undefined> {
+        return getConnection().lookupLibraryIAsp(library);
+    }
 }
 
 export const IBMI_OBJECT_NAME = /^([\w$#@][\w\d$#@_.]{0,9})$/i;

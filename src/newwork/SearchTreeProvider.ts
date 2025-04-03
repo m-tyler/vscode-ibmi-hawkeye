@@ -1,7 +1,7 @@
 // searchtreeprovider.ts
 import * as vscode from 'vscode';
 import { SearchSession } from './SearchSession';
-import { SearchResult } from './searchResult';
+import { SearchResult } from './SearchResult';
 
 /**
  * TreeDataProvider for the Hawkeye search results view

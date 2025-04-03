@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { SearchResult } from './searchResult';
+import { SearchResult } from './SearchResult';
 
 /**
  * Represents a search session from a Hawkeye command execution

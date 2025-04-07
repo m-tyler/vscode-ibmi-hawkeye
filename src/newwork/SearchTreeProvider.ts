@@ -68,4 +68,7 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
     // Leaf node or other cases
     return Promise.resolve([]);
   }
+  refresh(): void {
+    this._onDidChangeTreeData.fire(undefined);
+  }
 }

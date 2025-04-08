@@ -33,7 +33,7 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
         this.expand();
       }),
     );
-    registerCommandHandlers( context, this._searchTreeProvider )
+    registerCommandHandlers( context, this._searchTreeProvider );
   }
 
   setViewVisible(visible: boolean) {
@@ -167,18 +167,18 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
 // //     };
 // //   }
 // // }
-/**
- * Computes where to highlight the search result label text
- */
-function computeHighlights (term: string, line: string) :[number, number][]{
-  let index = 0;
-  let HI :[number,number][] = [];
-  while (index >= 0) {
-    index = line.indexOf(term, index);
-    if (index >= 0) {
-      HI.push([index, index +term.length]);
-      index += term.length;
-    }
-  }
-  return HI;
-}
+// // /**
+// //  * Computes where to highlight the search result label text
+// //  */
+// // function computeHighlights (term: string, line: string) :[number, number][]{
+// //   let index = 0;
+// //   let HI :[number,number][] = [];
+// //   while (index >= 0) {
+// //     index = line.indexOf(term, index);
+// //     if (index >= 0) {
+// //       HI.push([index, index +term.length]);
+// //       index += term.length;
+// //     }
+// //   }
+// //   return HI;
+// // }

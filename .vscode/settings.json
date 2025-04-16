@@ -14,7 +14,8 @@
     "autoHide.hidePanelOnDebug": false,
     "cSpell.enabled": true,
     "cSpell.enabledFileTypes": {
-        "typescript": false
+        "typescript": false,
+        "json": false
     },
     "CodeGPT.apiKey": "CodeGPT Plus Beta"
 }

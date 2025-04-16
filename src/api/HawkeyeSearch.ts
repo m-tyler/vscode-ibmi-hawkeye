@@ -1,8 +1,7 @@
 import { l10n } from 'vscode';
-import { Code4i, sanitizeSearchTerm, nthIndex,  checkObject } from '../tools';
+import { Code4i, sanitizeSearchTerm, nthIndex, checkObject, getSourceObjectType } from '../tools';
 import { CommandResult } from '@halcyontech/vscode-ibmi-types';
 export namespace HawkeyeSearch {
-  // const QSYS_PATTERN = /(?:\/\w{1,10}\/QSYS\.LIB\/)|(?:\/QSYS\.LIB\/)|(?:\.LIB)|(?:\.FILE)|(?:\.MBR)/g;
   const QSYS_PATTERN = /^(?:\/)|(?:QSYS\.LIB\/)|(?:\.LIB)|(?:\.FILE)|(?:\.MBR)/g;
   const NEWLINE = `\r\n`;
 
@@ -12,7 +11,7 @@ export namespace HawkeyeSearch {
     lines: Line[]
     readonly?: boolean
     label?: string
-    contextValue?: string
+    srcObjType?: string
   }
 
   export interface Line {
@@ -195,13 +194,14 @@ export namespace HawkeyeSearch {
         const parts = line.split(`~`); //path:line
         const path = pathTransformer?.(parts[0]) || parts[0];
         let result = results.find(r => r.path === path);
-        let howUsed = parts[1];
+        let howUsed = parts[1]?parts[1]:`*NA`;
         if (!result) {
           result = {
             path,
             howUsed,
             lines: [],
             readonly,
+            srcObjType : getSourceObjectType( path ),
           };
           results.push(result);
         }

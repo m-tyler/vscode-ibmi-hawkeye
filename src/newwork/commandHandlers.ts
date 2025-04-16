@@ -22,7 +22,8 @@ export async function handleScanSourceFiles(searchTreeProvider: SearchTreeProvid
           title: 'Open File',
           arguments: [/* your arguments here */]
         }
-      ))
+      )),
+      'searchTerm goes here'
     );
     
     // Make sure the view is visible

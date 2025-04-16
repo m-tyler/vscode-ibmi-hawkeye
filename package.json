@@ -77,33 +77,44 @@
           "group": "navigation@1",
           "when": "view == hawkeyeSearchView",
           "icon": "$(collapse-all)"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.expandSearchView",
+          "group": "navigation@1",
+          "when": "view == hawkeyeSearchView",
+          "icon": "$(search-expand-results)"
         }
       ],
       "Hawkeye-Pathfinder.Tools.menu": [
         {
           "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /\\*DBF/i",
           "group": "1_pathfinderTools@2"
         },
         {
           "command": "Hawkeye-Pathfinder.displayProgramObjects",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /\\*PGM/i",
           "group": "1_pathfinderTools@2"
         },
         {
           "command": "Hawkeye-Pathfinder.displayObjectUsed",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /^.*/",
           "group": "1_pathfinderTools@2"
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /(:rpgle|:sqlrpgle)/i",
           "group": "2_pathfinderTools@1"
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTDDSPRT",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~  /\\*PRTF/i",
           "group": "2_pathfinderTools@2"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.runPRTDDSDSP",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~  /\\*DSPF/i",
+          "group": "2_pathfinderTools@3"
         }
       ],
       "view/item/context": [
@@ -114,7 +125,7 @@
         },
         {
           "submenu": "Hawkeye-Pathfinder.Tools.menu",
-          "when": "view === objectBrowser"
+          "when": "view === objectBrowser || view === hawkeyeSearchView"
         }
       ],
       "commandPalette": [
@@ -139,6 +150,10 @@
           "when": "never"
         },
         {
+          "command": "Hawkeye-Pathfinder.expandSearchView",
+          "when": "never"
+        },
+        {
           "command": "Hawkeye-Pathfinder.displayObjectUsed",
           "when": "code-for-ibmi:connected"
         },
@@ -148,6 +163,10 @@
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTDDSPRT",
+          "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.runPRTDDSDSP",
           "when": "never"
         }
       ]
@@ -189,6 +208,13 @@
         "icon": "$(collapse-all)"
       },
       {
+        "command": "Hawkeye-Pathfinder.expandSearchView",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Expand Results",
+        "category": "Hawkeye",
+        "icon": "$(search-expand-results)"
+      },
+      {
         "command": "Hawkeye-Pathfinder.displayObjectUsed",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Display Object Where Used",
@@ -205,6 +231,12 @@
         "command": "Hawkeye-Pathfinder.runPRTDDSPRT",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Spacing Chart-DDS Print File",
+        "category": "Hawkeye"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.runPRTDDSDSP",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Spacing Chart-DDS Display File",
         "category": "Hawkeye"
       }
     ],

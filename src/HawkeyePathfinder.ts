@@ -6,6 +6,8 @@ import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
 import { getMemberCount } from "./api/IBMiTools";
 import { MemberItem, } from '@halcyontech/vscode-ibmi-types';
 
+//https://code.visualstudio.com/api/references/icons-in-labels
+
 interface wItem {
   path: string,
   protected: boolean,
@@ -15,11 +17,18 @@ interface wItem {
   type: string,
 };
 
+let hawkeyeSearchViewProvider: HawkeyeSearchView;
 export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
   hawkeyeSearchViewProvider = new HawkeyeSearchView(context);
+  const hawkeyeSearchViewer = vscode.window.createTreeView(
+    `hawkeyeSearchView`, {
+    treeDataProvider: hawkeyeSearchViewProvider,
+    showCollapseAll: true,
+    canSelectMany: true,
+  });
   context.subscriptions.push(
+    hawkeyeSearchViewer,
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFiles`, async (memberItem: MemberItem) => {
-      // const connection = getConnection();
       let ww = <wItem>{};
       let promptedValue = ``;
       if (memberItem) {
@@ -256,8 +265,6 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
 
       // Hawkeye-Pathfinder
       if (ww.path) {
-        const config = getConfig();
-        const content = getContent();
 
         if (ww.name !== ` `) {
           // const aspText = ((config.sourceASP && config.sourceASP.length > 0) ? l10n.t(`(in ASP {0})`, config.sourceASP) : ``);
@@ -345,7 +352,6 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (Item) => {
-      const config = getConfig();
       let ww = <wItem>{};
       let promptedValue;
       if (Item && Item.object) {
@@ -486,7 +492,6 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (Item) => {
-      const config = getConfig();
       let ww = <wItem>{};
       let promptedValue;
       if (Item && Item.object) {
@@ -514,7 +519,6 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         promptedValue = ``;
         ww.protected = true;
       }
-      // const connection = getConnection();
       const input = await vscode.window.showInputBox({
         prompt: l10n.t(`Find where object is used by. See the help for DSPOBJU for selectable input values`),
         title: l10n.t(`Display Object Where Used`),
@@ -637,10 +641,9 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTRPGPRT', async (memberItem: MemberItem) => {
       //Run commands, print to output, etc
-      const connection = getConnection();
+      const connection = Code4i.getConnection();
 
       //Run SQL, upload/download stuff
-      // const content = Code4i.getContent();
       if (memberItem && !(/.*(RPG).*/gi.test(memberItem.path))) {
         vscode.window.showErrorMessage(l10n.t(`Spacing Chart-RPG Print File is only value for *RPG* programs.`));
         return;
@@ -667,10 +670,9 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTDDSPRT', async (memberItem: MemberItem) => {
       //Run commands, print to output, etc
-      const connection = getConnection();
+      const connection = Code4i.getConnection();
 
       //Run SQL, upload/download stuff
-      // const content = Code4i.getContent();
       if (memberItem && !(/.*(PRTF).*/gi.test(memberItem.path))) {
         vscode.window.showErrorMessage(l10n.t(`Spacing Chart-DDS Print File is only value for *PRTF* member.`));
         return;
@@ -695,49 +697,47 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
-    vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewProvider),
+    vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTDDSDSP', async (memberItem: MemberItem) => {
+      //Run commands, print to output, etc
+      const connection = Code4i.getConnection();
+
+      //Run SQL, upload/download stuff
+      if (memberItem && !(/.*(DSPF).*/gi.test(memberItem.path))) {
+        vscode.window.showErrorMessage(l10n.t(`Spacing Chart-DDS Display File is only value for *DSPF* member.`));
+        return;
+      }
+      //Prompt
+      const command = await vscode.window.showInputBox({
+        prompt: l10n.t("Prompt and run"),
+        value: `PRTDDSDSP SRCFILE(${memberItem.member.library}/${memberItem.member.file}) SRCMBR(${memberItem.member.name}) SUMMARY(*NO) OUTPUT(*PRINT) PRTFILE(QSYSPRT)`
+      });
+
+      if (command) { //if prompt wasn't canceled
+        const result = await connection.runCommand({ command, environment: "ile" });
+        if (result.code === 0) {
+          //success
+          console.log(result.stdout);
+          vscode.window.showInformationMessage(l10n.t("Command PRTDDSDSP successful, check your spooled files"));
+
+        }
+        else {
+          //failure
+          vscode.window.showErrorMessage(l10n.t("Command PRTDDSDSP failed: {0}", result.stderr)); //show the error output in error notification
+        }
+      }
+    }),
+    // vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewProvider),
   );
   Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup" , create_HWK_getObjectSourceInfo_Tools);
 }
 
-function getConfig() {
-  const config = Code4i.getConfig();
-  if (config) {
-    return config;
-  }
-  else {
-    throw new Error(l10n.t('Not connected to an IBM i'));
-  }
-}
-
-function getConnection() {
-  const connection = Code4i.getConnection();
-  if (connection) {
-    return connection;
-  }
-  else {
-    throw new Error(l10n.t('Not connected to an IBM i'));
-  }
-}
-
-function getContent() {
-  const content = Code4i.getContent();
-  if (content) {
-    return content;
-  }
-  else {
-    throw new Error(l10n.t('Not connected to an IBM i'));
-  }
-}
-
-let hawkeyeSearchViewProvider: HawkeyeSearchView;
-export function setSearchResultsHwk(actionCommand: string, term: string, results: HawkeyeSearch.Result[]) {
+function setSearchResultsHwk(actionCommand: string, term: string, results: HawkeyeSearch.Result[]) {
   hawkeyeSearchViewProvider.setResults(actionCommand, term, results);
 }
 
 async function create_HWK_getObjectSourceInfo_Tools(): Promise<void> {
   const library = Code4i.getTempLibrary();
-  // let obj_exists = await getContent()?.checkObject({ library: library, name: "VSC00AFN86", type: "*PGM" });
+  // let obj_exists = await Code4i.getContent()?.checkObject({ library: library, name: "VSC00AFN86", type: "*PGM" });
   if ((await Code4i.runSQL(`select 1 as PROC_EXISTS from QSYS2.SYSPROCS where ROUTINE_NAME = 'VSC00AFN86'`)).length = 0) { // PROC not found
     // }
     // if (!obj_exists) {
@@ -747,7 +747,7 @@ async function create_HWK_getObjectSourceInfo_Tools(): Promise<void> {
       noLibList: true
     });
   }
-  if (!await getContent()?.checkObject({ library: library, name: "VSC00AFN87", type: "*SRVPGM" })) {
+  if (!await Code4i.getContent()?.checkObject({ library: library, name: "VSC00AFN87", type: "*SRVPGM" })) {
     Code4i.runCommand({
       command: `RUNSQL SQL('${getHWK_getObjectSourceInfo_func_src(library)}') COMMIT(*NONE) NAMING(*SQL)`,
       cwd: `/`,
@@ -870,7 +870,7 @@ function scrubLibrary(lib: string, command: string): string {
 function setProtectMode(library: string, command: String): boolean {
   let protection: boolean = true;
   if (command === `DSPSCNSRC`) {
-    if (getConnection().currentUser === library) { protection = false; }
+    if (Code4i.getConnection().currentUser === library) { protection = false; }
   }
   return protection;
 }

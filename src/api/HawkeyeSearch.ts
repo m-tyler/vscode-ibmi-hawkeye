@@ -1,6 +1,7 @@
 import { l10n } from 'vscode';
-import { Code4i, sanitizeSearchTerm, nthIndex, checkObject, getSourceObjectType } from '../tools';
+import { Code4i, sanitizeSearchTerm, nthIndex, checkObject, getSourceObjectType, showCustomInputs } from '../tools';
 import { CommandResult } from '@halcyontech/vscode-ibmi-types';
+
 export namespace HawkeyeSearch {
   const QSYS_PATTERN = /^(?:\/)|(?:QSYS\.LIB\/)|(?:\.LIB)|(?:\.FILE)|(?:\.MBR)/g;
   const NEWLINE = `\r\n`;
@@ -31,21 +32,34 @@ export namespace HawkeyeSearch {
 
     if (connection) {
       await Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName} MBR(HWKSEARCH)`, noLibList: true });
-      // let asp = await Code4i.getLibraryIAsp(library);
+      let aspa = await Code4i.getLibraryIAsp(library);
+      let aspb = await Code4i.getCurrentIAspName();
       let asp = await Code4i.lookupLibraryIAsp(library);
+      asp = asp?asp:aspa?aspa:aspb;
+      // console.log(asp);
       let arrayofSearchTokens = searchTerm.split(',').map(term => `'` + term.substring(0, 30).replace(/['"]/g, '').trim() + `'`);// wrapped in single quotes for DSPSCNSRC SCAN() keyword
-      let stringofSearchTokens = sanitizeSearchTerm(arrayofSearchTokens.join(`,`));
+      let stringofSearchTokens = sanitizeSearchTerm(arrayofSearchTokens.join(` `));
 
+      let runDSPSCNSRC = Code4i.getContent().toCl(`DSPSCNSRC`, {
+        srcfile: `${connection.sysNameInAmerican(lib)}/${connection.sysNameInAmerican(spf)}`,
+        srcmbr: `${connection.sysNameInAmerican(member)}`,
+        type: `${connection.sysNameInAmerican(memberExt)}`,
+        output: `*OUTFILE`,
+        outfile:`${tempLibrary}/${tempName}`.toLocaleUpperCase(),
+        outmbr:`HWKSEARCH`,
+        // scan: stringofSearchTokens,
+        case: `*IGNORE`, 
+        begpos: `001`, 
+        endpos: `240`
+      });
+      runDSPSCNSRC += ` SCAN(${stringofSearchTokens})`;
       let cmdResult: CommandResult;
-      cmdResult = await Code4i.runCommand({ command: `DSPSCNSRC SRCFILE(${connection.sysNameInAmerican(lib)}/${connection.sysNameInAmerican(spf)}) SRCMBR(${connection.sysNameInAmerican(member)}) TYPE(${connection.sysNameInAmerican(memberExt)}) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName}) OUTMBR(HWKSEARCH) SCAN(${stringofSearchTokens}) CASE(*IGNORE) BEGPOS(001) ENDPOS(240)`, noLibList: true });
-      // const memberInfo = await Code4i.getMemberInfo(`${tempLibrary}`, `${tempName}`, `HWKSEARCH`);
+      cmdResult = await Code4i.runCommand({ command: runDSPSCNSRC, environment: `ile`, noLibList: true });
       const resultsExist = await checkObject(`${tempLibrary}`, `${tempName}`, `*FILE`);
-      // if (!memberInfo) {
       if (!resultsExist) {
         throw new Error(l10n.t('No results for Display Scan Source.'));
       }
       else {
-      // if (resultsExist) {
         const result = await connection.sendQsh({
           command: `db2 -s "select '/${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'||(case when SP.SOURCE_TYPE is not null then SP.SOURCE_TYPE when SP.SOURCE_TYPE is null and SCDFIL = 'QSQDSRC' then 'SQL' else 'MBR' end)||'~'||'~'||char(SCDSEQ)||'~'||varchar(rtrim(SCDSTM),112) from ${tempLibrary}.${tempName} left join QSYS2.SYSPARTITIONSTAT SP on SP.SYSTEM_TABLE_SCHEMA=SCDLIB and SP.SYSTEM_TABLE_NAME=SCDFIL and SP.SYSTEM_TABLE_MEMBER=SCDMBR" | sed -e '1,3d' -e 's/\(.*\)/&/' -e '/^$/d' -e '/RECORD.*.*.* SELECTED/d' ;`,
         }); // add to end of list in future => -e 's/:/~/' -e 's/:/~/'
@@ -66,7 +80,10 @@ export namespace HawkeyeSearch {
   }
   export async function hwkdisplayFileSetsUsed(library: string, dbFile: string, searchTerm: string, readOnly?: boolean): Promise<Result[]> {
     const connection = Code4i.getConnection();
-    let asp = await Code4i.getLibraryIAsp(library);
+    let aspa = await Code4i.getLibraryIAsp(library);
+    let aspb = await Code4i.getCurrentIAspName();
+    let asp = await Code4i.lookupLibraryIAsp(library);
+    asp = asp?asp:aspa?aspa:aspb;
     const lib = (library !== '*' ? library : '*ALL');
     const file = (dbFile !== '*' ? dbFile : '*ALL');
     const tempLibrary = Code4i.getTempLibrary();

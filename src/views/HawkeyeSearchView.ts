@@ -157,4 +157,8 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
     return item;
   }
 
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

@@ -65,7 +65,11 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     }),
     //   // vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewProvider),
   );
+<<<<<<< Updated upstream
   getInstance()?.subscribe(context, `connected`, "Hawkeye Extension Setup" , create_HWK_getObjectSourceInfo_Tools);
+=======
+  Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup", create_HWK_getObjectSourceInfo_Tools);
+>>>>>>> Stashed changes
 }
 
 async function create_HWK_getObjectSourceInfo_Tools(): Promise<void> {

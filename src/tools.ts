@@ -227,7 +227,7 @@ export function parseCommandString(input: string): Record<string, string> {
   return result;
 }
 
-export function replaceCommandDefault(command: string, keyword:string, replaceValue:string) 
+export function replaceCommandDefault(command: string, keyword:string, replaceValue:string): string 
 {
   const components = [];
   let loop = true;
@@ -240,7 +240,6 @@ export function replaceCommandDefault(command: string, keyword:string, replaceVa
       const start = idx;
       // if (command.indexOf(keyword, start)===0) {continue;} // Not at keyword to alter default value
       end = command.indexOf(`}`, start);
-      
       if (end >= 0) {
         let currentInput = command.substring(start + 2, end);
         
@@ -250,14 +249,6 @@ export function replaceCommandDefault(command: string, keyword:string, replaceVa
         pipe = command.indexOf(`|`, pipe+1);
         command = command.substring(0,pipe);
       
-
-        // components.push({
-        //   name,
-        //   label,
-        //   initialValue: initialValue || ``,
-        //   start,
-        //   end: end + 1
-        // });
       } else {
         loop = false;
       }
@@ -265,4 +256,5 @@ export function replaceCommandDefault(command: string, keyword:string, replaceVa
       loop = false;
     }
   }
+  return command;
 }

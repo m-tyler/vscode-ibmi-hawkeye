@@ -1,10 +1,10 @@
-import { Action, MemberItem, CommandResult } from '@halcyontech/vscode-ibmi-types';
+import { Action } from '@halcyontech/vscode-ibmi-types';
 
 export const hawkeyeActions: Action[] =
   [
     {
       "name": `DSPSCNSRC`,
-      "command": "DSPSCNSRC SRCLIB(${LIBRARY|Source Library . . . : <b>Name, *LIBL, *USRLIBL</b>|*LIBL,*DOCLIBL,*USRLIBL,*ALLUSR,*CURLIB,*SRCL}) SRCFILE(${SRCFILE|Source File  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) SRCMBR(${MEMBER|Source Member  . . . : <b>Name, generic*, *ALL</b>|*ALL}) TYPE(${MEMBEREXT|Source Type  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) CASE(${CASE|Text case match  . . :<b>*IGNORE,*MATCH</b>|*IGNORE,*MATCH}) LOGIC(${LOGIC|Matching logic . . . : <b>*OR,*AND</b>|*OR,*AND}) BEGPOS(${BEGPOS|Source scan begin pos: 1-240|001}) ENDPOS(${ENDPOS|Source scan end pos  : <b>1-240</b>|240}) SCAN1(${SCAN1|Scan string 1|}) SCAN2(${scan2|Scan string 2|}) SCAN3(${scan3|Scan string 3|}) SCAN4(${SCAN4|Scan string 4|}) SCAN5(${scan5|Scan string 5|}) SCAN6(${scan6|Scan string 6|}) SCAN7(${scan7|Scan string 7|}) SCAN8(${scan8|Scan string 8|}) SCAN9(${scan9|Scan string 9|}) SCANA(${scanA|Scan string 10|})",
+      "command": "DSPSCNSRC SRCLIB(${LIBRARY|Source Library . . . : <b>Name, *LIBL, *USRLIBL</b>|*LIBL,*DOCLIBL,*USRLIBL,*ALLUSR,*CURLIB,*SRCL}) SRCFILE(${SRCFILE|Source File  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) SRCMBR(${MEMBER|Source Member  . . . : <b>Name, generic*, *ALL</b>|*ALL}) TYPE(${MEMBEREXT|Source Type  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) CASE(${CASE|Text case match  . . :<b>*IGNORE,*MATCH</b>|*IGNORE,*MATCH}) LOGIC(${LOGIC|Matching logic . . . : <b>*OR,*AND</b>|*OR,*AND}) BEGPOS(${BEGPOS|Source scan begin pos: <B>1-240</B>|001}) ENDPOS(${ENDPOS|Source scan end pos  : <b>1-240</b>|240}) SCAN1(${SCAN1|Scan string 1|}) SCAN2(${scan2|Scan string 2|}) SCAN3(${scan3|Scan string 3|}) SCAN4(${SCAN4|Scan string 4|}) SCAN5(${scan5|Scan string 5|}) SCAN6(${scan6|Scan string 6|}) SCAN7(${scan7|Scan string 7|}) SCAN8(${scan8|Scan string 8|}) SCAN9(${scan9|Scan string 9|}) SCANA(${scanA|Scan string 10|})",
       "environment": "ile",
       "type": "file",
       "extensions": [

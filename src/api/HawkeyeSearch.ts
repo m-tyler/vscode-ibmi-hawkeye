@@ -30,16 +30,14 @@ export namespace HawkeyeSearch {
     const member = (mbrExt[0] !== '*' ? mbrExt[0] : '*ALL');
     const memberExt = (mbrExt[1] !== '*' ? mbrExt[1] : '*ALL');
     const tempLibrary = Code4i.getTempLibrary();
-    const tempName = makeid();
+    let aspa = await Code4i.getLibraryIAsp(library);
+    let aspb = await Code4i.getCurrentIAspName();
+    let asp = await Code4i.lookupLibraryIAsp(library);
+    asp = asp?asp:aspa?aspa:aspb;
+    const tempName = Code4i.makeid();
 
     if (connection) {
       await Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName} MBR(HWKSEARCH)`, noLibList: true });
-      let asp = await getLibraryAspInfo( library);
-      await Code4i.runCommand({ command: `DSPSCNSRC SRCFILE(${connection.sysNameInAmerican(lib)}/${connection.sysNameInAmerican(spf)}) SRCMBR(${connection.sysNameInAmerican(member)}) TYPE(${connection.sysNameInAmerican(memberExt)}) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName}) OUTMBR(HWKSEARCH) SCAN('${sanitizeSearchTerm(searchTerm).substring(0, 30)}') CASE(*IGNORE) BEGPOS(001) ENDPOS(240)`, noLibList: true });
-      const result = await connection.sendQsh({
-        command: `db2 -s "select '${asp ?`${asp}`:``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'||(case when SP.SOURCE_TYPE is not null then SP.SOURCE_TYPE when SP.SOURCE_TYPE is null and SCDFIL = 'QSQDSRC' then 'SQL' else 'MBR' end)||'~'||'~'||char(SCDSEQ)||'~'||varchar(rtrim(SCDSTM),112) from ${tempLibrary}.${tempName} left join QSYS2.SYSPARTITIONSTAT SP on SP.SYSTEM_TABLE_SCHEMA=SCDLIB and SP.SYSTEM_TABLE_NAME=SCDFIL and SP.SYSTEM_TABLE_MEMBER=SCDMBR where ucase(rtrim(SCDSTM)) like ucase('%${sanitizeSearchTerm(searchTerm)}%')" | sed -e '1,3d' -e 's/\(.*\)/&/' -e '/^$/d' -e '/RECORD.*.*.* SELECTED/d' ;`,
-      }); // add to end of list in future => -e 's/:/~/' -e 's/:/~/'
-
       let runDSPSCNSRC = Code4i.getContent().toCl(`DSPSCNSRC`, {
         srcfile: `${connection.sysNameInAmerican(lib)}/${connection.sysNameInAmerican(spf).toLocaleUpperCase()}`,
         srcmbr: `${connection.sysNameInAmerican(member).toLocaleUpperCase()}`,
@@ -54,6 +52,12 @@ export namespace HawkeyeSearch {
       runDSPSCNSRC += ` SCAN(${stringofSearchTokens})`;
       let cmdResult: CommandResult;
       cmdResult = await Code4i.runCommand({ command: runDSPSCNSRC, environment: `ile`, noLibList: true });
+      await Code4i.runCommand({ command: `DSPSCNSRC SRCFILE(${connection.sysNameInAmerican(lib)}/${connection.sysNameInAmerican(spf)}) SRCMBR(${connection.sysNameInAmerican(member)}) TYPE(${connection.sysNameInAmerican(memberExt)}) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName}) OUTMBR(HWKSEARCH) SCAN('${sanitizeSearchTerm(searchTerm).substring(0, 30)}') CASE(*IGNORE) BEGPOS(001) ENDPOS(240)`, noLibList: true });
+      const result = await connection.sendQsh({
+        command: `db2 -s "select '${asp ?`${asp}`:``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'||(case when SP.SOURCE_TYPE is not null then SP.SOURCE_TYPE when SP.SOURCE_TYPE is null and SCDFIL = 'QSQDSRC' then 'SQL' else 'MBR' end)||'~'||'~'||char(SCDSEQ)||'~'||varchar(rtrim(SCDSTM),112) from ${tempLibrary}.${tempName} left join QSYS2.SYSPARTITIONSTAT SP on SP.SYSTEM_TABLE_SCHEMA=SCDLIB and SP.SYSTEM_TABLE_NAME=SCDFIL and SP.SYSTEM_TABLE_MEMBER=SCDMBR where ucase(rtrim(SCDSTM)) like ucase('%${sanitizeSearchTerm(searchTerm)}%')" | sed -e '1,3d' -e 's/\(.*\)/&/' -e '/^$/d' -e '/RECORD.*.*.* SELECTED/d' ;`,
+      }); // add to end of list in future => -e 's/:/~/' -e 's/:/~/'
+
+
       const resultsExist = await checkObject(`${tempLibrary}`, `${tempName}`, `*FILE`);
       if (!resultsExist) {
         throw new Error(l10n.t('No results for Display Scan Source.'));

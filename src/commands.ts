@@ -3,7 +3,7 @@ import { Code4i, showCustomInputs, parseCommandString, replaceCommandDefault } f
 import { HawkeyeSearch } from "./api/HawkeyeSearch";
 import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
 import { getMemberCount } from "./api/IBMiTools";
-import { hawkeyeActions } from "./commandActions";
+import { getHawkeyeAction } from "./commandActions";
 import { MemberItem, ObjectItem, CommandResult } from '@halcyontech/vscode-ibmi-types';
 import { SearchResult } from './newwork/SearchResult';
 //https://code.visualstudio.com/api/references/icons-in-labels
@@ -46,7 +46,7 @@ export namespace HwkI {
     }
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
-    const chosenAction = hawkeyeActions[0]; // DSPSCNSRC
+    const chosenAction = getHawkeyeAction(0); // DSPSCNSRC
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCLIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCFILE', ww.sourceFile);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCMBR', ww.name);
@@ -246,7 +246,7 @@ export namespace HwkI {
     }
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
-    let chosenAction = hawkeyeActions[1]; // DSPFILSET
+    let chosenAction = getHawkeyeAction(1); // DSPFILSET
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILELIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILE', ww.name);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
@@ -393,7 +393,7 @@ export namespace HwkI {
    
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
-    const chosenAction = hawkeyeActions[2]; // DSPPGMOBJ
+    const chosenAction = getHawkeyeAction(2); // DSPPGMOBJ
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJLIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJ', ww.name);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.type);
@@ -536,7 +536,7 @@ export namespace HwkI {
 
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
-    const chosenAction = hawkeyeActions[3]; // DSPOBJU
+    const chosenAction = getHawkeyeAction(3); // DSPOBJU
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJLIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJ', ww.name);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.type);

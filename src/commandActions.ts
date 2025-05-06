@@ -1,6 +1,15 @@
 import { Action } from '@halcyontech/vscode-ibmi-types';
 
-export const hawkeyeActions: Action[] =
+export function getHawkeyeAction(id:number): Action {
+  if (id >= 0 && id <= 3 ) {
+    return hawkeyeActions[id];
+  }
+  else 
+  {
+    return {} as Action;
+  }
+}
+const hawkeyeActions: Action[] =
   [
     {
       "name": `DSPSCNSRC`,

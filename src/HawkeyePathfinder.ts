@@ -69,6 +69,9 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
   getInstance()?.subscribe(context, `connected`, "Hawkeye Extension Setup" , create_HWK_getObjectSourceInfo_Tools);
 =======
   Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup", create_HWK_getObjectSourceInfo_Tools);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }
 

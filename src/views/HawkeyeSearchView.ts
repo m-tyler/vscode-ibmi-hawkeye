@@ -4,18 +4,28 @@ import * as vscode from 'vscode';
 import path from 'path';
 import { HawkeyeSearch } from "../api/HawkeyeSearch";
 import { QsysFsOptions } from '@halcyontech/vscode-ibmi-types/';
+import {SearchTreeProvider} from '../newwork/SearchTreeProvider';
+import {registerCommandHandlers} from '../newwork/commandHandlers';
+import { SearchSession } from '../newwork/SearchSession';
+import { HitSource } from '../newwork/HitSource'; // Import HitSource
+import { LineHit } from '../newwork/LineHit'; // Import LineHit
+
+
 export type OpenEditableOptions = QsysFsOptions & { position?: Range };
 
 export class HawkeyeSearchView implements TreeDataProvider<any> {
-  private _term = ``;
-  private _actionCommand = ``;
-  private _results: HawkeyeSearch.Result[] = [];
-  private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
-  readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+  // private _searchTreeProvider: SearchTreeProvider;
+  private _searchSessions: SearchSession[] = [];
+
+  private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> 
+                          = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem |undefined | null | void> = this._onDidChangeTreeData.event;
 
   constructor(context: vscode.ExtensionContext) {
+    // this._searchTreeProvider = new SearchTreeProvider;
     context.subscriptions.push(
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.refreshSearchView`, async () => {
+        // this._searchTreeProvider.refresh();
         this.refresh();
       }),
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.closeSearchView`, async () => {
@@ -27,7 +37,17 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.expandSearchView`, async () => {
         this.expand();
       }),
+      vscode.commands.registerCommand(`Hawkeye-Pathfinder.setSearchResults`, async (actionCommand :string, term: string, results: HawkeyeSearch.Result[]) => {
+        // if (searchResults.hits.some(hit => hit.lines.length)) {
+        //   searchViewViewer.message = vscode.l10n.t(`{0} file(s) contain(s) '{1}'`, searchResults.hits.length,  searchResults.term);
+        // }
+        // else {
+        //   searchViewViewer.message = vscode.l10n.t(`{0} file(s) named '{1}'`, searchResults.hits.length,  searchResults.term);
+        // }
+        this.setResults(actionCommand, term, results);
+      })
     );
+    // registerCommandHandlers( context, this._searchTreeProvider );
   }
 
   setViewVisible(visible: boolean) {
@@ -35,22 +55,22 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
   }
 
   setResults(actionCommand :string, term: string, results: HawkeyeSearch.Result[]) {
-    this._actionCommand = actionCommand;
-    this._term = term;
-    this._results = results;
-    this.refresh();
+    this.addSearchSession(actionCommand, results, term);
     this.setViewVisible(true);
 
     vscode.commands.executeCommand(`hawkeyeSearchView.focus`);
   }
 
-  refresh() {
-    this._onDidChangeTreeData.fire();
-  }
+  // getTreeItem(element: any): vscode.TreeItem |Thenable<vscode.TreeItem> {
+  //   return this._searchTreeProvider.getTreeItem(element);
+  // }
+  // getChildren(element?: any): vscode.ProviderResult<any[]> {
+  //   return this._searchTreeProvider.getChildren(element);
+  // }
 
-  getTreeItem(element: vscode.TreeItem) {
-    return element;
-  }
+  // getTreeItem(element: vscode.TreeItem) {
+  //   return element;
+  // }
 
   collapse() {
     vscode.commands.executeCommand(`workbench.actions.treeView.hawkeyeSearchView.collapseAll`);
@@ -59,115 +79,82 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
     vscode.commands.executeCommand(`workbench.actions.treeView.hawkeyeSearchView.expandAll`);
   }
 
-  async getChildren(hitSource: HitSource): Promise<vscode.TreeItem[]> {
-    if (!hitSource) {
-      return this._results.map(result => new HitSource(result, this._term));
-    } else {
-      return hitSource.getChildren();
+  /**
+   * Add a new search session with results
+   * @param command The IBM i command that was executed (e.g., DSPSCNSRC)
+   * @param results The results from the command execution
+   */
+  addSearchSession(command: string, results: any[], searchTerm: string): void {
+    const timestamp = new Date().toLocaleTimeString();
+    const sessionId = `${command}_${timestamp}`;
+    const hitSources = results.map(result => new HitSource(result, searchTerm)); 
+    const newSession = new SearchSession(sessionId, command, hitSources, searchTerm);
+    this._searchSessions.push(newSession);
+    this._onDidChangeTreeData.fire(undefined); // Refresh the entire tree
+  }
+
+  /**
+   * Remove a specific search session
+   * @param sessionId The ID of the session to remove
+   */
+  removeSession(sessionId: string): void {
+    const index = this._searchSessions.findIndex(session => session.id === sessionId);
+    if (index !== -1) {
+      this._searchSessions.splice(index, 1);
+      this._onDidChangeTreeData.fire(undefined);
     }
   }
-  // async getChildren(hit: HitCommand): Promise<vscode.TreeItem[]> {
-  //   if (!hit) {
-  //     return new HitCommand(this._actionCommand, this._results, this._term);
-  //   } else {
-  //     return hit.getChildren();
-  //   }
-  // }
-}
 
-class HitCommand extends vscode.TreeItem {
-  private readonly _actionCommand: string;
-
-  constructor(actionCommand :string, readonly results: HawkeyeSearch.Result[], readonly term: string) {
-    super(actionCommand, vscode.TreeItemCollapsibleState.Expanded);
-
-    this.contextValue = `hitCommand`;
-    this.iconPath = vscode.ThemeIcon.File;
-    this.description = `${actionCommand}`;
-    this._actionCommand = actionCommand;
+  /**
+   * Clear all search sessions
+   */
+  clearSessions(): void {
+    this._searchSessions = [];
+    this._onDidChangeTreeData.fire(undefined);
   }
 
-  async getChildren(): Promise<HitSource[]> { 
-      return this.results.map(result => new HitSource(result, this.term));
-  }
-}
-
-class HitSource extends vscode.TreeItem {
-  private readonly _path: string;
-  private readonly _readonly?: boolean;
-
-  constructor(readonly result: HawkeyeSearch.Result, readonly term: string) {
-    super(result.label ? result.path : path.posix.basename(result.path), vscode.TreeItemCollapsibleState.Collapsed);
-
-    const hits = result.lines.length;
-    this.contextValue = `hitSource`;
-    this.iconPath = vscode.ThemeIcon.File;
-    this.description = `${hits} hit${hits === 1 ? `` : `s`}`;
-    this._path = result.path;
-    this._readonly = result.readonly;
-    this.tooltip = ``
-      .concat(result.howUsed ? vscode.l10n.t(`How Used\t\t\t:  {0}`, result.howUsed) : ``)
-      .concat(result.contextValue ? vscode.l10n.t(`\nContext: {0}`, result.contextValue) : ``);
+  /**      
+   * Get the tree item for the given element
+   */
+  getTreeItem(element: SearchSession | HitSource | LineHit): vscode.TreeItem {
+    return element;
   }
 
-  async getChildren(): Promise<LineHit[]> {
-   
-    return this.result.lines.map(line => new LineHit(this.term, this._path, line, this._readonly));
-  }
-}
-class LineHit extends vscode.TreeItem {
-  constructor(term: string, readonly path: string, line: HawkeyeSearch.Line, readonly?: boolean) {
-    const highlights: [number, number][] = [];
-
-    const upperContent = line.content.trimEnd().toUpperCase();
-    const upperTerm = term.toUpperCase();
-    const openOptions: OpenEditableOptions = { readonly };
-    let index = 0;
-
-    // Calculate the highlights
-    if (term.length > 0) {
-      const positionLine = line.number>= 1 ? line.number-1 :0;
-      while (index >= 0) {
-        index = upperContent.indexOf(upperTerm, index);
-        if (index >= 0) {
-          highlights.push([index, index + term.length]);
-          if (!openOptions.position) {
-            openOptions.position = new vscode.Range(positionLine, index, positionLine, index + term.length);
-          }
-          index += term.length;
-        }
-      }
+  /**
+   * Get the children of the given element
+   */
+  getChildren(element?: SearchSession | HitSource | LineHit): Thenable<(SearchSession | HitSource | LineHit)[]> {
+    if (!element) {
+      // Root level - return all search sessions
+      return Promise.resolve(this._searchSessions);
+    } else if (element instanceof SearchSession) {
+      // Session level - return all results for this session
+      return Promise.resolve(element.hitSources);
     }
-
-    super({
-      label: line.content.trim(),
-      highlights
-    });
-
-    this.contextValue = `lineHit`;
-    this.collapsibleState = vscode.TreeItemCollapsibleState.None;
-
-    this.description = String(line.number);
-
-    this.command = {
-      command: `code-for-ibmi.openEditable`,
-      title: `Open`,
-      arguments: [this.path, openOptions]
-    };
+    else if (element instanceof HitSource) {
+      // HitSource level - return all LineHit objects for this HitSource
+      return Promise.resolve(element.getChildren());
+    }
+    
+    // Leaf node or other cases
+    return Promise.resolve([]);
   }
+  refresh(): void {
+    this._onDidChangeTreeData.fire(undefined);
+  }
+  async resolveTreeItem(item: SearchSession | HitSource | LineHit, element: any, token: vscode.CancellationToken): Promise<vscode.TreeItem> {
+    if (!element) {
+      // Root level - return all search sessions
+      item.tooltip = item.tooltip;
+    } else if (element instanceof SearchSession) {
+      // Session level - return all results for this session
+      item.tooltip = item.tooltip;
+    }
+    else if (element instanceof HitSource) {
+      // HitSource level - return all LineHit objects for this HitSource
+      item.tooltip = item.tooltip;
+    }
+    return item;
+  }
+
 }
-
-/*
-Tree Item map for lowest level (HwkXrefItem)
-path/uri
-object/member
-object/source file
-object/source library
-object/source type (if *NONE then no look up using double click from tree)
-howUSed
-text
-
-Second lowest to second highest level (HwkXref)
-path/uri for this level, no command to double click and open things.
-array of `HwkXrefIem`s of type treeItem
-*/

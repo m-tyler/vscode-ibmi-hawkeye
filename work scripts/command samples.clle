@@ -1,0 +1,42 @@
+DSPSCNSRC 
+ SRCLIB(${library|Library: Name, *LIBL, *USRLIBL...|*LIBL,*DOCLIBL,*USRLIBL,*ALL,*ALLUSR,*CURLIB,*SRCL}) 
+SRCFILE(${srcfile|Source File: Name, generic*, *ALL|*ALL}) 
+ SRCMBR(${member |Source Member: Name, generic*, *ALL|*ALL}) 
+   TYPE(${memberExt|Source Type: Name, generic*, *ALL|*ALL}) 
+CASE(${case|Text case match:*IGNORE,*MATCH|*IGNORE,*MATCH}) 
+LOGIC(${logic|Matching logic: *OR,*AND|*OR,*AND}) 
+BEGPOS(${begpos|Source scan begin pos: 1-240|001}) 
+ENDPOS(${endpos|Source scan end pos: 1-240|240}) 
+SCAN1(${scan1|Scan string 1|}) 
+SCAN2(${scan2|Scan string 2|}) 
+SCAN3(${scan3|Scan string 3|}) 
+SCAN4(${scan4|Scan string 4|}) 
+SCAN5(${scan5|Scan string 5|}) 
+SCAN6(${scan6|Scan string 6|}) 
+SCAN7(${scan7|Scan string 7|}) 
+SCAN8(${scan8|Scan string 8|}) 
+SCAN9(${scan9|Scan string 9|}) 
+SCANA(${scanA|Scan string 10|}) 
+
+"DSPSCNSRC SRCLIB(*DOCLIBL) SRCFILE(QRPGSRC) SRCMBR(PRP) TYPE(*ALL) CASE(*IGNORE) LOGIC(*OR) BEGPOS(001) ENDPOS(240) SCAN1(PRP_) SCAN2() SCAN3() SCAN4() SCAN5() SCAN6() SCAN7() SCAN8() SCAN9() SCANA()"
+
+{
+  SRCLIB: { value: "*DOCLIBL", }, 
+  SRCFILE: { value: "qrpgsrc", },
+  SRCMBR: { value: "prp*", },
+  TYPE: { value: "*ALL", },
+  CASE: { value: "*IGNORE", },
+  LOGIC: { value: "*OR", },
+  BEGPOS: { value: "001", },
+  ENDPOS: { value: "240", },
+  SCAN1: { value: "PRP_", },
+  SCAN2: { value: "", },
+  SCAN3: { value: "", },
+  SCAN4: { value: "", },
+  SCAN5: { value: "", },
+  SCAN6: { value: "", },
+  SCAN7: { value: "", },
+  SCAN8: { value: "", },
+  SCAN9: { value: "", },
+  SCANA: { value: "", },
+}

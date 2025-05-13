@@ -14,12 +14,13 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
                           = new vscode.EventEmitter<SearchSession | HitSource | LineHit | undefined | null>();
   
   readonly onDidChangeTreeData: vscode.Event<SearchSession | HitSource | LineHit | undefined | null> = this._onDidChangeTreeData.event;
-
+  constructor(context: vscode.ExtensionContext) {}
   /**
    * Add a new search session with results
    * @param command The IBM i command that was executed (e.g., DSPSCNSRC)
    * @param results The results from the command execution
    */
+  // addSearchSession(command: string, results: any[], searchTerm: string): void {
   addSearchSession(command: string, results: any[], searchTerm: string): void {
     const timestamp = new Date().toLocaleTimeString();
     const sessionId = `${command}_${timestamp}`;

@@ -13,7 +13,7 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
   readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
   constructor(context: vscode.ExtensionContext) {
-    this._searchTreeProvider = new SearchTreeProvider;
+    this._searchTreeProvider = new SearchTreeProvider(context);
     context.subscriptions.push(
       // vscode.window.registerTreeDataProvider('hawkeyeSearchView', this._searchTreeProvider),
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.refreshSearchView`, async () => {
@@ -28,6 +28,9 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.expandSearchView`, async () => {
         this.expand();
       }),
+      vscode.commands.registerCommand(`Hawkeye-Pathfinder.setSearchResults`, async (actionCommand :string, term: string, results: HawkeyeSearch.Result[]) => {
+        this.setResults(actionCommand, term, results);
+      })
     );
     registerCommandHandlers( context, this._searchTreeProvider );
   }

@@ -1,6 +1,4 @@
-import { CodeForIBMi, CommandResult, RemoteCommand } from '@halcyontech/vscode-ibmi-types';
-// import Instance from "@halcyontech/vscode-ibmi-types/Instance";
-import IBMi from "@halcyontech/vscode-ibmi-types/api/IBMi";
+import { CommandResult, RemoteCommand } from '@halcyontech/vscode-ibmi-types';
 import type { Tools } from '@halcyontech/vscode-ibmi-types/api/Tools';
 import { CustomUI } from '@halcyontech/vscode-ibmi-types/webviews/CustomUI';
 import { ExtensionContext } from "vscode";
@@ -34,8 +32,8 @@ export namespace Code4i {
   //     return getContent().getTable(library, name, name, true);
   // }
 
-  export async function runSQL(sqlStatement: string): Promise<Tools.DB2Row[]> {
-    return getContent().ibmi.runSQL(sqlStatement);
+  export async function runSQL(sqlStatement: string, options?: { fakeBindings?: (string | number)[]; forceSafe?: boolean; }): Promise<Tools.DB2Row[]> {
+    return getContent().ibmi.runSQL(sqlStatement, options||undefined );
   }
 
   export async function runCommand(command: RemoteCommand): Promise<CommandResult> {
@@ -229,26 +227,26 @@ export function parseCommandString(input: string): Record<string, string> {
 
 export function replaceCommandDefault(command: string, keyword:string, replaceValue:string): string 
 {
+  if (replaceValue === "") {
+    return command;
+  }
   const components = [];
   let loop = true;
-
   let end = 0;
   while (loop) {
     const idx = command.indexOf(`\${`, end);
-
     if (idx >= 0) {
       const start = idx;
-      // if (command.indexOf(keyword, start)===0) {continue;} // Not at keyword to alter default value
       end = command.indexOf(`}`, start);
       if (end >= 0) {
         let currentInput = command.substring(start + 2, end);
-        
         const [name, label, initialValue] = currentInput.split(`|`);
-        if (keyword!==name) {continue;} // Not at keyword to alter default value
+        if (keyword !== name) {
+          continue;
+        }
         let pipe = command.indexOf(`|`, start);
-        pipe = command.indexOf(`|`, pipe+1);
-        command = command.substring(0,pipe);
-      
+        pipe = command.indexOf(`|`, pipe + 1);
+        command = command.substring(0, pipe) + `${replaceValue},` + command.substring(0, pipe + 1);
       } else {
         loop = false;
       }

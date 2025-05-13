@@ -1,11 +1,10 @@
 import vscode, { l10n, } from 'vscode';
 import { Code4i, showCustomInputs, parseCommandString, replaceCommandDefault } from "./tools";
 import { HawkeyeSearch } from "./api/HawkeyeSearch";
-import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
 import { getMemberCount } from "./api/IBMiTools";
 import { getHawkeyeAction } from "./commandActions";
-import { MemberItem, ObjectItem, CommandResult } from '@halcyontech/vscode-ibmi-types';
-import { SearchResult } from './newwork/SearchResult';
+import { HawkeyeSearchMatches } from './types/types';
+import { MemberItem } from '@halcyontech/vscode-ibmi-types';
 //https://code.visualstudio.com/api/references/icons-in-labels
 // Create objects and functionality for this tool, here.
 
@@ -20,14 +19,10 @@ interface wItem {
   searchTerm: string
   searchTerms: string[]
 };
-interface SearchResults {
-  command?: string,
-  searchTerm?: string,
-  results?: HawkeyeSearch.Result[]
-};
 export namespace HwkI {
-  export async function searchSourceFiles(memberItem: MemberItem): Promise<SearchResults[]> {
+  export async function searchSourceFiles(memberItem: MemberItem): Promise<HawkeyeSearchMatches[]> {
     let ww = <wItem>{};
+    let searchMatch:HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
     ww.searchTerms = [];
     if (memberItem) {
       ww.path = memberItem.path;
@@ -47,19 +42,21 @@ export namespace HwkI {
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
     const chosenAction = getHawkeyeAction(0); // DSPSCNSRC
+    console.log(chosenAction);
+    console.log(`Length of chosenAction.command: ${chosenAction.command.length}`);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCLIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCFILE', ww.sourceFile);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCMBR', ww.name);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCTYPE', ww.type);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
-    if (!command) { return [{}]; }
+    if (!command) { return [{} as HawkeyeSearchMatches]; }
 
     // Parse user input into values to pass on to secondary tools. 
     let keywords = parseCommandString(command);
     // console.log(keywords);
     if (!keywords) {
       vscode.window.showErrorMessage(l10n.t(`Error running DSPSCNSRC command, no keywords.`));
-      return [{}];
+      return [{} as HawkeyeSearchMatches];
     } else {
       const path1 = keywords.SRCLIB + '/' + keywords.SRCFILE + '/' + keywords.SRCMBR;
       const mbrtype = keywords.TYPE === '*ALL' ? '*ALL' : keywords.TYPE;
@@ -118,7 +115,7 @@ export namespace HwkI {
 
         if (ww.searchTerm) {
           try {
-            await vscode.window.withProgress({
+            searchMatch = await vscode.window.withProgress({
               location: vscode.ProgressLocation.Notification,
               title: l10n.t(`Searching`),
             }, async progress => {
@@ -160,39 +157,9 @@ export namespace HwkI {
                   , `${ww.name || `*`}.${ww.type || `*`}`
                   , ww.searchTerm, ww.protected);
 
-                // Filter search result by member type filter.
-                if (results.length > 0 && ww.type) {
-                  const newType = ww.type!=='*ALL' ? ww.type :'*';
-                  const patternExt = new RegExp(`^` + newType.replace(/[*]/g, `.*`).replace(/[$]/g, `\\$`) + `$`);
-                  results = results.filter(result => {
-                    const resultPath = result.path.split(`/`);
-                    const resultName = resultPath[resultPath.length - 1].split(`.`)[0];
-                    const resultExt = resultPath[resultPath.length - 1].split(`.`)[1];
-                    // const member = members.find(member => member.name === resultName);
-                    const member = resultName;
-                    return (member && patternExt.test(resultExt));
-                  });
-                }
-
-                if (results.length > 0) {
-                  const objectNamesLower = true;
-
-                  results.forEach(result => {
-                    if (objectNamesLower === true) {
-                      result.path = result.path.toLowerCase();
-                    }
-                    result.label = result.path;
-                  });
-
-                  results = results.sort((a, b) => {
-                    return a.path.localeCompare(b.path);
-                  });
-                  // vscode.commands.executeCommand(`Hawkeye-Pathfinder.setSearchResults`,`DSPSCNSRC`
-                  //   , ww.searchTerm || ''
-                  //   , results || []
-                  // );
-                  return [{ command: `DSPSCNSRC ${new Date().toLocaleString()}`, searchTerm: ww.searchTerm, results: results }];
-
+                if (results) {
+                  let searchMatches = { command: `DSPSCNSRC`, searchDescription: `DSPFILSETU ${new Date().toLocaleString()}`, searchTerm: ww.searchTerm, files: results };
+                  return searchMatches;
                 } else {
                   vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' in HAWKEYE/DSPSCNSRC {1}.`
                     , ww.searchTerm, ww.path
@@ -215,9 +182,9 @@ export namespace HwkI {
 
     } else {
     }
-    return [{}];
+    return [searchMatch];
   };
-  export async function displayFileSetsUsed(item: any): Promise<SearchResults> {
+  export async function displayFileSetsUsed(item: any): Promise<HawkeyeSearchMatches[]> {
     let ww = <wItem>{};
     if (item && item.object) {
       ww.path = item.path;
@@ -247,16 +214,18 @@ export namespace HwkI {
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
     let chosenAction = getHawkeyeAction(1); // DSPFILSET
+    console.log(chosenAction);
+    console.log(`Length of chosenAction.command: ${chosenAction.command.length}`);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILELIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILE', ww.name);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
-    if (!command) { return {}; }
+    if (!command) { return [{} as HawkeyeSearchMatches]; }
 
     // Parse user input into values to pass on to secondary tools. 
     let keywords = parseCommandString(command);
     // console.log(keywords);
     if (!keywords) {
-      return {};
+      return [{} as HawkeyeSearchMatches];
     } else {
       ww.path = keywords.FILELIB + '/' + keywords.FILE;
       ww.library = keywords.FILELIB;
@@ -273,7 +242,7 @@ export namespace HwkI {
       } else {
         // if (ww && !(/.*(tb.*\.sql|pf.*\.pf|v.*\.sql)/.test(ww.path))) {
         vscode.window.showErrorMessage(l10n.t(`Display File Set Used is only value for database tables or views.`));
-        return {};
+        return [{} as HawkeyeSearchMatches];
       }
 
       if (ww.name !== ` `) {
@@ -325,24 +294,9 @@ export namespace HwkI {
               // returns results member name with member type as extension
               let results = await HawkeyeSearch.hwkdisplayFileSetsUsed(ww.library, ww.name, ww.searchTerm, ww.protected);
 
-              if (results.length > 0) {
-                const objectNamesLower = true;
-                results.forEach(result => {
-                  if (objectNamesLower === true) {
-                    result.path = result.path.toLowerCase();
-                  }
-                  result.label = result.path;
-                });
-
-                results = results.sort((a, b) => {
-                  return a.path.localeCompare(b.path);
-                });
-                vscode.commands.executeCommand(`Hawkeye-Pathfinder.setSearchResults`,`DSPSCNSRC`
-                  , ww.searchTerm || ''
-                  , results || []
-                );
-                // return { searchTerm: ww.path, results: results };
-
+              if (results) {
+                let searchMatches = { command: `DSPFILSETU`, searchDescription: `DSPFILSETU ${new Date().toLocaleString()}`, searchTerm: ww.searchTerm, files: results };
+                return [searchMatches];
               } else {
                 vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/DSPFILSETU {1}.`
                   , ww.searchTerm, ww.path
@@ -362,9 +316,9 @@ export namespace HwkI {
     } else {
       //Running from command.
     };
-    return {};
+    return [{} as HawkeyeSearchMatches];
   };
-  export async function displayProgramObjects(item: any): Promise<SearchResults> {
+  export async function displayProgramObjects(item: any): Promise<HawkeyeSearchMatches[]> {
     let ww = <wItem>{};
     if (item && item.object) {
       ww.path = item.path;
@@ -390,21 +344,23 @@ export namespace HwkI {
       ww.protected = true;
 
     }
-   
+
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
     const chosenAction = getHawkeyeAction(2); // DSPPGMOBJ
+    console.log(chosenAction);
+    console.log(`Length of chosenAction.command: ${chosenAction.command.length}`);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJLIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJ', ww.name);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.type);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
-    if (!command) { return {}; }
+    if (!command) { return [{} as HawkeyeSearchMatches]; }
 
     // Parse user input into values to pass on to secondary tools. 
     let keywords = parseCommandString(command);
     // console.log(keywords);
     if (!keywords) {
-      return {};
+      return [{} as HawkeyeSearchMatches];
     } else {
       ww.path = keywords.OBJLIB + '/' + keywords.OBJ;
       ww.library = keywords.OBJLIB;
@@ -417,7 +373,7 @@ export namespace HwkI {
     if (ww.path) {
       if (item && ((/.*(tb|pf|v.*|cmd)/gi.test(ww.type)) || !(/(\*PGM|\*SRVPGM)/gi.test(ww.type)))) {
         vscode.window.showErrorMessage(l10n.t(`Display Program Objects is only value for *PGM or *SRVPGM types.`));
-        return {};
+        return [{} as HawkeyeSearchMatches];
       }
       if (ww.name !== ` `) {
 
@@ -467,25 +423,22 @@ export namespace HwkI {
               // returns results member name with member type as extension
               let results = await HawkeyeSearch.hwkdisplayProgramObjects(ww.library, ww.name, ww.searchTerm, ww.protected);
 
-              if (results.length > 0) {
-                const objectNamesLower = true;
+              if (results) {
+                // const objectNamesLower = true;
                 // const objectNamesLower = GlobalConfiguration.get(`ObjectBrowser.showNamesInLowercase`);
 
-                results.forEach(result => {
-                  if (objectNamesLower === true) {
-                    result.path = result.path.toLowerCase();
-                  }
-                  result.label = result.path;
-                });
+                // results.forEach(result => {
+                //   if (objectNamesLower === true) {
+                //     result.path = result.path.toLowerCase();
+                //   }
+                //   result.label = result.path;
+                // });
 
-                results = results.sort((a, b) => {
-                  return a.path.localeCompare(b.path);
-                });
-                vscode.commands.executeCommand(`Hawkeye-Pathfinder.setSearchResults`,`DSPSCNSRC`
-                  , ww.searchTerm || ''
-                  , results || []
-                );
-                // return { searchTerm: ww.path, results: results };
+                // results = results.sort((a, b) => {
+                //   return a.path.localeCompare(b.path);
+                // });
+                let searchMatches = { command: `DSPPGMOBJ`, searchDescription: `DSPPGMONJ ${new Date().toLocaleString()}`, searchTerm: ww.searchTerm, files: results };
+                return [searchMatches];
               } else {
                 vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/DSPPGMOBJ {1}.`
                   , ww.searchTerm, ww.path
@@ -505,11 +458,12 @@ export namespace HwkI {
     } else {
       //Running from command.
     }
-    return {};
+    return [{} as HawkeyeSearchMatches];
   };
-  export async function displayObjectUsed(item: any): Promise<SearchResults> {
+  export async function displayObjectUsed(item: any): Promise<HawkeyeSearchMatches[]> {
     let ww = <wItem>{};
     let howUsed: string = '';
+    let results: HawkeyeSearchMatches[] = [{} as HawkeyeSearchMatches];
     if (item && item.object) {
       ww.path = item.path;
       ww.protected = item.filter.protected;
@@ -541,13 +495,13 @@ export namespace HwkI {
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJ', ww.name);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.type);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
-    if (!command) { return {}; }
+    if (!command) { return [{} as HawkeyeSearchMatches]; }
 
     // Parse user input into values to pass on to secondary tools. 
     let keywords = parseCommandString(command);
     // console.log(keywords);
     if (!keywords) {
-      return {};
+      return [{} as HawkeyeSearchMatches];
     } else {
       ww.path = keywords.OBJLIB + '/' + keywords.OBJ;
       ww.library = keywords.OBJLIB;
@@ -615,35 +569,17 @@ export namespace HwkI {
                 }, timeoutInternal);
                 // Hawkeye-Pathfinder-DSPSCNSRC
                 // returns results member name with member type as extension
-                let results = await HawkeyeSearch.hwkdisplayObjectUsed(ww.library, ww.name, ww.type
+                let resultsDOU = await HawkeyeSearch.hwkdisplayObjectUsed(ww.library, ww.name, ww.type
                   , ww.searchTerm, howUsed, ww.protected);
 
-                if (results.length > 0) {
-                  const objectNamesLower = true;
-                  // const objectNamesLower = GlobalConfiguration.get(`ObjectBrowser.showNamesInLowercase`);
-
-                  results.forEach(result => {
-                    if (objectNamesLower === true) {
-                      result.path = result.path.toLowerCase();
-                    }
-                    result.label = result.path;
-                  });
-
-                  results = results.sort((a, b) => {
-                    return a.path.localeCompare(b.path);
-                  });
-                  vscode.commands.executeCommand(`Hawkeye-Pathfinder.setSearchResults`,`DSPSCNSRC`
-                    , ww.searchTerm || ''
-                    , results || []
-                  );
-                  // return { searchTerm: ww.path, results: results };
-
+                if (resultsDOU) {
+                  let searchMatches = { command: `DSPOBJU`, searchDescription: `DSPOBJU ${new Date().toLocaleString()}`, searchTerm: ww.searchTerm, files: resultsDOU };
+                  return [searchMatches];
                 } else {
                   vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/DSPOBJU {1}.`
                     , ww.searchTerm, ww.path
                   ));
                 }
-
               });
 
             } catch (e) {
@@ -658,7 +594,7 @@ export namespace HwkI {
     } else {
       //Running from command.
     }
-    return {};
+    return results || [{} as HawkeyeSearchMatches];
   };
   export async function runPRTRPGPRT(memberItem: MemberItem): Promise<void> {
     //Run commands, print to output, etc

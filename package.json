@@ -34,6 +34,11 @@
           "id": "Hawkeye-search",
           "title": "Hawkeye Pathfinder",
           "icon": "$(references)"
+        },
+        {
+          "id": "Hawkeye-search-2",
+          "title": "Hawkeye Pathfinder",
+          "icon": "$(references)"
         }
       ]
     },
@@ -42,6 +47,13 @@
         {
           "id": "hawkeyeSearchView",
           "name": "Results",
+          "when": "Hawkeye-Pathfinder:searchViewVisible"
+        }
+      ],
+      "Hawkeye-search-2": [
+        {
+          "id": "hawkeyeSearchView2",
+          "name": "Hawkeye Tool Results",
           "when": "Hawkeye-Pathfinder:searchViewVisible"
         }
       ]
@@ -54,6 +66,16 @@
       },
       {
         "view": "hawkeyeSearchView",
+        "contents": "Hawkeye Tools, version 6.6.6.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)",
+        "when": "code-for-ibmi:connected == true"
+      },
+      {
+        "view": "hawkeyeSearchView2",
+        "contents": "Hawkeye Tools, version 6.6.6. \n[Connect before using this tool](command:code-for-ibmi.connectTo)",
+        "when": "code-for-ibmi:connected == false"
+      },
+      {
+        "view": "hawkeyeSearchView2",
         "contents": "Hawkeye Tools, version 6.6.6.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)",
         "when": "code-for-ibmi:connected == true"
       }

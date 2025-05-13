@@ -93,7 +93,7 @@ export async function getHwkDocLibl(lib: string): Promise<string> {
     `select listagg(''''||trim(b.element),''',')||'''' DOCLIBL from ${templib}.${tempName}
       , table ( systools.split(INPUT_LIST => trim(H$DDOCL), DELIMITER => '2') ) B where ELEMENT > '  '
       `.replace(/\n\s*/g, ' ');
-  results = await Code4i!.runSQL(statement);
+  results = await Code4i!.runSQL(statement, { forceSafe: true });
   if (results.length) {
     liblist = String(results[0].DOCLIBL);
   }
@@ -115,7 +115,7 @@ export async function getHwkSrcLibl(lib: string): Promise<string> {
   ) select listagg(distinct ''''||varchar(trim(substr(THESPLITVALUE, 11, 10)), 10), ''',')
             within group (order by substr(THESPLITVALUE, 11, 10))||'''' as LIBL
     from THESPLIT where THESPLITVALUE <> ' '`.replace(/\n\s*/g, ' ');
-  results = await Code4i!.runSQL(statement);
+  results = await Code4i?.runSQL(statement, { forceSafe: true });
   if (results.length) {
     liblist = String(results[0].LIBL);
   }
@@ -148,7 +148,7 @@ export async function getLibList(lib: string): Promise<string> {
     break;
   }
   if (statement) {
-    const results = await Code4i!.runSQL(statement);
+    const results = await Code4i!.runSQL(statement, { forceSafe: true });
     if (results.length) {
       liblist = String(results[0].LIBLIST);
     }

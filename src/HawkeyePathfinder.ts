@@ -1,33 +1,30 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import vscode, { l10n, } from 'vscode';
 import { Code4i } from "./tools";
-import { HawkeyeSearch } from "./api/HawkeyeSearch";
-import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
-import { getMemberCount } from "./api/IBMiTools";
 import { HwkI } from "./commands";
-import { SearchResultProvider, SearchResult } from "./search/SearchProvider";
-import { MemberItem, CommandResult } from '@halcyontech/vscode-ibmi-types';
+import { SearchResultProvider } from "./search/SearchProvider";
+import { SearchTreeProvider } from "./newwork/SearchTreeProvider";
+import { MemberItem } from '@halcyontech/vscode-ibmi-types';
 
-// let hawkeyeSearchViewProvider : HawkeyeSearchView;
 export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
-  // const searchResultProvider = new SearchResultProvider();
-  // const treeView = vscode.window.createTreeView("Hawkeye", {
-  //   treeDataProvider: searchResultProvider,
-  // });
-  const hawkeyeSearchViewProvider = new HawkeyeSearchView(context);
-  const hawkeyeSearchViewer = vscode.window.createTreeView(
+  const searchResultProvider = new SearchResultProvider(context);
+  const searchView = vscode.window.createTreeView(
     `hawkeyeSearchView`, {
-    treeDataProvider: hawkeyeSearchViewProvider,
-    showCollapseAll: true,
-    canSelectMany: true,
+    treeDataProvider: searchResultProvider,
+  });
+  const searchTreeProvider = new SearchTreeProvider(context);
+  const searchTreeView = vscode.window.createTreeView(
+    `hawkeyeSearchView2`, {
+    treeDataProvider: searchTreeProvider,
   });
   context.subscriptions.push(
-    hawkeyeSearchViewer,
-    // treeView,
+    searchView,
+    searchTreeView,
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFiles`, async (memberItem: MemberItem) => {
       try {
         const searchResults = await HwkI.searchSourceFiles(memberItem);
-        // searchResultProvider.addSearchResults(searchResults);
+        searchResultProvider.addSearchResults(searchResults);
+        searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
       } catch (e: unknown) {
         if (e instanceof Error) {
           vscode.window.showErrorMessage(l10n.t(`Error searching source members: {0}`, e.message));
@@ -37,6 +34,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (Item) => {
       try {
         const searchResults = await HwkI.displayFileSetsUsed(Item);
+        searchResultProvider.addSearchResults(searchResults);
+        searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
       } catch (e) {
         if (e instanceof Error) {
           vscode.window.showErrorMessage(l10n.t(`Error searching for file uses of: {0}`, e.message));
@@ -46,6 +45,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (Item) => {
       try {
         const searchResults = await HwkI.displayProgramObjects(Item);
+        searchResultProvider.addSearchResults(searchResults);
+        searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
       } catch (e) {
         if (e instanceof Error) {
           vscode.window.showErrorMessage(l10n.t(`Error searching for file uses of: {0}`, e.message));
@@ -55,6 +56,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (Item) => {
       try {
         const searchResults = await HwkI.displayObjectUsed(Item);
+        searchResultProvider.addSearchResults(searchResults);
+        searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
       } catch (e) {
         if (e instanceof Error) {
           vscode.window.showErrorMessage(l10n.t(`Error searching for file uses of: {0}`, e.message));
@@ -158,59 +161,3 @@ function getHWK_getObjectSourceInfo_func_src(library: string): string {
     `end`,
   ].join(` `);
 }
-
-// /**
-//  * Use this function to alter the library reference if the source passes something like WFISRC
-//  * This will be needed if the calling tool is triggered off a source file member reference.
-//  *
-//  * @param library
-//  * @param command
-//  * @returns the adjusted lib value
-//  */
-// function scrubLibrary(lib: string, command: string): string {
-//   if (/.*(SRC).*/gi.test(lib)) {
-//     switch (command) {
-//     case `DSPSCNSRC`:
-//       break;
-//     case `DSPOBJU`:
-//     case `DSPPGMOBJ`:
-//       lib = `*ALL`;
-//       break;
-//     case `DSPFILSETU`:
-//       lib = `*DOCLIBL`;
-//       break;
-//     default:
-//       lib = `*LIBL`;
-//       break;
-//     }
-//   }
-//   else if (lib === `*`) {
-//     switch (command) {
-//     case `DSPOBJU`:
-//     case `DSPPGMOBJ`:
-//       lib = `*ALL`;
-//       break;
-//     case `DSPFILSETU`:
-//       lib = `*DOCLIBL`;
-//       break;
-//     default:
-//       break;
-//     }
-//   } else {
-//   }
-//   return lib;
-// }
-// /**
-//  * setProtectMode
-//  * Determine source protection by default as protecting unless otherwise known.
-//  * @param library
-//  * @param command
-//  * @returns a true or false value
-//  */
-// function setProtectMode(library: string, command: String): boolean {
-//   let protection: boolean = true;
-//   if (command === `DSPSCNSRC`) {
-//     if (Code4i.getConnection().currentUser === library) { protection = false; }
-//   }
-//   return protection;
-// }

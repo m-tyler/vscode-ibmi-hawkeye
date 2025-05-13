@@ -1,11 +1,9 @@
 import  { TreeDataProvider } from "vscode";
-import  { Range } from "vscode";
 import * as vscode from 'vscode';
-import { HawkeyeSearch } from "../api/HawkeyeSearch";
-import { QsysFsOptions } from '@halcyontech/vscode-ibmi-types/';
-import {SearchTreeProvider} from '../newwork/SearchTreeProvider';
+import { HawkeyeSearch } from "../../src/api/HawkeyeSearch";
+
+import {SearchTreeProvider} from '../../src/newwork/SearchTreeProvider';
 import {registerCommandHandlers} from '../newwork/commandHandlers';
-export type OpenEditableOptions = QsysFsOptions & { position?: Range };
 
 export class HawkeyeSearchView implements TreeDataProvider<any> {
   private _searchTreeProvider: SearchTreeProvider;

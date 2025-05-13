@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
  import { HawkeyeSearch } from '../api/HawkeyeSearch'; // Import HawkeyeSearch
- import { OpenEditableOptions } from '../views/HawkeyeSearchView'; // Import OpenEditableOptions
+ import { OpenEditableOptions } from '../types/types'; // Import OpenEditableOptions
 
 export class LineHit extends vscode.TreeItem {
   constructor(term: string, readonly path: string, line: HawkeyeSearch.Line, readonly?: boolean) {

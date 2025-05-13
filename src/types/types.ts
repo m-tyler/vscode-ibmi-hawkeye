@@ -1,4 +1,8 @@
 
+import { QsysFsOptions } from '@halcyontech/vscode-ibmi-types/';
+import  { Range } from "vscode";
+
+export type OpenEditableOptions = QsysFsOptions & { position?: Range };
 
 // Level 1: Search Run object 
 export type HawkeyeSearchMatches = {
@@ -23,12 +27,12 @@ export interface SearchMatch {
 
 
 
-export interface SearchResult {
-  timestamp: string; // e.g., "MATTSCMD 04/28/25 at 15:25"
-  files: SearchFile[]; // List of files
-}
+// export interface SearchResult {
+//   timestamp: string; // e.g., "MATTSCMD 04/28/25 at 15:25"
+//   files: SearchFile[]; // List of files
+// }
 
-export interface SearchFile {
-  fileName: string; // e.g., "file1.txt"
-  matches: SearchMatch[]; // Matches within the file
-}
+// export interface SearchFile {
+//   fileName: string; // e.g., "file1.txt"
+//   matches: SearchMatch[]; // Matches within the file
+// }

@@ -1,7 +1,6 @@
 import { CodeForIBMi } from "@halcyontech/vscode-ibmi-types";
 import Instance from "@halcyontech/vscode-ibmi-types/Instance";
 import { Extension, ExtensionContext, extensions } from "vscode";
-// import { SQLStatementChecker } from "./connection/syntaxChecker";
 
 let baseExtension: Extension<CodeForIBMi>|undefined;
 

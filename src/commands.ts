@@ -185,6 +185,7 @@ export namespace HwkI {
   export async function displayFileSetsUsed(item: any): Promise<HawkeyeSearchMatches[]|undefined> {
     const commandName = 'DSPFILSETU';
     let ww = <wItem>{};
+    let wwResultSequence: string = '*PGM';
     let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
 
     if (item && item.object) {
@@ -237,12 +238,13 @@ export namespace HwkI {
       ww.name = keywords.FILE;
       ww.type = '*FILE';
       ww.searchTerm = keywords.SCAN || '';
+      wwResultSequence = keywords.SEQUNCE || '*PGM';
     }
 
     // Hawkeye-Pathfinder
     if (ww.path) {
       if (ww.type === 'SQL' && (/.*(tb|pf|v.*)/gi.test(ww.name))
-        || ww.type === 'PF' || ww.type === '*ALL') {
+        || ww.type === 'PF' || ww.type === '*FILE') {
       } else {
         // if (ww && !(/.*(tb.*\.sql|pf.*\.pf|v.*\.sql)/.test(ww.path))) {
         vscode.window.showErrorMessage(l10n.t(`Display File Set Used is only value for database tables or views.`));
@@ -287,7 +289,7 @@ export namespace HwkI {
                 }
               }, timeoutInternal);
               // returns results member name with member type as extension
-              let resultsFSU = await HawkeyeSearch.hwkdisplayFileSetsUsed(ww.library, ww.name, ww.searchTerm, ww.protected);
+              let resultsFSU = await HawkeyeSearch.hwkdisplayFileSetsUsed(ww.library, ww.name, ww.searchTerm, ww.protected, wwResultSequence);
 
               if (resultsFSU) {
                 searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`,  searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsFSU };

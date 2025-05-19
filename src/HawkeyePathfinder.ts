@@ -19,7 +19,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       try {
         const searchResults = await HwkI.searchSourceFiles(memberItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchItem);
+          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
         }
       } catch (e: unknown) {
         if (e instanceof Error) {
@@ -31,7 +31,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       try {
         const searchResults = await HwkI.displayFileSetsUsed(Item);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchItem);
+          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -43,7 +43,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       try {
         const searchResults = await HwkI.displayProgramObjects(Item);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchItem);
+          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -55,7 +55,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       try {
         const searchResults = await HwkI.displayObjectUsed(Item);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchItem);
+          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
         }
       } catch (e) {
         if (e instanceof Error) {

@@ -53,7 +53,7 @@ export async function getMemberCount(filter: { library: string, sourceFile?: str
   }
   let statement = ``;
   let libl = await getLibList(library);
-  if (!libl) {return 0;}
+  if (!libl) { return 0; }
   // filter patterns
   // No source file + member details (it seemed quicker on some tests )
   if (!sourceFile && !singleMember && !singleMemberExtension) {
@@ -75,7 +75,7 @@ export async function getMemberCount(filter: { library: string, sourceFile?: str
       `.replace(/\n\s*/g, ' ');
   }
 
-  const results = await Code4i!.runSQL(statement);
+  const results = await Code4i.runSQL(statement, { forceSafe: true });
   if (results.length) {
     return Number(results[0].MEMBER_COUNT);
   }
@@ -88,12 +88,12 @@ export async function getHwkDocLibl(lib: string): Promise<string> {
   const templib = Code4i.getTempLibrary();
   const tempName = Code4i.makeid();
   let statement = `create or replace alias ${templib}.${tempName} for HAWKEYE.H$DDOCL (##HAWKEYE)`;
-  let results = await Code4i!.runSQL(statement);
+  let results = await Code4i.runSQL(statement, { forceSafe: true });
   statement =
-    `select listagg(''''||trim(b.element),''',')||'''' DOCLIBL from ${templib}.${tempName}
+    `select varchar(listagg(''''||trim(b.element),''',')||'''',2750) DOCLIBL from ${templib}.${tempName}
       , table ( systools.split(INPUT_LIST => trim(H$DDOCL), DELIMITER => '2') ) B where ELEMENT > '  '
       `.replace(/\n\s*/g, ' ');
-  results = await Code4i!.runSQL(statement, { forceSafe: true });
+  results = await Code4i.runSQL(statement, { forceSafe: true });
   if (results.length) {
     liblist = String(results[0].DOCLIBL);
   }
@@ -104,7 +104,7 @@ export async function getHwkSrcLibl(lib: string): Promise<string> {
   const templib = Code4i.getTempLibrary();
   const tempName = Code4i.makeid();
   let statement = `create or replace alias ${templib}.${tempName} for HAWKEYE.H$DSRCFL (##HAWKEYE)`;
-  let results = await Code4i!.runSQL(statement);
+  let results = await Code4i.runSQL(statement, { forceSafe: true });
   statement = `with recursive THESPLIT (ID, THESPLITVALUE, REMAINING_VALUE) as (
     select 1 as ID ,substring(H$DSRCFL, 1, 20) as THESPLITVALUE ,substring(H$DSRCFL, 21) as REMAINING_VALUE
       from ${templib}.${tempName}
@@ -112,8 +112,8 @@ export async function getHwkSrcLibl(lib: string): Promise<string> {
     select ID+1 ,substring(REMAINING_VALUE, 1, 20) ,substring(REMAINING_VALUE, 21)
       from THESPLIT
       where length(REMAINING_VALUE) > 0
-  ) select listagg(distinct ''''||varchar(trim(substr(THESPLITVALUE, 11, 10)), 10), ''',')
-            within group (order by substr(THESPLITVALUE, 11, 10))||'''' as LIBL
+  ) select varchar(listagg(distinct ''''||varchar(trim(substr(THESPLITVALUE, 11, 10)), 10), ''',')
+            within group (order by substr(THESPLITVALUE, 11, 10))||'''',3300) as LIBL
     from THESPLIT where THESPLITVALUE <> ' '`.replace(/\n\s*/g, ' ');
   results = await Code4i?.runSQL(statement, { forceSafe: true });
   if (results.length) {
@@ -126,6 +126,7 @@ export async function getLibList(lib: string): Promise<string> {
   let statement: string = ``;
   switch (lib) {
   case '*DOCLIBL':
+  case '*ALL': // For some commands we dont really want to know about all libraries so default to this list version
     liblist = await getHwkDocLibl(lib);
     break;
   case '*SRCL':
@@ -148,10 +149,16 @@ export async function getLibList(lib: string): Promise<string> {
     break;
   }
   if (statement) {
-    const results = await Code4i!.runSQL(statement, { forceSafe: true });
+    const results = await Code4i.runSQL(statement, { forceSafe: true });
     if (results.length) {
       liblist = String(results[0].LIBLIST);
     }
   }
   return liblist;
+}
+export async function getIASP(library:string): Promise<string>{
+  let aspa = Code4i.getLibraryIAsp(library);
+  let aspb = Code4i.getCurrentIAspName();
+  let asp = await Code4i.lookupLibraryIAsp(library);
+  return asp ? asp : aspa ? aspa : aspb||'';
 }

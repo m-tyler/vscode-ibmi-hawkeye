@@ -1,33 +1,36 @@
 import * as vscode from 'vscode';
 import path from 'path';
+import { Code4i, getSourceObjectType } from "../tools";
 import { LineHit } from './LineHit';
-import { HawkeyeSearch } from '../api/HawkeyeSearch';
+import { SourceFileMatch, QSYS_PATTERN } from '../types/types';
+
 
 export class HitSource extends vscode.TreeItem {
   private readonly _path: string;
   private readonly _readonly?: boolean;
 
-  constructor(readonly result: HawkeyeSearch.Result, readonly term: string) {
-    super(result.label ? result.path : path.posix.basename(result.path), vscode.TreeItemCollapsibleState.Collapsed);
+  constructor(readonly result: SourceFileMatch, readonly term: string) {
+    super(path.posix.basename(result.fileName), vscode.TreeItemCollapsibleState.Collapsed);
 
-    const hits = result.lines.length;
+    const hits = result.matches.length;
     // this.contextValue = `hitSource`;
-    this.contextValue = result.srcObjType;
+    this._path = Code4i.sysNameInLocal(result.fileName.replace(QSYS_PATTERN, ''));
+    // this.contextValue = Code4i.parserMemberPath( this._path ).extension;
+    this.contextValue = getSourceObjectType( this._path )[1]+':'+Code4i.parserMemberPath( this._path ).extension;
     this.iconPath = vscode.ThemeIcon.File;
     this.description = `${hits} hit${hits === 1 ? `` : `s`}`;
-    this._path = result.path;
-    this._readonly = result.readonly;
+    this._readonly = false;
     this.tooltip = ``
-      .concat(result.srcObjType ? vscode.l10n.t(`\nSource Object Type: {0}`, result.srcObjType) : ``)
-      .concat(result.howUsed    ? vscode.l10n.t(`\nHow Used\t:  {0}`, result.howUsed) : ``)
-      .concat(this.contextValue ? vscode.l10n.t(`\nContext\t\t: {0}`, this.contextValue) : ``)
-      // .concat(result.path       ? vscode.l10n.t(`\nPath\t\t\t: {0}`, result.path) : ``)
+      .concat(this.contextValue ? vscode.l10n.t(`\nSource Object Type: {0}`, this.contextValue) : ``)
+      .concat(result.howUsed    ? vscode.l10n.t(`\nHow Used:  {0}`, result.howUsed) : ``)
+      .concat(result.fileText   ? vscode.l10n.t(`\nText  \t\t: {0}`, result.fileText) : ``)
+      .concat(hits              ? vscode.l10n.t(`\nMatches \t: {0}`, hits) : ``)
       ;
-    vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:hitSource`, result.srcObjType);
+    vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:hitSource`, this.contextValue);
   }
 
   async getChildren(): Promise<LineHit[]> {
    
-    return this.result.lines.map(line => new LineHit(this.term, this._path, line, this._readonly));
+    return this.result.matches.map((match:any) => new LineHit(this.term, this._path, match, this._readonly));
   }
 }

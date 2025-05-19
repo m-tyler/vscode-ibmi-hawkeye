@@ -6,7 +6,7 @@ export function getHawkeyeAction(id:number): Action {
   let workAction: Action = {} as Action;
   if (id >= 0 && id <= 3 ) {
     workAction = hawkeyeActions[id];
-    return hawkeyeActions[id];
+    return workAction;
   }
   else 
   {
@@ -55,7 +55,7 @@ const hawkeyeActions: Action[] =
     }
     , {
       "name": `DSPOBJU`,
-      "command": "DSPOBJU OBJLIB(${OBJLIB|Object Library . . . : <b>Name, *ALL, *CURLIB</b>|*ALL,*CURLIB}) OBJ(${OBJ|Object name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) OBJTYPE(${OBJTYPE|Object Type  . . . . : |*PGM ,*MENU ,*MODULE ,*QRYDFN ,*SRVPGM ,*CMD ,*JOBD ,*SBSD ,*USRPRF ,*EXT}) HOWUSED(${HOWUSED|How used . . . . . . :|*ALL ,RPG-COPY ,RPG-FILE ,RPG-INP ,RPG-OUT ,RPG-UPD ,RPG-CMB ,RPG-INP/AD ,RPG-OUT/AD ,RPG-UPD/AD ,RPG-CMB/AD ,RPG-***/AD ,RPG-WRITE ,SQL-CALL ,SQL-INP ,SQL-OUT ,SQL-UPD ,SQL-I-O ,SQL-INP/AD ,SQL-OUT/AD ,SQL-UPD/AD ,SQL-I-O/AD ,SQL-***/AD ,DFUFILE ,QRYFILE}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
+      "command": "DSPOBJU OBJLIB(${OBJLIB|Object Library . . . : <b>Name, *ALL, *CURLIB, *VARIABLE</b>|*ALL,*CURLIB}) OBJ(${OBJ|Object name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) OBJTYPE(${OBJTYPE|Object Type  . . . . : |*ALL ,*PGM ,*CMD ,*FILE ,*MODULE ,*SRVPGM ,*BNDDIR ,*DTAARA ,*DTAQ ,*PNLGRP ,*LIB ,*MENU ,*MSGF ,*MSGQ ,*OUTQ ,*JRN ,*JRNRCV ,*AUTL ,*EXITRG ,*OVL ,*PAGDFN ,*PAGSEG ,*QMFORM ,*QMQRY ,*SQLPKG ,*USRIDX ,*USRPRF ,*USRQ ,*USRSPC ,*WSCST}) HOWUSED(${HOWUSED|How used . . . . . . :|*ALL ,RPG-COPY ,RPG-FILE ,RPG-INP ,RPG-OUT ,RPG-UPD ,RPG-CMB ,RPG-INP/AD ,RPG-OUT/AD ,RPG-UPD/AD ,RPG-CMB/AD ,RPG-***/AD ,RPG-WRITE ,SQL-CALL ,SQL-INP ,SQL-OUT ,SQL-UPD ,SQL-I-O ,SQL-INP/AD ,SQL-OUT/AD ,SQL-UPD/AD ,SQL-I-O/AD ,SQL-***/AD ,DFUFILE ,QRYFILE}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
       "environment": "ile",
       "type": "file",
       "extensions": [

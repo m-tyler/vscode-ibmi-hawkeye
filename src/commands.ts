@@ -1,9 +1,10 @@
 import vscode, { l10n, } from 'vscode';
-import { Code4i, showCustomInputs, parseCommandString, replaceCommandDefault } from "./tools";
+import { Code4i, showCustomInputs, parseCommandString, replaceCommandDefault, scrubLibrary, setProtectMode,getSourceObjectType } from "./tools";
 import { HawkeyeSearch } from "./api/HawkeyeSearch";
 import { getMemberCount } from "./api/IBMiTools";
 import { getHawkeyeAction } from "./commandActions";
-import { HawkeyeSearchMatches } from './types/types';
+import { HawkeyeSearchMatches, QSYS_PATTERN } from './types/types';
+import { getRandomLocalizedMessages, loadMessageData } from "./localizedMessages";
 import { MemberItem } from '@halcyontech/vscode-ibmi-types';
 //https://code.visualstudio.com/api/references/icons-in-labels
 // Create objects and functionality for this tool, here.
@@ -20,9 +21,10 @@ interface wItem {
   searchTerms: string[]
 };
 export namespace HwkI {
-  export async function searchSourceFiles(memberItem: MemberItem): Promise<HawkeyeSearchMatches[]> {
+  export async function searchSourceFiles(memberItem: MemberItem): Promise<HawkeyeSearchMatches[]|undefined> {
+    const commandName = 'DSPSCNSRC';
     let ww = <wItem>{};
-    let searchMatch:HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
+    let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
     ww.searchTerms = [];
     if (memberItem) {
       ww.path = memberItem.path;
@@ -32,6 +34,16 @@ export namespace HwkI {
       ww.name = memberItem.filter.member;
       ww.type = memberItem.filter.memberType;
     }
+    // else if (item) {
+    //   ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
+    //   const parts = Code4i.parserMemberPath( item._path );
+    //   ww.protected = item._readonly;
+    //   ww.sourceFile = parts.file;
+    //   ww.library = parts.library;
+    //   ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
+    //   ww.name = parts.name;
+    //   ww.type = getSourceObjectType(ww.path)[0];
+    // }
     else {
       ww.library = ``;
       ww.sourceFile = ``;
@@ -42,21 +54,18 @@ export namespace HwkI {
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
     const chosenAction = getHawkeyeAction(0); // DSPSCNSRC
-    console.log(chosenAction);
-    console.log(`Length of chosenAction.command: ${chosenAction.command.length}`);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCLIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCFILE', ww.sourceFile);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCMBR', ww.name);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCTYPE', ww.type);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
-    if (!command) { return [{} as HawkeyeSearchMatches]; }
+    if (!command) { return undefined; }
 
     // Parse user input into values to pass on to secondary tools. 
     let keywords = parseCommandString(command);
-    // console.log(keywords);
     if (!keywords) {
-      vscode.window.showErrorMessage(l10n.t(`Error running DSPSCNSRC command, no keywords.`));
-      return [{} as HawkeyeSearchMatches];
+      vscode.window.showErrorMessage(l10n.t(`Error running ${commandName} command, no keywords.`));
+      return undefined;
     } else {
       const path1 = keywords.SRCLIB + '/' + keywords.SRCFILE + '/' + keywords.SRCMBR;
       const mbrtype = keywords.TYPE === '*ALL' ? '*ALL' : keywords.TYPE;
@@ -98,8 +107,8 @@ export namespace HwkI {
       }
       ww.searchTerm = ww.searchTerms.join(',');
     }
-    ww.library = scrubLibrary(ww.library, `DSPSCNSRC`);
-    ww.protected = setProtectMode(ww.library, `DSPSCNSRC`);
+    ww.library = scrubLibrary(ww.library, `${commandName}`);
+    ww.protected = setProtectMode(ww.library, `${commandName}`);
 
     // Hawkeye-Pathfinder
     if (ww.path) {
@@ -108,7 +117,7 @@ export namespace HwkI {
         if (!ww.searchTerm || ww.searchTerm === ` `) {
 
           ww.searchTerm = await vscode.window.showInputBox({
-            prompt: l10n.t(`Use command DSPSCNSRC to search {0}.`, ww.path),
+            prompt: l10n.t(`Use command ${commandName} to search {0}.`, ww.path),
             placeHolder: l10n.t(`Enter the search for term`),
           }) || '';
         }
@@ -123,22 +132,12 @@ export namespace HwkI {
                 message: l10n.t(`Fetching member count for {0}`, ww.path)
               });
               const memberCount = await getMemberCount({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name, extensions: ww.type });
+              let messageData = loadMessageData(ww, {memberCount: memberCount, commandName: commandName} );
+              const searchMessages = getRandomLocalizedMessages(messageData, 8);
 
               if (memberCount > 0) {
                 // NOTE: if more messages are added, lower the timeout interval
                 const timeoutInternal = 9000;
-                const searchMessages = [
-                  l10n.t(`Using Hawkeye Pathfinder's DSPSCNSRC to search source members`),
-                  l10n.t(`'{0}' in {1}.`, ww.searchTerm, ww.path),
-                  l10n.t(`This is taking a while because there are {0} members. Searching '{1}' in {2} still.`, memberCount, ww.searchTerm, ww.path),
-                  l10n.t(`What's so special about '{0}' anyway?`, ww.searchTerm),
-                  l10n.t(`Still searching '{0}' in {1}...`, ww.searchTerm, ww.path),
-                  l10n.t(`While you wait, why not make some tea?`),
-                  l10n.t(`Wow. This really is taking a while. Let's hope you get the result you want.`),
-                  l10n.t(`Why was six afraid of seven?`),
-                  l10n.t(`How does one end up with {0} members?`, memberCount),
-                  l10n.t(`'{0}' in {1}.`, ww.searchTerm, ww.path),
-                ];
 
                 let currentMessage = 0;
                 const messageTimeout = setInterval(() => {
@@ -151,17 +150,14 @@ export namespace HwkI {
                     clearInterval(messageTimeout);
                   }
                 }, timeoutInternal);
-                // Hawkeye-Pathfinder-DSPSCNSRC
-                // returns results member name with member type as extension
-                let results = await HawkeyeSearch.searchMembers(ww.library, ww.sourceFile
+                let resultsSCN = await HawkeyeSearch.searchMembers(ww.library, ww.sourceFile
                   , `${ww.name || `*`}.${ww.type || `*`}`
                   , ww.searchTerm, ww.protected);
 
-                if (results) {
-                  let searchMatches = { command: `DSPSCNSRC`, searchDescription: `DSPFILSETU ${new Date().toLocaleString()}`, searchTerm: ww.searchTerm, files: results };
-                  return searchMatches;
+                if (resultsSCN) {
+                  searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`,  searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsSCN };
                 } else {
-                  vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' in HAWKEYE/DSPSCNSRC {1}.`
+                  vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' in HAWKEYE/${commandName} {1}.`
                     , ww.searchTerm, ww.path
                   ));
                 }
@@ -170,11 +166,13 @@ export namespace HwkI {
                 vscode.window.showErrorMessage(l10n.t(`No members to search.`));
               }
 
+              return searchMatch;
             });
 
           } catch (e: unknown) {
             if (e instanceof Error) {
-              vscode.window.showErrorMessage(l10n.t(`Error searching source members: {0}`, e.message));
+              vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
+              return undefined;
             }
           }
         }
@@ -184,13 +182,16 @@ export namespace HwkI {
     }
     return [searchMatch];
   };
-  export async function displayFileSetsUsed(item: any): Promise<HawkeyeSearchMatches[]> {
+  export async function displayFileSetsUsed(item: any): Promise<HawkeyeSearchMatches[]|undefined> {
+    const commandName = 'DSPFILSETU';
     let ww = <wItem>{};
+    let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
+
     if (item && item.object) {
       ww.path = item.path;
       ww.protected = item.filter.protected;
       ww.library = item.object.library;
-      ww.library = scrubLibrary(ww.library, `DSPFILSETU`);
+      ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.object.name;
       ww.type = item.object.attribute;
     }
@@ -198,34 +199,37 @@ export namespace HwkI {
       ww.path = item.path;
       ww.protected = item.member.protected;
       ww.library = item.member.library;
-      ww.library = scrubLibrary(ww.library, `DSPFILSETU`);
+      ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.member.name;
       ww.type = item.member.extension;
-
+    }
+    else if (item) {
+      ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
+      const parts = Code4i.parserMemberPath( item._path );
+      ww.protected = item._readonly;
+      ww.sourceFile = parts.file;
+      ww.library = parts.library;
+      ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
+      ww.name = parts.name;
+      ww.type = getSourceObjectType(ww.path)[0];
     }
     else {
       ww.library = ``;
       ww.name = ``;
       ww.protected = true;
     }
-    if (ww.path) {
-
-    }
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
     let chosenAction = getHawkeyeAction(1); // DSPFILSET
-    console.log(chosenAction);
-    console.log(`Length of chosenAction.command: ${chosenAction.command.length}`);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILELIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILE', ww.name);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
-    if (!command) { return [{} as HawkeyeSearchMatches]; }
+    if (!command) { return undefined; }
 
     // Parse user input into values to pass on to secondary tools. 
     let keywords = parseCommandString(command);
-    // console.log(keywords);
     if (!keywords) {
-      return [{} as HawkeyeSearchMatches];
+      return undefined;
     } else {
       ww.path = keywords.FILELIB + '/' + keywords.FILE;
       ww.library = keywords.FILELIB;
@@ -242,14 +246,14 @@ export namespace HwkI {
       } else {
         // if (ww && !(/.*(tb.*\.sql|pf.*\.pf|v.*\.sql)/.test(ww.path))) {
         vscode.window.showErrorMessage(l10n.t(`Display File Set Used is only value for database tables or views.`));
-        return [{} as HawkeyeSearchMatches];
+        return undefined;
       }
 
       if (ww.name !== ` `) {
 
         if (!ww.searchTerm) {
           ww.searchTerm = await vscode.window.showInputBox({
-            prompt: l10n.t(`Select token to search results from DSPFILSETU`),
+            prompt: l10n.t(`Select token to search results from ${commandName}`),
             value: `*NA`,
             placeHolder: l10n.t(`Enter the search for term`),
           }) || '';
@@ -257,28 +261,19 @@ export namespace HwkI {
 
         if (ww.searchTerm) {
           try {
-            await vscode.window.withProgress({
+            searchMatch = await vscode.window.withProgress({
               location: vscode.ProgressLocation.Notification,
               title: l10n.t(`Searching`),
             }, async progress => {
               progress.report({
                 message: l10n.t(`Starting process to find file sets used.`, ww.path)
               });
+              const memberCount = await getMemberCount({ library: ww.library });
+              let messageData = loadMessageData(ww, {memberCount: memberCount, commandName: commandName} );
+              const searchMessages = getRandomLocalizedMessages(messageData, 8);
 
               // NOTE: if more messages are added, lower the timeout interval
               const timeoutInternal = 9000;
-              const searchMessages = [
-                l10n.t(`Using Hawkeye Pathfinder's DSPFILSETU to search for file sets used`),
-                l10n.t(`Searching in '{1}' for uses of {0}.`, ww.searchTerm, ww.path),
-                // l10n.t(`This is taking a while because there are {0} members. Searching '{1}' in {2} still.`, members.length, xrefLib, ww.path),
-                l10n.t(`What's so special about '{0} in {1}' anyway?`, ww.searchTerm, ww.path),
-                l10n.t(`Still getting uses for {0}...`, ww.path),
-                l10n.t(`While you wait, why not make some tea?`),
-                l10n.t(`Wow. This really is taking a while. Let's hope you get the result you want.`),
-                l10n.t(`Why was six afraid of seven?`),
-                // l10n.t(`How does one end up with {0} members?`, members.length),
-                l10n.t(`Searching in '{0}' for uses of {1}.`, ww.searchTerm, ww.path),
-              ];
 
               let currentMessage = 0;
               const messageTimeout = setInterval(() => {
@@ -292,22 +287,22 @@ export namespace HwkI {
                 }
               }, timeoutInternal);
               // returns results member name with member type as extension
-              let results = await HawkeyeSearch.hwkdisplayFileSetsUsed(ww.library, ww.name, ww.searchTerm, ww.protected);
+              let resultsFSU = await HawkeyeSearch.hwkdisplayFileSetsUsed(ww.library, ww.name, ww.searchTerm, ww.protected);
 
-              if (results) {
-                let searchMatches = { command: `DSPFILSETU`, searchDescription: `DSPFILSETU ${new Date().toLocaleString()}`, searchTerm: ww.searchTerm, files: results };
-                return [searchMatches];
+              if (resultsFSU) {
+                searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`,  searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsFSU };
               } else {
-                vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/DSPFILSETU {1}.`
+                vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/${commandName} {1}.`
                   , ww.searchTerm, ww.path
                 ));
               }
-
+              return searchMatch;
             });
 
           } catch (e) {
             if (e instanceof Error) {
-              vscode.window.showErrorMessage(l10n.t(`Error searching for file uses of: {0}`, e.message));
+              vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
+              return undefined;
             }
           }
         }
@@ -316,15 +311,18 @@ export namespace HwkI {
     } else {
       //Running from command.
     };
-    return [{} as HawkeyeSearchMatches];
+    return [searchMatch];
   };
-  export async function displayProgramObjects(item: any): Promise<HawkeyeSearchMatches[]> {
+  export async function displayProgramObjects(item: any): Promise<HawkeyeSearchMatches[]|undefined> {
+    let commandName = 'DSPPGMOBJ';
     let ww = <wItem>{};
+    let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
+
     if (item && item.object) {
       ww.path = item.path;
       ww.protected = item.filter.protected;
       ww.library = item.object.library;
-      ww.library = scrubLibrary(ww.library, `DSPPGMOBJ`);
+      ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.object.name;
       ww.type = item.object.type;
     }
@@ -332,35 +330,40 @@ export namespace HwkI {
       ww.path = item.path;
       ww.protected = item.member.protected;
       ww.library = item.member.library;
-      ww.library = scrubLibrary(ww.library, `DSPPGMOBJ`);
+      ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.member.name;
       ww.type = item.member.extension;
-
+    }
+    else if (item) {
+      ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
+      const parts = Code4i.parserMemberPath( item._path );
+      ww.protected = item._readonly;
+      ww.sourceFile = parts.file;
+      ww.library = parts.library;
+      ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
+      ww.name = parts.name;
+      ww.type = getSourceObjectType(ww.path)[0];
     }
     else {
       ww.library = ``;
       ww.name = ``;
       ww.type = ``;
       ww.protected = true;
-
     }
 
     // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
     let command: string = '';
     const chosenAction = getHawkeyeAction(2); // DSPPGMOBJ
-    console.log(chosenAction);
-    console.log(`Length of chosenAction.command: ${chosenAction.command.length}`);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJLIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJ', ww.name);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.type);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
-    if (!command) { return [{} as HawkeyeSearchMatches]; }
+    if (!command) { return undefined; }
 
     // Parse user input into values to pass on to secondary tools. 
     let keywords = parseCommandString(command);
-    // console.log(keywords);
     if (!keywords) {
-      return [{} as HawkeyeSearchMatches];
+      return undefined;
     } else {
       ww.path = keywords.OBJLIB + '/' + keywords.OBJ;
       ww.library = keywords.OBJLIB;
@@ -373,13 +376,13 @@ export namespace HwkI {
     if (ww.path) {
       if (item && ((/.*(tb|pf|v.*|cmd)/gi.test(ww.type)) || !(/(\*PGM|\*SRVPGM)/gi.test(ww.type)))) {
         vscode.window.showErrorMessage(l10n.t(`Display Program Objects is only value for *PGM or *SRVPGM types.`));
-        return [{} as HawkeyeSearchMatches];
+        return undefined;
       }
       if (ww.name !== ` `) {
 
         if (!ww.searchTerm) {
           ww.searchTerm = await vscode.window.showInputBox({
-            prompt: l10n.t(`Select token to search results from DSPPGMOBJ`),
+            prompt: l10n.t(`Select token to search results from ${commandName}`),
             value: `*NA`,
             placeHolder: l10n.t(`Enter the search for term`),
           }) || '';
@@ -387,26 +390,18 @@ export namespace HwkI {
 
         if (ww.searchTerm) {
           try {
-            await vscode.window.withProgress({
+            searchMatch = await vscode.window.withProgress({
               location: vscode.ProgressLocation.Notification,
               title: `Searching`,
             }, async progress => {
               progress.report({
                 message: l10n.t(`Starting process to find program objects used by {0}.`, ww.path)
               });
-
+              const memberCount = await getMemberCount({ library: ww.library });
+              let messageData = loadMessageData(ww, {memberCount: memberCount, commandName: commandName} );
+              const searchMessages = getRandomLocalizedMessages(messageData, 8);
               // NOTE: if more messages are added, lower the timeout interval
               const timeoutInternal = 9000;
-              const searchMessages = [
-                l10n.t(`Using Hawkeye Pathfinder's DSPPGMOBJ to list program objects used`),
-                l10n.t(`Searching in '{1}' for uses of {0}.`, ww.searchTerm, ww.path),
-                l10n.t(`What's so special about '{0} in {1}' anyway?`, ww.searchTerm, ww.path),
-                l10n.t(`Still getting uses for {0}...`, ww.path),
-                l10n.t(`While you wait, why not make some tea?`),
-                l10n.t(`Wow. This really is taking a while. Let's hope you get the result you want.`),
-                l10n.t(`Why was six afraid of seven?`),
-                l10n.t(`Searching in '{0}' for uses of {1}.`, ww.searchTerm, ww.path),
-              ];
 
               let currentMessage = 0;
               const messageTimeout = setInterval(() => {
@@ -419,37 +414,22 @@ export namespace HwkI {
                   clearInterval(messageTimeout);
                 }
               }, timeoutInternal);
-              // Hawkeye-Pathfinder-DSPSCNSRC
-              // returns results member name with member type as extension
-              let results = await HawkeyeSearch.hwkdisplayProgramObjects(ww.library, ww.name, ww.searchTerm, ww.protected);
+              let resultsDPO = await HawkeyeSearch.hwkdisplayProgramObjects(ww.library, ww.name, ww.searchTerm, ww.protected);
 
-              if (results) {
-                // const objectNamesLower = true;
-                // const objectNamesLower = GlobalConfiguration.get(`ObjectBrowser.showNamesInLowercase`);
-
-                // results.forEach(result => {
-                //   if (objectNamesLower === true) {
-                //     result.path = result.path.toLowerCase();
-                //   }
-                //   result.label = result.path;
-                // });
-
-                // results = results.sort((a, b) => {
-                //   return a.path.localeCompare(b.path);
-                // });
-                let searchMatches = { command: `DSPPGMOBJ`, searchDescription: `DSPPGMONJ ${new Date().toLocaleString()}`, searchTerm: ww.searchTerm, files: results };
-                return [searchMatches];
+              if (resultsDPO) {
+                searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`,  searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsDPO };
               } else {
-                vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/DSPPGMOBJ {1}.`
+                vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/${commandName} {1}.`
                   , ww.searchTerm, ww.path
                 ));
               }
-
+              return searchMatch;
             });
 
           } catch (e) {
             if (e instanceof Error) {
-              vscode.window.showErrorMessage(l10n.t(`Error searching for file uses of: {0}`, e.message));
+              vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
+              return undefined;
             }
           }
         }
@@ -458,28 +438,40 @@ export namespace HwkI {
     } else {
       //Running from command.
     }
-    return [{} as HawkeyeSearchMatches];
+    return [searchMatch];
   };
-  export async function displayObjectUsed(item: any): Promise<HawkeyeSearchMatches[]> {
+  export async function displayObjectUsed(item: any): Promise<HawkeyeSearchMatches[]|undefined> {
+    let commandName = 'DSPOBJU';
     let ww = <wItem>{};
     let howUsed: string = '';
-    let results: HawkeyeSearchMatches[] = [{} as HawkeyeSearchMatches];
+    let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
     if (item && item.object) {
       ww.path = item.path;
+      ww.path = Code4i.sysNameInLocal(item.path.replace(QSYS_PATTERN, ''));
       ww.protected = item.filter.protected;
       ww.library = item.object.library;
-      ww.library = scrubLibrary(ww.library, `DSPOBJU`);
+      ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.object.name;
       ww.type = item.object.attribute;
     }
     else if (item && item.member) {
-      ww.path = item.path;
+      ww.path = Code4i.sysNameInLocal(item.path.replace(QSYS_PATTERN, ''));
       ww.protected = item.member.protected;
+      ww.sourceFile = item.member.file;
       ww.library = item.member.library;
-      ww.library = scrubLibrary(ww.library, `DSPOBJU`);
+      ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
       ww.name = item.member.name;
-      ww.type = item.member.extension;
-
+      ww.type = getSourceObjectType(ww.path)[0];
+    }
+    else if (item) {
+      ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
+      const parts = Code4i.parserMemberPath( item._path );
+      ww.protected = item._readonly;
+      ww.sourceFile = parts.file;
+      ww.library = parts.library;
+      ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
+      ww.name = parts.name;
+      ww.type = getSourceObjectType(ww.path)[0];
     }
     else {
       ww.library = ``;
@@ -495,15 +487,17 @@ export namespace HwkI {
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJ', ww.name);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.type);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
-    if (!command) { return [{} as HawkeyeSearchMatches]; }
+    if (!command) { 
+      vscode.window.showInformationMessage(l10n.t(`Command HAWKEYE/${commandName}, canceled.` ));
+      return undefined; 
+    }
 
     // Parse user input into values to pass on to secondary tools. 
     let keywords = parseCommandString(command);
-    // console.log(keywords);
     if (!keywords) {
-      return [{} as HawkeyeSearchMatches];
+      return undefined;
     } else {
-      ww.path = keywords.OBJLIB + '/' + keywords.OBJ;
+      ww.path = keywords.OBJLIB + '/' + keywords.OBJ +'.'+keywords.OBJTYPE;
       ww.library = keywords.OBJLIB;
       ww.name = keywords.OBJ;
       ww.type = keywords.OBJTYPE;
@@ -518,8 +512,8 @@ export namespace HwkI {
 
         if (!ww.searchTerm) {
           ww.searchTerm = await vscode.window.showInputBox({
-            prompt: l10n.t(`Select token to search within the results from DSPOBJU`),
-            value: `*NA`,
+            prompt: l10n.t(`Select token to search within the results from ${commandName}`),
+            value: `*NONE`,
             placeHolder: l10n.t(`Enter the search for term`),
           }) || '';
         }
@@ -527,34 +521,27 @@ export namespace HwkI {
         if (ww.searchTerm) {
           if (!howUsed) {
             howUsed = await vscode.window.showInputBox({
-              prompt: l10n.t(`Select the HOW USED string from DSPOBJU`),
-              value: `*NA`,
+              prompt: l10n.t(`Select the HOW USED string from ${commandName}`),
+              value: `*ALL`,
               placeHolder: l10n.t(`Enter the how used value. See Hawkeye product for values.`),
             }) || '';
           }
 
           if (howUsed) {
             try {
-              await vscode.window.withProgress({
+              searchMatch = await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: `Searching`,
               }, async progress => {
                 progress.report({
                   message: l10n.t(`Starting process to find program objects used by {0}.`, ww.path)
                 });
+                const memberCount = await getMemberCount({ library: ww.library });
+                let messageData = loadMessageData(ww, {commandName: commandName, memberCount: memberCount} );
+                const searchMessages = getRandomLocalizedMessages(messageData, 8);
 
                 // NOTE: if more messages are added, lower the timeout interval
                 const timeoutInternal = 9000;
-                const searchMessages = [
-                  l10n.t(`Using Hawkeye Pathfinder's DSPOBJU to list object used details`),
-                  l10n.t(`Searching in '{1}' for uses of {0}.`, ww.searchTerm, ww.path),
-                  l10n.t(`What's so special about '{0} in {1}' anyway?`, ww.searchTerm, ww.path),
-                  l10n.t(`Still getting uses for {0}...`, ww.path),
-                  l10n.t(`While you wait, why not make some tea?`),
-                  l10n.t(`Wow. This really is taking a while. Let's hope you get the result you want.`),
-                  l10n.t(`Why was six afraid of seven?`),
-                  l10n.t(`Searching in '{0}' for uses of {1}.`, ww.searchTerm, ww.path),
-                ];
 
                 let currentMessage = 0;
                 const messageTimeout = setInterval(() => {
@@ -567,24 +554,24 @@ export namespace HwkI {
                     clearInterval(messageTimeout);
                   }
                 }, timeoutInternal);
-                // Hawkeye-Pathfinder-DSPSCNSRC
-                // returns results member name with member type as extension
+                // try { } catch(err) {}
                 let resultsDOU = await HawkeyeSearch.hwkdisplayObjectUsed(ww.library, ww.name, ww.type
                   , ww.searchTerm, howUsed, ww.protected);
 
-                if (resultsDOU) {
-                  let searchMatches = { command: `DSPOBJU`, searchDescription: `DSPOBJU ${new Date().toLocaleString()}`, searchTerm: ww.searchTerm, files: resultsDOU };
-                  return [searchMatches];
+                if (resultsDOU && resultsDOU.length > 0) {
+                  searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`, searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsDOU };
                 } else {
-                  vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/DSPOBJU {1}.`
+                  vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/${commandName} {1}.`
                     , ww.searchTerm, ww.path
                   ));
                 }
+                return searchMatch;
               });
-
+              
             } catch (e) {
               if (e instanceof Error) {
-                vscode.window.showErrorMessage(l10n.t(`Error searching for file uses of: {0}`, e.message));
+                vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
+                return undefined;
               }
             }
           }
@@ -594,7 +581,7 @@ export namespace HwkI {
     } else {
       //Running from command.
     }
-    return results || [{} as HawkeyeSearchMatches];
+    return [searchMatch];
   };
   export async function runPRTRPGPRT(memberItem: MemberItem): Promise<void> {
     //Run commands, print to output, etc
@@ -615,7 +602,6 @@ export namespace HwkI {
       const result = await connection.runCommand({ command, environment: "ile" });
       if (result.code === 0) {
         //success
-        console.log(result.stdout);
         vscode.window.showInformationMessage(l10n.t("Command PRTRPGPRT successful, check your spooled files"));
 
       }
@@ -644,7 +630,6 @@ export namespace HwkI {
       const result = await connection.runCommand({ command, environment: "ile" });
       if (result.code === 0) {
         //success
-        console.log(result.stdout);
         vscode.window.showInformationMessage(l10n.t("Command PRTDDSPRT successful, check your spooled files"));
 
       }
@@ -673,9 +658,7 @@ export namespace HwkI {
       const result = await connection.runCommand({ command, environment: "ile" });
       if (result.code === 0) {
         //success
-        console.log(result.stdout);
         vscode.window.showInformationMessage(l10n.t("Command PRTDDSDSP successful, check your spooled files"));
-
       }
       else {
         //failure
@@ -686,59 +669,3 @@ export namespace HwkI {
 };
 
 
-
-/**
- * Use this function to alter the library reference if the source passes something like WFISRC 
- * This will be needed if the calling tool is triggered off a source file member reference.
- *  
- * @param library 
- * @param command
- * @returns the adjusted lib value
- */
-function scrubLibrary(lib: string, command: string): string {
-  if (/.*(SRC).*/gi.test(lib)) {
-    switch (command) {
-    case `DSPSCNSRC`:
-      break;
-    case `DSPOBJU`:
-    case `DSPPGMOBJ`:
-      lib = `*ALL`;
-      break;
-    case `DSPFILSETU`:
-      lib = `*DOCLIBL`;
-      break;
-    default:
-      lib = `*LIBL`;
-      break;
-    }
-  }
-  else if (lib === `*`) {
-    switch (command) {
-    case `DSPOBJU`:
-    case `DSPPGMOBJ`:
-      lib = `*ALL`;
-      break;
-    case `DSPFILSETU`:
-      lib = `*DOCLIBL`;
-      break;
-    default:
-      break;
-    }
-  } else {
-  }
-  return lib;
-}
-/**
- * setProtectMode
- * Determine source protection by default as protecting unless otherwise known.
- * @param library 
- * @param command
- * @returns a true or false value
- */
-function setProtectMode(library: string, command: String): boolean {
-  let protection: boolean = true;
-  if (command === `DSPSCNSRC`) {
-    if (Code4i.getConnection().currentUser === library) { protection = false; }
-  }
-  return protection;
-}

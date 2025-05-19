@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { SearchResult, SearchFile, SearchMatch } from "../types/types";
+// import { SearchResult, SearchFile, SearchMatch } from "../types/types";
 import { HawkeyeSearchMatches, SourceFileMatch } from "../types/types";
 
 export class SearchResultProvider implements vscode.TreeDataProvider<SearchResultItem> {
@@ -66,7 +66,7 @@ export class SearchResultProvider implements vscode.TreeDataProvider<SearchResul
     } else if (element.file) {
       // Level 3: Matches inside a file
       return element.file.matches.map(
-        match => new SearchResultItem(`Line ${match.line}: ${match.content}`, vscode.TreeItemCollapsibleState.None)
+        match => new SearchResultItem(`Line ${match.lineNumber}: ${match.content}`, vscode.TreeItemCollapsibleState.None)
       );
     } else if (element.result) {
       // Level 2: Files inside a Search Run

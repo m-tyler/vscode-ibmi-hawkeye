@@ -47,14 +47,8 @@
         {
           "id": "hawkeyeSearchView",
           "name": "Results",
-          "when": "Hawkeye-Pathfinder:searchViewVisible"
-        }
-      ],
-      "Hawkeye-search-2": [
-        {
-          "id": "hawkeyeSearchView2",
-          "name": "Hawkeye Tool Results",
-          "when": "Hawkeye-Pathfinder:searchViewVisible"
+          "when": "Hawkeye-Pathfinder:searchViewVisible",
+          "icon": "none"
         }
       ]
     },
@@ -66,16 +60,6 @@
       },
       {
         "view": "hawkeyeSearchView",
-        "contents": "Hawkeye Tools, version 6.6.6.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)",
-        "when": "code-for-ibmi:connected == true"
-      },
-      {
-        "view": "hawkeyeSearchView2",
-        "contents": "Hawkeye Tools, version 6.6.6. \n[Connect before using this tool](command:code-for-ibmi.connectTo)",
-        "when": "code-for-ibmi:connected == false"
-      },
-      {
-        "view": "hawkeyeSearchView2",
         "contents": "Hawkeye Tools, version 6.6.6.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)",
         "when": "code-for-ibmi:connected == true"
       }
@@ -99,6 +83,12 @@
           "group": "navigation@1",
           "when": "view == hawkeyeSearchView",
           "icon": "$(collapse-all)"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.clearSessions",
+          "group": "navigation@2",
+          "when": "view == hawkeyeSearchView",
+          "icon": "$(search-expand-results)"
         },
         {
           "command": "Hawkeye-Pathfinder.expandSearchView",
@@ -136,6 +126,11 @@
         {
           "command": "Hawkeye-Pathfinder.runPRTDDSDSP",
           "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~  /\\*DSPF/i",
+          "group": "2_pathfinderTools@3"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.removeSession",
+          "when": "view =~ /^hawkeyeSearchView$/ && viewItem =~ /^.*/",
           "group": "2_pathfinderTools@3"
         }
       ],
@@ -224,7 +219,7 @@
         "enablement": "code-for-ibmi:connected == true",
         "title": "Close Hawkeye Results View",
         "category": "Hawkeye",
-        "icon": "$(close)"
+        "icon": "$(remove-close)"
       },
       {
         "command": "Hawkeye-Pathfinder.collapseSearchView",
@@ -239,6 +234,20 @@
         "title": "Expand Results",
         "category": "Hawkeye",
         "icon": "$(search-expand-results)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.clearSessions",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Clear Search Results",
+        "category": "Hawkeye",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.removeSession",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Remove Selected Search Results",
+        "category": "Hawkeye",
+        "icon": "$(remove)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayObjectUsed",
@@ -269,6 +278,12 @@
         "command": "Hawkeye-Pathfinder.doNothing",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Does nothing",
+        "category": "Hawkeye"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.getRandomMessage",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Get Random Messages",
         "category": "Hawkeye"
       }
     ],

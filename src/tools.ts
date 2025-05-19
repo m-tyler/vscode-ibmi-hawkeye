@@ -1,5 +1,6 @@
-import { CommandResult, RemoteCommand } from '@halcyontech/vscode-ibmi-types';
+import { CommandResult, RemoteCommand, } from '@halcyontech/vscode-ibmi-types';
 import type { Tools } from '@halcyontech/vscode-ibmi-types/api/Tools';
+import type { MemberParts } from '@halcyontech/vscode-ibmi-types/api/IBMi';
 import { CustomUI } from '@halcyontech/vscode-ibmi-types/webviews/CustomUI';
 import { ExtensionContext } from "vscode";
 import { IBMiMember } from '@halcyontech/vscode-ibmi-types';
@@ -27,13 +28,19 @@ export namespace Code4i {
   export function getTempLibrary(): string {
     return getConfig().tempLibrary;
   }
+  export function parserMemberPath(string: string, checkExtension?: boolean): MemberParts {
+    return getInstance().getConnection().parserMemberPath(string, checkExtension);
+  }
+  export function sysNameInLocal(string: string): string {
+    return getInstance().getConnection().sysNameInLocal(string);
+  }
 
   // export async function getTable(library: string, name: string): Promise<Tools.DB2Row[]> {
   //     return getContent().getTable(library, name, name, true);
   // }
 
   export async function runSQL(sqlStatement: string, options?: { fakeBindings?: (string | number)[]; forceSafe?: boolean; }): Promise<Tools.DB2Row[]> {
-    return getContent().ibmi.runSQL(sqlStatement, options||undefined );
+    return getContent().ibmi.runSQL(sqlStatement, options || undefined);
   }
 
   export async function runCommand(command: RemoteCommand): Promise<CommandResult> {
@@ -45,13 +52,13 @@ export namespace Code4i {
   export function makeid(length?: number) {
     return getBase()!.tools.makeid(length);
   }
-  export async function getLibraryIAsp(library: string): Promise<string | undefined> {
+  export function getLibraryIAsp(library: string):string | undefined {
     return getConnection().getLibraryIAsp(library);
   }
   export function getCurrentIAspName(): string | undefined {
     return getConnection().getCurrentIAspName();
   }
-  export async function lookupLibraryIAsp(library: string): Promise<string | undefined> {
+  export function lookupLibraryIAsp(library: string): Promise<string | undefined> {
     return getConnection().lookupLibraryIAsp(library);
   }
 }
@@ -75,18 +82,18 @@ export function nthIndex(aString: string, pattern: string, n: number) {
   }
   return index;
 }
-export function getSourceObjectType(path: string): string {
-  let srcObjType: string;
+export function getSourceObjectType(path: string): string[] {
+  let srcObjType: string[];
   let parts: string[] = [];
   let i: number = 0;
   parts = path.split('/');
   let mbrExt: string[];
   // /iasp/lib/file/mbr.ext - if iasp length = 4
   if (parts.length === 4) { parts.slice(0); } // take away any iasp value
-  i = parts.length-1;
+  i = parts.length - 1;
   // DO we have member extenstion? get it separated out.
   if (i !== 0) {
-    mbrExt =parts[i].split('.');
+    mbrExt = parts[i].split('.');
     parts.push(mbrExt[1]);
   }
   switch (parts[2]) { // source file
@@ -95,36 +102,36 @@ export function getSourceObjectType(path: string): string {
     case `PF`:
     case `LF`:
     case `SQL`:
-      srcObjType = `*DBF:${parts[4]}`;
+      srcObjType = [`*FILE`,`*DBF`];
       break;
-      
+
     case `DSPF`:
-      srcObjType = `*DSPF:${parts[4]}`;
+      srcObjType = [`*FILE`,`*DSPF`];
       break;
     case `PRTF`:
-      srcObjType = `*PRTF:${parts[4]}`;
+      srcObjType = [`*FILE`,`*PRTF`];
       break;
     default:
-      srcObjType = `*ANY:${parts[4]}`;
+      srcObjType = [`*FILE`,`*ALL`];
       break;
     }
   case `QCLSRC`:
-    srcObjType = `*PGM:${parts[4]}`;
+    srcObjType = [`*PGM`,`*PGM`];
     break;
   case `QRPGSRC`:
-    srcObjType = `*PGM:${parts[4]}`;
+    srcObjType = [`*PGM`,`*PGM`];
     break;
   case `QTXTSRC`:
     if (parts[4] === `SQL`) {
-      srcObjType = `*PGM:${parts[4]}`;
+      srcObjType = [`*PGM`,`*PGM`];
       break;
     }
-    else { 
-      srcObjType = `*ANY:${parts[4]}`;
+    else {
+      srcObjType = [`*ALL`,`*ALL`];
       break;
     }
   default:
-    srcObjType = `*ANY:${parts[4]}`;
+    srcObjType = [`*ALL`,`*ALL`];
     break;
   }
 
@@ -217,20 +224,43 @@ export function parseCommandString(input: string): Record<string, string> {
 
   let match: RegExpExecArray | null;
   while ((match = regex.exec(input)) !== null) {
-      const key = match[1];  // Capture the keyword
-      const value = match[2]; // Capture the value inside parentheses
-      result[key] = value;   // Add to the result object
+    const key = match[1];  // Capture the keyword
+    const value = match[2]; // Capture the value inside parentheses
+    result[key] = value;   // Add to the result object
   }
 
   return result;
 }
 
-export function replaceCommandDefault(command: string, keyword:string, replaceValue:string): string 
-{
+export function replaceCommandDefault(command: string, keyword: string, replaceValue: string): string {
   if (replaceValue === "") {
     return command;
   }
-  const components = [];
+
+  let newCommand = ``;
+  const commandName = command.split(' ')[0];
+  let commandParts = parseCommandString(command);
+  // const recordSize: number = Object.keys(commandParts).length;
+  for (const key in commandParts) {
+    if (commandParts.hasOwnProperty(key)) {
+      let [name, label, initialValue] = commandParts[key].split(`|`);
+      if (key === keyword) {
+        // pass default value not the same as defined default so add value.
+        // const pos = initialValue.indexOf(replaceValue);
+        // if (pos < 0) {
+          initialValue = replaceValue + `,` + initialValue;
+        // }
+        newCommand += `${key}(${name}|${label}|${initialValue}) `;
+      }
+      else {
+        newCommand += `${key}(${commandParts[key]}) `;
+      }
+    }
+  }
+  return commandName + ` ` + newCommand;
+}
+export function replaceCommandDefaultold(command: string, keyword: string, replaceValue: string): string {
+
   let loop = true;
   let end = 0;
   while (loop) {
@@ -240,13 +270,17 @@ export function replaceCommandDefault(command: string, keyword:string, replaceVa
       end = command.indexOf(`}`, start);
       if (end >= 0) {
         let currentInput = command.substring(start + 2, end);
-        const [name, label, initialValue] = currentInput.split(`|`);
+        let [name, label, initialValue] = currentInput.split(`|`);
         if (keyword !== name) {
           continue;
         }
-        let pipe = command.indexOf(`|`, start);
-        pipe = command.indexOf(`|`, pipe + 1);
-        command = command.substring(0, pipe) + `${replaceValue},` + command.substring(0, pipe + 1);
+        if (initialValue.indexOf(replaceValue) === 0) {
+          initialValue += replaceValue + `,` + initialValue;
+        }
+        // let pipe = command.indexOf(`|`, start);
+        // pipe = command.indexOf(`|`, pipe + 1);
+        // command = command.substring(0, pipe) + `${replaceValue},` + command.substring(pipe + 1);
+
       } else {
         loop = false;
       }
@@ -255,4 +289,75 @@ export function replaceCommandDefault(command: string, keyword:string, replaceVa
     }
   }
   return command;
+}
+/**
+ * Computes where to highlight the search result label text
+ */
+export function computeHighlights(term: string, line: string): [number, number][] {
+  let index = 0;
+  let HI: [number, number][] = [];
+  while (index >= 0) {
+    index = line.indexOf(term, index);
+    if (index >= 0) {
+      HI.push([index, index + term.length]);
+      index += term.length;
+    }
+  }
+  return HI;
+}
+
+/**
+ * Use this function to alter the library reference if the source passes something like WFISRC 
+ * This will be needed if the calling tool is triggered off a source file member reference.
+ *  
+ * @param library 
+ * @param command
+ * @returns the adjusted lib value
+ */
+export function scrubLibrary(lib: string, command: string, fromSourceFile?: boolean): string {
+  if (/.*(SRC).*/gi.test(lib) || fromSourceFile) {
+    switch (command) {
+    case `DSPSCNSRC`:
+      break;
+    case `DSPOBJU`:
+    case `DSPPGMOBJ`:
+      lib = `*ALL`;
+      break;
+    case `DSPFILSETU`:
+      lib = `*DOCLIBL`;
+      break;
+    default:
+      lib = `*LIBL`;
+      break;
+    }
+  }
+  else if (lib === `*`) {
+    switch (command) {
+    case `DSPOBJU`:
+    case `DSPPGMOBJ`:
+      lib = `*ALL`;
+      break;
+    case `DSPFILSETU`:
+      lib = `*DOCLIBL`;
+      break;
+    default:
+      break;
+    }
+  } else {
+  }
+  return lib;
+}
+/**
+ * setProtectMode
+ * Determine source protection by default as protecting unless otherwise known.
+ * @param library 
+ * @param command
+ * @returns a true or false value
+ */
+export function setProtectMode(library: string, command: String): boolean {
+  let protection: boolean = true;
+  if (command === `DSPSCNSRC`) {
+    if (Code4i.getConnection().currentUser === library) { protection = false; }
+  }
+  return protection;
 }

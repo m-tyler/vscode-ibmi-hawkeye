@@ -10,22 +10,40 @@ import { LineHit } from './LineHit'; // Import LineHit
  */
 export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession | HitSource | LineHit> {
   private _searchSessions: SearchSession[] = [];
-  private _onDidChangeTreeData: vscode.EventEmitter<SearchSession | HitSource | LineHit | undefined | null> 
-                          = new vscode.EventEmitter<SearchSession | HitSource | LineHit | undefined | null>();
-  
+  private _onDidChangeTreeData: vscode.EventEmitter<SearchSession | HitSource | LineHit | undefined | null>
+    = new vscode.EventEmitter<SearchSession | HitSource | LineHit | undefined | null>();
+
   readonly onDidChangeTreeData: vscode.Event<SearchSession | HitSource | LineHit | undefined | null> = this._onDidChangeTreeData.event;
-  constructor(context: vscode.ExtensionContext) {}
+  constructor(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+      // vscode.window.registerTreeDataProvider('hawkeyeSearchView', this._searchTreeProvider),
+      vscode.commands.registerCommand(`Hawkeye-Pathfinder.refreshSearchView`, async () => {
+        this.refresh();
+      }),
+      vscode.commands.registerCommand(`Hawkeye-Pathfinder.closeSearchView`, async () => {
+        vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:searchViewVisible`, false);
+      }),
+      vscode.commands.registerCommand(`Hawkeye-Pathfinder.collapseSearchView`, async () => {
+        this.collapse();
+      }),
+      vscode.commands.registerCommand(`Hawkeye-Pathfinder.clearSessions`, async () => {
+        this.clearSessions();
+      }),
+      vscode.commands.registerCommand(`Hawkeye-Pathfinder.removeSession`, async (sessionId) => {
+        this.removeSession(sessionId);
+      }),
+    );
+  }
   /**
    * Add a new search session with results
    * @param command The IBM i command that was executed (e.g., DSPSCNSRC)
    * @param results The results from the command execution
    */
-  // addSearchSession(command: string, results: any[], searchTerm: string): void {
-  addSearchSession(command: string, results: any[], searchTerm: string): void {
+  addSearchSession(command: string, results: any[], searchItem: string): void {
     const timestamp = new Date().toLocaleTimeString();
     const sessionId = `${command}_${timestamp}`;
-    const hitSources = results.map(result => new HitSource(result, searchTerm)); 
-    const newSession = new SearchSession(sessionId, command, hitSources, searchTerm);
+    const hitSources = results[0].files.map((file: any) => new HitSource(file, searchItem));
+    const newSession = new SearchSession(sessionId, command, hitSources, searchItem);
     this._searchSessions.push(newSession);
     this._onDidChangeTreeData.fire(undefined); // Refresh the entire tree
   }
@@ -72,7 +90,7 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
       // HitSource level - return all LineHit objects for this HitSource
       return Promise.resolve(element.getChildren());
     }
-    
+
     // Leaf node or other cases
     return Promise.resolve([]);
   }
@@ -92,5 +110,11 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
       item.tooltip = item.tooltip;
     }
     return item;
+  }
+  collapse() {
+    vscode.commands.executeCommand(`workbench.actions.treeView.hawkeyeSearchView.collapseAll`);
+  }
+  expand() {
+    vscode.commands.executeCommand(`workbench.actions.treeView.hawkeyeSearchView.expandAll`);
   }
 }

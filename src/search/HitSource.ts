@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import path from 'path';
 import { Code4i, getSourceObjectType } from "../tools";
-import { LineHit } from './LineHit';
+import { LineHit } from '../search/LineHit';
 import { SourceFileMatch, QSYS_PATTERN } from '../types/types';
 
 

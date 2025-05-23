@@ -120,7 +120,7 @@ export namespace HawkeyeSearch {
                         left join HOW_USED_CONDENSED on TUDSFL=SCDFIL and TUDSLB=SCDLIB and TUDSMB=SCDMBR
                         left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=SCDLIB and SP.SYS_TNAME=SCDFIL and SP.SYS_MNAME=SCDMBR
                         group by SCDLIB,SCDFIL,SCDMBR,SP.SRCTYPE,SCDFIL)
-                    select SEARCHMATCH from SEARCHMATCHES order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
+                    select cast( SEARCHMATCH as varchar(32000)) SEARCHMATCH from SEARCHMATCHES order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
         let queryResults = await Code4i.runSQL(statement);
         const parsedRows = queryResults.map(row => parseSearchMatch(row.SEARCHMATCH));
         searchMatches = parsedRows
@@ -192,7 +192,7 @@ export namespace HawkeyeSearch {
                   left join HOW_USED_CONDENSED on PODSFL = SCDFIL and PODSLB = SCDLIB and PODSMB = SCDMBR
                   left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=SCDLIB and SP.SYS_TNAME=SCDFIL and SP.SYS_MNAME=SCDMBR
                   group by SCDLIB,SCDFIL,SCDMBR,SP.SRCTYPE,SCDFIL )
-              select SEARCHMATCH from SEARCHMATCHES
+              select cast( SEARCHMATCH as varchar(32000)) SEARCHMATCH from SEARCHMATCHES
               order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
 
         let queryResults = await Code4i.runSQL(statement);
@@ -263,7 +263,7 @@ export namespace HawkeyeSearch {
                       left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=SCDLIB and SP.SYS_TNAME=SCDFIL and SP.SYS_MNAME=SCDMBR
                       group by SCDLIB,SCDFIL,SCDMBR,SP.SRCTYPE,SCDFIL
                     )
-                    select SEARCHMATCH from SEARCHMATCHES order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
+                    select cast( SEARCHMATCH as varchar(32000)) SEARCHMATCH from SEARCHMATCHES order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
         let queryResults = await Code4i.runSQL(statement);
         const parsedRows = queryResults.map(row => parseSearchMatch(row.SEARCHMATCH));
         searchMatches = parsedRows

@@ -3,7 +3,7 @@ import vscode, { l10n, } from 'vscode';
 import { Code4i } from "./tools";
 import { HwkI } from "./commands";
 // import { SearchResultProvider } from "./search/SearchProvider";
-import { SearchTreeProvider } from "./newwork/SearchTreeProvider";
+import { SearchTreeProvider } from "./search/SearchTreeProvider";
 import { getRandomLocalizedMessages, getCommandText } from "./localizedMessages";
 import { MemberItem } from '@halcyontech/vscode-ibmi-types';
 
@@ -113,6 +113,7 @@ async function create_HWK_getObjectSourceInfo_Tools(): Promise<void> {
       noLibList: true
     });
   }
+  // searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm)
 }
 function getHWK_getObjectSourceInfo_sp_src(library: string): string {
   return [

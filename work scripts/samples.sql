@@ -12,7 +12,7 @@ select '~'
 ,ifnull(nullif(PODATR,''),POHATR) ITEMSRCT
 ,dec(PODSEQ,7,2) ITEMSRCSEQ
 ,ifnull(PODCMD,X.OXCMD) HOWUSED
-,v  archar(rtrim(substr(ifnull(X.OXSTMT,X2.OXSTMT),1,80)),112) ITEMSRCSTMT
+,varchar(rtrim(substr(ifnull(X.OXSTMT,X2.OXSTMT),1,80)),112) ITEMSRCSTMT
 ,'~AA~'
 ,A.*
 ,'~XX~'
@@ -21,18 +21,18 @@ select '~'
 -- ,x2.*
 -- ,'~HS~'
 -- ,HS.*
-from ILEDITOR.O_4FLOE8VN a -- PGMOBJs 
+from PGMT.H$PGMOBJ a -- PGMOBJs 
 left join HAWKEYE.H$DOBJS x on (PODOBJ,PODLIB,PODTYP) = (X.OXNAME,X.OXLIB,X.OXTYPE) -- refs in PGMOBJ
                             and x.OXPGML = (POHPGM||' '||POHLIB) -- PGMOBJ references
                             and X.OXSEQ = dec(PODSEQ,7,2)  -- PGMOBJ references
 -- and x.OXCMD = PODCMD 
 left join HAWKEYE.H$DOBJS x2 on X2.OXID = X.OXID and X2.OXCMD = 'RPG-COPY' and x2.OXSEQ = 0 and X2.OXTYPE = 'MBR'
-left join table ( VSC_getHawkeyeProgramObjectSourceListTF(APITYP => '20' ,APIOPT => '80'
-                                                          , APIOB => ifnull(X2.OXNAME, PODOBJ)
-                                                          , APIOBL => ifnull(X2.OXLIB, PODLIB)
-                                                          , APIOBM => ' '
-                                                          , APIOBA => PODTYP
-                                                          ) ) HS on 1=1 --PODTYP  = '*FILE'
+left join table ( HWK_GetObjectSourceInfo(APITYP => '20' ,APIOPT => '80'
+                                          , APIOB => ifnull(X2.OXNAME, PODOBJ)
+                                          , APIOBL => ifnull(X2.OXLIB, PODLIB)
+                                          , APIOBM => ' '
+                                          , APIOBA => PODTYP
+                                          ) ) HS on 1=1 --PODTYP  = '*FILE'
 )
 select 'QQ'
 ,'WIASP/QSYS.LIB/'||trim(ITEMSRFL)||'.LIB/'||trim(ITEMSRCF)||'.FILE/'||trim(ITEMSRCM)||'.'|| ifnull(SP.SOURCE_TYPE,ITEMSRCT) 

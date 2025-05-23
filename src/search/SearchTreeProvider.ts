@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { SearchSession } from './SearchSession';
 import { HitSource } from './HitSource'; // Import HitSource
-import { LineHit } from './LineHit'; // Import LineHit
+import { LineHit } from '../search/LineHit'; // Import LineHit
 
 /**
  * TreeDataProvider for the Hawkeye search results view

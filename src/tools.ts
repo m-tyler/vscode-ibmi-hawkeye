@@ -46,9 +46,6 @@ export namespace Code4i {
   export async function runCommand(command: RemoteCommand): Promise<CommandResult> {
     return await getConnection().runCommand(command);
   }
-  export async function getMemberInfo(library: string, sourceFile: string, member: string): Promise<IBMiMember | undefined> {
-    return await getConnection().getContent().getMemberInfo(library, sourceFile, member);
-  }
   export function makeid(length?: number) {
     return getBase()!.tools.makeid(length);
   }
@@ -61,6 +58,9 @@ export namespace Code4i {
   export function lookupLibraryIAsp(library: string): Promise<string | undefined> {
     return getConnection().lookupLibraryIAsp(library);
   }
+  export async function checkObject(library: string, name: string, type: string) {
+    return await Code4i.getContent().checkObject({ library, name, type });
+  };
 }
 
 export const IBMI_OBJECT_NAME = /^([\w$#@][\w\d$#@_.]{0,9})$/i;
@@ -134,9 +134,9 @@ export function getSourceObjectType(path: string): string[] {
     srcObjType = [`*ALL`,`*ALL`];
     break;
   }
-
   return srcObjType;
 }
+
 /**
  * @param  name action's name
  * @param command action's command string
@@ -277,9 +277,9 @@ export function replaceCommandDefaultold(command: string, keyword: string, repla
         if (initialValue.indexOf(replaceValue) === 0) {
           initialValue += replaceValue + `,` + initialValue;
         }
-        // let pipe = command.indexOf(`|`, start);
-        // pipe = command.indexOf(`|`, pipe + 1);
-        // command = command.substring(0, pipe) + `${replaceValue},` + command.substring(pipe + 1);
+        let pipe = command.indexOf(`|`, start);
+        pipe = command.indexOf(`|`, pipe + 1);
+        command = command.substring(0, pipe) + `${replaceValue},` + command.substring(pipe + 1);
 
       } else {
         loop = false;

@@ -145,7 +145,7 @@ export async function getLibList(lib: string): Promise<string> {
     statement = `select SYSTEM_SCHEMA_NAME LIBLIST from QSYS2.LIBRARY_LIST_INFO where TYPE = 'CURRENT'`;
     break;
   default: // named
-    liblist = lib;
+    liblist = `'`+lib+`'`;
     break;
   }
   if (statement) {

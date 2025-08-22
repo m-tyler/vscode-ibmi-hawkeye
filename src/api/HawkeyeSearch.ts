@@ -1,11 +1,23 @@
 import { l10n } from 'vscode';
-import { Code4i, sanitizeSearchTerm, checkObject } from '../tools';
+import { Code4i, sanitizeSearchTerm } from '../tools';
 import { getIASP } from '../api/IBMiTools';
-import { HawkeyeSearchMatches, SourceFileMatch, QSYS_PATTERN, SearchMatch } from '../types/types';
+import { SourceFileMatch } from '../types/types';
 import { CommandResult } from '@halcyontech/vscode-ibmi-types';
 
 export namespace HawkeyeSearch {
+  export interface Result {
+    path: string
+    howUsed: string
+    lines: Line[]
+    readonly?: boolean
+    label?: string
+    contextValue?: string
+  }
 
+  export interface Line {
+    number: number
+    content: string
+  }
 
   export async function searchMembers(library: string, sourceFile: string, memberFilter: string, searchTerm: string, readOnly?: boolean): Promise<SourceFileMatch[]> {
     const connection = Code4i.getConnection();
@@ -36,10 +48,10 @@ export namespace HawkeyeSearch {
         begpos: `001`,
         endpos: `240`
       });
-      runDSPSCNSRC += ` SCAN(${stringofSearchTokens})`;
+      runDSPSCNSRC += `${stringofSearchTokens}`;
       let cmdResult: CommandResult;
       cmdResult = await Code4i.runCommand({ command: runDSPSCNSRC, environment: `ile`, noLibList: true });
-      const resultsExist = await checkObject(`${tempLibrary}`, `${tempName1}`, `*FILE`);
+      const resultsExist = await Code4i.checkObject(`${tempLibrary}`, `${tempName1}`, `*FILE`);
       if (!resultsExist) {
         throw new Error(l10n.t('No results for Display Scan Source.'));
       }

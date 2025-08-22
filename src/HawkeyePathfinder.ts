@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import vscode, { l10n, } from 'vscode';
 import { Code4i } from "./tools";
+// import { HawkeyeSearch } from "./api/HawkeyeSearch";
+// import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
+// import { getMemberCount } from "./api/IBMiTools";
 import { HwkI } from "./commands";
 // import { SearchResultProvider } from "./search/SearchProvider";
 import { SearchTreeProvider } from "./search/SearchTreeProvider";
@@ -13,6 +16,11 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     `hawkeyeSearchView`, {
     treeDataProvider: searchTreeProvider,
   });
+  // let hawkeyeSearchViewProvider = <HawkeyeSearchView>{};
+  // hawkeyeSearchViewProvider = new HawkeyeSearchView(context);
+  // context.subscriptions.push(
+  //    vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewProvider),
+  //   // treeView,
   context.subscriptions.push(
     searchTreeView,
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFiles`, async (memberItem: MemberItem) => {

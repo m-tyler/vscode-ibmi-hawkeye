@@ -225,18 +225,19 @@ export namespace HwkI {
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILELIB', ww.library);
     chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILE', ww.name);
     command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
-    if (!command) { return undefined; }
+    if (!command) { vscode.window.showErrorMessage(l10n.t(`Search canceled.`)); return undefined; }
 
     // Parse user input into values to pass on to secondary tools. 
     let keywords = parseCommandString(command);
     if (!keywords) {
+      vscode.window.showErrorMessage(l10n.t(`Search canceled.`));
       return undefined;
     } else {
       ww.path = keywords.FILELIB + '/' + keywords.FILE;
       ww.library = keywords.FILELIB;
       ww.sourceFile = keywords.FILE;
       ww.name = keywords.FILE;
-      ww.type = '*FILE';
+      ww.type = ww.type?ww.type:'PF';
       ww.searchTerm = keywords.SCAN || '';
       wwResultSequence = keywords.SEQUNCE || '*PGM';
     }

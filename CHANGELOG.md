@@ -1,4 +1,17 @@
 # Change log
+## Version 0.1.2
+  * Fixed bug where search results line path was formatted incorrectly.
+## Version 0.1.1
+  * Synchronize to updates to Code for IBM i
+  * Minor updates 
+## Version 0.1.0 
+  * Fixed search result highlighting
+  * Fixed erroneous search results when no matches exists. Showing a notification instead.
+## Version 0.0.13
+  * Fixed issue when using generic patterns for source file and source member with a specific extension
+## Version 0.0.12
+  * Fixed bug where search term highlighted wrong position.  
+  * Fixed bug when only library used for commands, wrong SQL statement used.
 ## Version 0.0.11
   * Fix for version .0.0.10 get getting server config iASP value when iASP look up for library returned no iASP.  No longer look at the server config for iASP information. 
 ## Version 0.0.10

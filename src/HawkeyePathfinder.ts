@@ -1,26 +1,26 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import vscode, { l10n, } from 'vscode';
-import { Code4i, getInstance } from "./tools";
-import { HawkeyeSearch } from "./api/HawkeyeSearch";
-import { HawkeyeSearchView } from "./views/HawkeyeSearchView";
-import { getMemberCount } from "./api/IBMiTools";
+import { Code4i } from "./tools";
 import { HwkI } from "./commands";
-import { SearchResultProvider, SearchResult } from "./search/SearchProvider";
-import { MemberItem, CommandResult } from '@halcyontech/vscode-ibmi-types';
+// import { SearchResultProvider } from "./search/SearchProvider";
+import { SearchTreeProvider } from "./search/SearchTreeProvider";
+import { getRandomLocalizedMessages, getCommandText } from "./localizedMessages";
+import { MemberItem } from '@halcyontech/vscode-ibmi-types';
 
 export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
-  // const searchResultProvider = new SearchResultProvider();
-  // const treeView = vscode.window.createTreeView("Hawkeye", {
-  //   treeDataProvider: searchResultProvider,
-  // });
-  hawkeyeSearchViewProvider = new HawkeyeSearchView(context);
+  const searchTreeProvider = new SearchTreeProvider(context);
+  const searchTreeView = vscode.window.createTreeView(
+    `hawkeyeSearchView`, {
+    treeDataProvider: searchTreeProvider,
+  });
   context.subscriptions.push(
-    hawkeyeSearchViewer,
-    // treeView,
+    searchTreeView,
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFiles`, async (memberItem: MemberItem) => {
       try {
         const searchResults = await HwkI.searchSourceFiles(memberItem);
-        // searchResultProvider.addSearchResults(searchResults);
+        if (searchResults) {
+          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+        }
       } catch (e: unknown) {
         if (e instanceof Error) {
           vscode.window.showErrorMessage(l10n.t(`Error searching source members: {0}`, e.message));
@@ -30,27 +30,36 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (Item) => {
       try {
         const searchResults = await HwkI.displayFileSetsUsed(Item);
+        if (searchResults) {
+          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+        }
       } catch (e) {
         if (e instanceof Error) {
-          vscode.window.showErrorMessage(l10n.t(`Error searching for file uses of: {0}`, e.message));
+          vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
         }
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (Item) => {
       try {
         const searchResults = await HwkI.displayProgramObjects(Item);
+        if (searchResults) {
+          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+        }
       } catch (e) {
         if (e instanceof Error) {
-          vscode.window.showErrorMessage(l10n.t(`Error searching for file uses of: {0}`, e.message));
+          vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
         }
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (Item) => {
       try {
         const searchResults = await HwkI.displayObjectUsed(Item);
+        if (searchResults) {
+          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+        }
       } catch (e) {
         if (e instanceof Error) {
-          vscode.window.showErrorMessage(l10n.t(`Error searching for file uses of: {0}`, e.message));
+          vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
         }
       }
     }),
@@ -63,16 +72,25 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTDDSDSP', async (memberItem: MemberItem) => {
       await HwkI.runPRTDDSDSP(memberItem);
     }),
-    //   // vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewProvider),
+    vscode.commands.registerCommand('Hawkeye-Pathfinder.getRandomMessage', async () => {
+      const commandName: string = `DSPOBJU`;
+      const myTestData = {
+        path: "/*LIBL/*ALL/PRP*.PGM",
+        library: "WFISRC",
+        name: "PRP06YRG",
+        sourceFile: "QRPGSRC",
+        type: "PGM",
+        searchItem: `PRP06YRG`,
+        searchTerm: ``,
+        memberCount: 3800,
+        commandName: commandName,
+        commandText: getCommandText(commandName.toLocaleLowerCase())
+      };
+      const randomLocalizedMessages = getRandomLocalizedMessages(myTestData, 8);
+      vscode.window.showInformationMessage(randomLocalizedMessages.map((msg, index) => `${index + 1}. ${msg}`).join('\n'), { modal: true });
+    }),
   );
-<<<<<<< Updated upstream
-  getInstance()?.subscribe(context, `connected`, "Hawkeye Extension Setup" , create_HWK_getObjectSourceInfo_Tools);
-=======
   Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup", create_HWK_getObjectSourceInfo_Tools);
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 }
 
 async function create_HWK_getObjectSourceInfo_Tools(): Promise<void> {
@@ -87,13 +105,14 @@ async function create_HWK_getObjectSourceInfo_Tools(): Promise<void> {
       noLibList: true
     });
   }
-  if (!await getContent()?.checkObject({ library: library, name: "VSC00AFN87", type: "*SRVPGM" })) {
+  if (!await Code4i.getContent()?.checkObject({ library: library, name: "VSC00AFN87", type: "*SRVPGM" })) {
     Code4i.runCommand({
       command: `RUNSQL SQL('${getHWK_getObjectSourceInfo_func_src(library)}') COMMIT(*NONE) NAMING(*SQL)`,
       cwd: `/`,
       noLibList: true
     });
   }
+  // searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm)
 }
 function getHWK_getObjectSourceInfo_sp_src(library: string): string {
   return [
@@ -158,59 +177,3 @@ function getHWK_getObjectSourceInfo_func_src(library: string): string {
     `end`,
   ].join(` `);
 }
-
-// /**
-//  * Use this function to alter the library reference if the source passes something like WFISRC
-//  * This will be needed if the calling tool is triggered off a source file member reference.
-//  *
-//  * @param library
-//  * @param command
-//  * @returns the adjusted lib value
-//  */
-// function scrubLibrary(lib: string, command: string): string {
-//   if (/.*(SRC).*/gi.test(lib)) {
-//     switch (command) {
-//     case `DSPSCNSRC`:
-//       break;
-//     case `DSPOBJU`:
-//     case `DSPPGMOBJ`:
-//       lib = `*ALL`;
-//       break;
-//     case `DSPFILSETU`:
-//       lib = `*DOCLIBL`;
-//       break;
-//     default:
-//       lib = `*LIBL`;
-//       break;
-//     }
-//   }
-//   else if (lib === `*`) {
-//     switch (command) {
-//     case `DSPOBJU`:
-//     case `DSPPGMOBJ`:
-//       lib = `*ALL`;
-//       break;
-//     case `DSPFILSETU`:
-//       lib = `*DOCLIBL`;
-//       break;
-//     default:
-//       break;
-//     }
-//   } else {
-//   }
-//   return lib;
-// }
-// /**
-//  * setProtectMode
-//  * Determine source protection by default as protecting unless otherwise known.
-//  * @param library
-//  * @param command
-//  * @returns a true or false value
-//  */
-// function setProtectMode(library: string, command: String): boolean {
-//   let protection: boolean = true;
-//   if (command === `DSPSCNSRC`) {
-//     if (Code4i.getConnection().currentUser === library) { protection = false; }
-//   }
-//   return protection;
-// }

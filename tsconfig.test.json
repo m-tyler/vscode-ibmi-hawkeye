@@ -12,8 +12,9 @@
       "skipLibCheck": true,  // This will skip type checking of declaration files
       "types": [
         "node",
-        "mocha",
-        "vscode"
+        "vscode",
+        "chai",
+        "mocha"
       ]
     },
     "include": [

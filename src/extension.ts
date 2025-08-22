@@ -7,11 +7,12 @@ import { initializeHawkeyePathfinder } from "./HawkeyePathfinder";
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-	Code4i.initialize();
+	Code4i.initialize(context);
 
 	initializeHawkeyePathfinder(context);
+	vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:searchViewVisible`, true);
 
-	console.log(`Congratulations, extension "vscode-ibmi-hawkeye "Version" :"${context.extension.packageJSON.version}" is now active!`);
+	console.log(`Congratulations, extension "${context.extension.packageJSON.description}" "Version" :"${context.extension.packageJSON.version}" is now active!`);
 }
 
 // this method is called when your extension is deactivated

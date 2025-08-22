@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "0.0.11",
+  "version": "6.6.6",
   "preview": true,
   "license": "MIT",
   "engines": {
@@ -34,6 +34,11 @@
           "id": "Hawkeye-search",
           "title": "Hawkeye Pathfinder",
           "icon": "$(references)"
+        },
+        {
+          "id": "Hawkeye-search-2",
+          "title": "Hawkeye Pathfinder",
+          "icon": "$(references)"
         }
       ]
     },
@@ -42,19 +47,20 @@
         {
           "id": "hawkeyeSearchView",
           "name": "Results",
-          "when": "Hawkeye-Pathfinder:searchViewVisible"
+          "when": "Hawkeye-Pathfinder:searchViewVisible",
+          "icon": "none"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "hawkeyeSearchView",
-        "contents": "Hawkeye Tools, version 6.6.6. \n[Connect to an IBM i before using this tool](command:code-for-ibmi.connectTo)",
+        "contents": "Hawkeye Tools, version 6.6.6. \n[Connect before using this tool](command:code-for-ibmi.connectTo)",
         "when": "code-for-ibmi:connected == false"
       },
       {
         "view": "hawkeyeSearchView",
-        "contents": "Hawkeye Tools, version 6.6.6.                        [Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)",
+        "contents": "Hawkeye Tools, version 6.6.6.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)",
         "when": "code-for-ibmi:connected == true"
       }
     ],
@@ -77,33 +83,55 @@
           "group": "navigation@1",
           "when": "view == hawkeyeSearchView",
           "icon": "$(collapse-all)"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.clearSessions",
+          "group": "navigation@2",
+          "when": "view == hawkeyeSearchView",
+          "icon": "$(search-expand-results)"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.expandSearchView",
+          "group": "navigation@1",
+          "when": "view == hawkeyeSearchView",
+          "icon": "$(search-expand-results)"
         }
       ],
       "Hawkeye-Pathfinder.Tools.menu": [
         {
           "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /\\*DBF/i",
           "group": "1_pathfinderTools@2"
         },
         {
           "command": "Hawkeye-Pathfinder.displayProgramObjects",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /\\*PGM/i",
           "group": "1_pathfinderTools@2"
         },
         {
           "command": "Hawkeye-Pathfinder.displayObjectUsed",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /^.*/",
           "group": "1_pathfinderTools@2"
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /(:rpgle|:sqlrpgle)/i",
           "group": "2_pathfinderTools@1"
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTDDSPRT",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~  /\\*PRTF/i",
           "group": "2_pathfinderTools@2"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.runPRTDDSDSP",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~  /\\*DSPF/i",
+          "group": "2_pathfinderTools@3"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.removeSession",
+          "when": "view =~ /^hawkeyeSearchView$/ && viewItem =~ /^.*/",
+          "group": "2_pathfinderTools@3"
         }
       ],
       "view/item/context": [
@@ -114,7 +142,7 @@
         },
         {
           "submenu": "Hawkeye-Pathfinder.Tools.menu",
-          "when": "view === objectBrowser"
+          "when": "view === objectBrowser || view === hawkeyeSearchView"
         }
       ],
       "commandPalette": [
@@ -139,6 +167,10 @@
           "when": "never"
         },
         {
+          "command": "Hawkeye-Pathfinder.expandSearchView",
+          "when": "never"
+        },
+        {
           "command": "Hawkeye-Pathfinder.displayObjectUsed",
           "when": "code-for-ibmi:connected"
         },
@@ -149,6 +181,14 @@
         {
           "command": "Hawkeye-Pathfinder.runPRTDDSPRT",
           "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.runPRTDDSDSP",
+          "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.doNothing",
+          "when": "never"
         }
       ]
     },
@@ -156,21 +196,21 @@
       {
         "command": "Hawkeye-Pathfinder.searchSourceFiles",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Hawkeye Scan Source Files ",
+        "title": "Hawkeye Scan Source Files",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Display File Set Where Used ",
+        "title": "Display File Set Where Used",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayProgramObjects",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Display Program Objects ",
+        "title": "Display Program Objects",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
@@ -179,7 +219,7 @@
         "enablement": "code-for-ibmi:connected == true",
         "title": "Close Hawkeye Results View",
         "category": "Hawkeye",
-        "icon": "$(close)"
+        "icon": "$(remove-close)"
       },
       {
         "command": "Hawkeye-Pathfinder.collapseSearchView",
@@ -187,6 +227,27 @@
         "title": "Collapse all Hawkeye Results",
         "category": "Hawkeye",
         "icon": "$(collapse-all)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.expandSearchView",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Expand Results",
+        "category": "Hawkeye",
+        "icon": "$(search-expand-results)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.clearSessions",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Clear Search Results",
+        "category": "Hawkeye",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.removeSession",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Remove Selected Search Results",
+        "category": "Hawkeye",
+        "icon": "$(remove)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayObjectUsed",
@@ -206,6 +267,24 @@
         "enablement": "code-for-ibmi:connected == true",
         "title": "Spacing Chart-DDS Print File",
         "category": "Hawkeye"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.runPRTDDSDSP",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Spacing Chart-DDS Display File",
+        "category": "Hawkeye"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.doNothing",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Does nothing",
+        "category": "Hawkeye"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.getRandomMessage",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Get Random Messages",
+        "category": "Hawkeye"
       }
     ],
     "keybindings": []
@@ -216,22 +295,23 @@
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "tsc -p . --outDir out",
+    "compile-tests": "tsc -p ./tsconfig.test.json",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@halcyontech/vscode-ibmi-types": "^2.12",
+    "@halcyontech/vscode-ibmi-types": "^2.15.3",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "16.x",
     "@types/vscode": "^1.71.0",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
-    "esbuild": "^0.19.2",
-    "esbuild-loader": "^3.0.1",
+    "@vscode/test-electron": "^2.4.1",
+    "esbuild": "^0.25.2",
+    "esbuild-loader": "^4.3.0",
     "eslint": "^8.20.0",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
@@ -243,6 +323,6 @@
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "i": "^0.3.7",
-    "npm": "^10.4.0"
+    "npm": "^10.9.2"
   }
 }

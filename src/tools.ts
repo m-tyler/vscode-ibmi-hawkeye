@@ -1,15 +1,13 @@
-import { CodeForIBMi, CommandResult, RemoteCommand } from '@halcyontech/vscode-ibmi-types';
-import Instance from "@halcyontech/vscode-ibmi-types/api/Instance";
-import { Tools } from '@halcyontech/vscode-ibmi-types/api/Tools';
-import { CachedServerSettings, GlobalStorage } from '@halcyontech/vscode-ibmi-types/api/Storage';
-import * as vscode from 'vscode';
-import { Extension, extensions } from "vscode";
-
-let codeForIBMi : CodeForIBMi;
-let baseExtension: Extension<CodeForIBMi> | undefined;
+import { CommandResult, RemoteCommand, } from '@halcyontech/vscode-ibmi-types';
+import type { Tools } from '@halcyontech/vscode-ibmi-types/api/Tools';
+import type { MemberParts } from '@halcyontech/vscode-ibmi-types/api/IBMi';
+import { CustomUI } from '@halcyontech/vscode-ibmi-types/webviews/CustomUI';
+import { ExtensionContext } from "vscode";
+import { IBMiMember } from '@halcyontech/vscode-ibmi-types';
+import { loadBase, getBase } from './base';
 
 export namespace Code4i {
-  export async function initialize(context: vscode.ExtensionContext) {
+  export async function initialize(context: ExtensionContext) {
     loadBase(context);
   }
   export function getInstance() {
@@ -30,12 +28,21 @@ export namespace Code4i {
   export function getTempLibrary(): string {
     return getConfig().tempLibrary;
   }
+  export function parserMemberPath(string: string, checkExtension?: boolean): MemberParts {
+    return getInstance().getConnection().parserMemberPath(string, checkExtension);
+  }
+  export function sysNameInLocal(string: string): string {
+    return getInstance().getConnection().sysNameInLocal(string);
+  }
+
   // export async function getTable(library: string, name: string): Promise<Tools.DB2Row[]> {
   //     return getContent().getTable(library, name, name, true);
   // }
-  export async function runSQL(sqlStatement: string): Promise<Tools.DB2Row[]> {
-    return getContent().ibmi.runSQL(sqlStatement);
+
+  export async function runSQL(sqlStatement: string, options?: { fakeBindings?: (string | number)[]; forceSafe?: boolean; }): Promise<Tools.DB2Row[]> {
+    return getContent().ibmi.runSQL(sqlStatement, options || undefined);
   }
+
   export async function runCommand(command: RemoteCommand): Promise<CommandResult> {
     return await getConnection().runCommand(command);
   }
@@ -45,13 +52,13 @@ export namespace Code4i {
   export function makeid(length?: number) {
     return getBase()!.tools.makeid(length);
   }
-  export async function getLibraryIAsp(library: string): Promise<string | undefined> {
+  export function getLibraryIAsp(library: string):string | undefined {
     return getConnection().getLibraryIAsp(library);
   }
   export function getCurrentIAspName(): string | undefined {
     return getConnection().getCurrentIAspName();
   }
-  export async function lookupLibraryIAsp(library: string): Promise<string | undefined> {
+  export function lookupLibraryIAsp(library: string): Promise<string | undefined> {
     return getConnection().lookupLibraryIAsp(library);
   }
 }
@@ -59,41 +66,72 @@ export namespace Code4i {
 export const IBMI_OBJECT_NAME = /^([\w$#@][\w\d$#@_.]{0,9})$/i;
 
 export function getQSYSObjectPath(library: string, name: string, type: string, member?: string, iasp?: string) {
-    return `${iasp ? `/${iasp.toUpperCase()}` : ''}/QSYS.LIB/${library.toUpperCase()}.LIB/${name.toUpperCase()}.${type.toUpperCase()}${member ? `/${member.toUpperCase()}.MBR` : ''}`;
-}
-
-export function makeid(length? : number){
-    return codeForIBMi.tools.makeid(length);
-}
-export function getInstance(): Instance | undefined {
-    return (baseExtension && baseExtension.isActive && baseExtension.exports ? baseExtension.exports.instance : undefined);
+  return `${iasp ? `/${iasp.toUpperCase()}` : ''}/QSYS.LIB/${library.toUpperCase()}.LIB/${name.toUpperCase()}.${type.toUpperCase()}${member ? `/${member.toUpperCase()}.MBR` : ''}`;
 }
 export function sanitizeSearchTerm(searchTerm: string): string {
-    return searchTerm.replace(/\\/g, `\\\\`).replace(/"/g, `\\"`);
+  return searchTerm.replace(/\\/g, `\\\\`).replace(/"/g, `\\"`);
 }
-
+export async function checkObject(library: string, name: string, type: string) {
+  return await Code4i.getContent().checkObject({ library, name, type });
+};
 export function nthIndex(aString: string, pattern: string, n: number) {
-    let index = -1;
-    while (n-- && index++ < aString.length) {
-        index = aString.indexOf(pattern, index);
-        if (index < 0) { break; }
+  let index = -1;
+  while (n-- && index++ < aString.length) {
+    index = aString.indexOf(pattern, index);
+    if (index < 0) { break; }
+  }
+  return index;
+}
+export function getSourceObjectType(path: string): string[] {
+  let srcObjType: string[];
+  let parts: string[] = [];
+  let i: number = 0;
+  parts = path.split('/');
+  let mbrExt: string[];
+  // /iasp/lib/file/mbr.ext - if iasp length = 4
+  if (parts.length === 4) { parts.slice(0); } // take away any iasp value
+  i = parts.length - 1;
+  // DO we have member extenstion? get it separated out.
+  if (i !== 0) {
+    mbrExt = parts[i].split('.');
+    parts.push(mbrExt[1]);
+  }
+  switch (parts[2]) { // source file
+  case `QDDSSRC`:
+    switch (parts[4]) {
+    case `PF`:
+    case `LF`:
+    case `SQL`:
+      srcObjType = [`*FILE`,`*DBF`];
+      break;
+
+    case `DSPF`:
+      srcObjType = [`*FILE`,`*DSPF`];
+      break;
+    case `PRTF`:
+      srcObjType = [`*FILE`,`*PRTF`];
+      break;
+    default:
+      srcObjType = [`*FILE`,`*ALL`];
+      break;
     }
-    return index;
-}  
-export async function getLibraryAspInfo( library: string) :Promise<string|undefined> {
-    let asp :string | undefined;
-    const [row] = await Code4i.runSQL(`SELECT IASP_NUMBER FROM TABLE(QSYS2.LIBRARY_INFO('${library}'))`);
-    const iaspNumber = row?.IASP_NUMBER;
-    if (iaspNumber && typeof iaspNumber === 'number' && Code4i.getConnection().aspInfo[iaspNumber]) {
-      asp = `/${Code4i.getConnection().aspInfo[iaspNumber]}`;
+  case `QCLSRC`:
+    srcObjType = [`*PGM`,`*PGM`];
+    break;
+  case `QRPGSRC`:
+    srcObjType = [`*PGM`,`*PGM`];
+    break;
+  case `QTXTSRC`:
+    if (parts[4] === `SQL`) {
+      srcObjType = [`*PGM`,`*PGM`];
+      break;
     }
-    return asp;
-    else { 
-      srcObjType = `*ANY:${parts[4]}`;
+    else {
+      srcObjType = [`*ALL`,`*ALL`];
       break;
     }
   default:
-    srcObjType = `*ANY:${parts[4]}`;
+    srcObjType = [`*ALL`,`*ALL`];
     break;
   }
 
@@ -186,36 +224,63 @@ export function parseCommandString(input: string): Record<string, string> {
 
   let match: RegExpExecArray | null;
   while ((match = regex.exec(input)) !== null) {
-      const key = match[1];  // Capture the keyword
-      const value = match[2]; // Capture the value inside parentheses
-      result[key] = value;   // Add to the result object
+    const key = match[1];  // Capture the keyword
+    const value = match[2]; // Capture the value inside parentheses
+    result[key] = value;   // Add to the result object
   }
 
   return result;
 }
 
-export function replaceCommandDefault(command: string, keyword:string, replaceValue:string) : string
-{
-  if (replaceValue === '') {return command;}
-  const components = [];
-  let loop = true;
+export function replaceCommandDefault(command: string, keyword: string, replaceValue: string): string {
+  if (replaceValue === "") {
+    return command;
+  }
 
+  let newCommand = ``;
+  const commandName = command.split(' ')[0];
+  let commandParts = parseCommandString(command);
+  // const recordSize: number = Object.keys(commandParts).length;
+  for (const key in commandParts) {
+    if (commandParts.hasOwnProperty(key)) {
+      let [name, label, initialValue] = commandParts[key].split(`|`);
+      if (key === keyword) {
+        // pass default value not the same as defined default so add value.
+        // const pos = initialValue.indexOf(replaceValue);
+        // if (pos < 0) {
+          initialValue = replaceValue + `,` + initialValue;
+        // }
+        newCommand += `${key}(${name}|${label}|${initialValue}) `;
+      }
+      else {
+        newCommand += `${key}(${commandParts[key]}) `;
+      }
+    }
+  }
+  return commandName + ` ` + newCommand;
+}
+export function replaceCommandDefaultold(command: string, keyword: string, replaceValue: string): string {
+
+  let loop = true;
   let end = 0;
   while (loop) {
     const idx = command.indexOf(`\${`, end);
-
     if (idx >= 0) {
       const start = idx;
       end = command.indexOf(`}`, start);
-      
       if (end >= 0) {
         let currentInput = command.substring(start + 2, end);
-        
-        const [name, label, initialValue] = currentInput.split(`|`);
-        if (keyword!==name) {continue;} // Not at keyword to alter default value
-        let pipe = command.indexOf(`|`, start);
-        pipe = command.indexOf(`|`, pipe+1);
-        command = command.substring(0,pipe)+`${replaceValue},`+command.substring(0,pipe+1);
+        let [name, label, initialValue] = currentInput.split(`|`);
+        if (keyword !== name) {
+          continue;
+        }
+        if (initialValue.indexOf(replaceValue) === 0) {
+          initialValue += replaceValue + `,` + initialValue;
+        }
+        // let pipe = command.indexOf(`|`, start);
+        // pipe = command.indexOf(`|`, pipe + 1);
+        // command = command.substring(0, pipe) + `${replaceValue},` + command.substring(pipe + 1);
+
       } else {
         loop = false;
       }
@@ -224,4 +289,75 @@ export function replaceCommandDefault(command: string, keyword:string, replaceVa
     }
   }
   return command;
+}
+/**
+ * Computes where to highlight the search result label text
+ */
+export function computeHighlights(term: string, line: string): [number, number][] {
+  let index = 0;
+  let HI: [number, number][] = [];
+  while (index >= 0) {
+    index = line.indexOf(term, index);
+    if (index >= 0) {
+      HI.push([index, index + term.length]);
+      index += term.length;
+    }
+  }
+  return HI;
+}
+
+/**
+ * Use this function to alter the library reference if the source passes something like WFISRC 
+ * This will be needed if the calling tool is triggered off a source file member reference.
+ *  
+ * @param library 
+ * @param command
+ * @returns the adjusted lib value
+ */
+export function scrubLibrary(lib: string, command: string, fromSourceFile?: boolean): string {
+  if (/.*(SRC).*/gi.test(lib) || fromSourceFile) {
+    switch (command) {
+    case `DSPSCNSRC`:
+      break;
+    case `DSPOBJU`:
+    case `DSPPGMOBJ`:
+      lib = `*ALL`;
+      break;
+    case `DSPFILSETU`:
+      lib = `*DOCLIBL`;
+      break;
+    default:
+      lib = `*LIBL`;
+      break;
+    }
+  }
+  else if (lib === `*`) {
+    switch (command) {
+    case `DSPOBJU`:
+    case `DSPPGMOBJ`:
+      lib = `*ALL`;
+      break;
+    case `DSPFILSETU`:
+      lib = `*DOCLIBL`;
+      break;
+    default:
+      break;
+    }
+  } else {
+  }
+  return lib;
+}
+/**
+ * setProtectMode
+ * Determine source protection by default as protecting unless otherwise known.
+ * @param library 
+ * @param command
+ * @returns a true or false value
+ */
+export function setProtectMode(library: string, command: String): boolean {
+  let protection: boolean = true;
+  if (command === `DSPSCNSRC`) {
+    if (Code4i.getConnection().currentUser === library) { protection = false; }
+  }
+  return protection;
 }

@@ -5,6 +5,3 @@
 
 ;select * from HAWKEYE.H$DOBJS3
 ;select * from HAWKEYE.H$DOBJS4 
-
-
-;select * from sysfuncs where routine_name like 'STF_%' order by SPECIFIC_NAME

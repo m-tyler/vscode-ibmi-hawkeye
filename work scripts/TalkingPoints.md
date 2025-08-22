@@ -7,3 +7,7 @@
 4. `showCustomInputs`, have an option or permanent change to allow for `combobox` attributes.  There are commands that allow for a specific value in the keyword or from a list of special values.  If I define a keyword pattern that allows for a list of special values, I cannot then type in a specific value.  Would it be valid to allow `combobox` to be applied all the time to the `select` input?
 
 5. `showCustomInputs`, have an optional flag on the action command that causes the Execute and Cancel buttons to be present before "optional" input.
+
+6. `showCustomInputs`, does it have the ability to provide a list of selections and allow for user input?
+
+7. `runSQL`, what harm is there so allow for the -S flag on the qshell `db2` tool?  I hve queries that can produce a long results but most times don't.  The output channel is loaded with long return values that are just mostly blanks. 

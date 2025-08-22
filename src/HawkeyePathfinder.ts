@@ -89,7 +89,6 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       const randomLocalizedMessages = getRandomLocalizedMessages(myTestData, 8);
       vscode.window.showInformationMessage(randomLocalizedMessages.map((msg, index) => `${index + 1}. ${msg}`).join('\n'), { modal: true });
     }),
-    //   // vscode.window.registerTreeDataProvider(`hawkeyeSearchView`, hawkeyeSearchViewProvider),
   );
   Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup", create_HWK_getObjectSourceInfo_Tools);
 }

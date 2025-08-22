@@ -236,7 +236,7 @@ export namespace HwkI {
       ww.library = keywords.FILELIB;
       ww.sourceFile = keywords.FILE;
       ww.name = keywords.FILE;
-      ww.type = '*FILE';
+      ww.type = ww.type?ww.type:'PF';
       ww.searchTerm = keywords.SCAN || '';
       wwResultSequence = keywords.SEQUNCE || '*PGM';
     }

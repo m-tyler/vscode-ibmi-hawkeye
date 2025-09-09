@@ -4,7 +4,7 @@ export function getHawkeyeAction(id:number): Action {
   // console.log(hawkeyeActions);
   // console.log(JSON.stringify(hawkeyeActions,null,2));
   let workAction: Action = {} as Action;
-  if (id >= 0 && id <= 3 ) {
+  if (id >= 0 && id <= 4 ) {
     workAction = hawkeyeActions[id];
     return workAction;
   }
@@ -63,6 +63,19 @@ const hawkeyeActions: Action[] =
       ],
       "postDownload": [
         "DSPOBJU.txt",
+        "tmp/"
+      ]
+    }
+    , {
+      "name": `DSPPRCU`,
+      "command": "DSPPRCU PRC(${PRC|Procedure  . . . . . : <b>Name, generic*, *ALL</b>|*ALL}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
+      "environment": "ile",
+      "type": "file",
+      "extensions": [
+        "GLOBAL"
+      ],
+      "postDownload": [
+        "DSPPRCU.txt",
         "tmp/"
       ]
     }

@@ -585,6 +585,149 @@ export namespace HwkI {
     }
     return [searchMatch];
   };
+  export async function displayProcedureUsed(item: any): Promise<HawkeyeSearchMatches[]|undefined> {
+    let commandName = 'DSPPRCU';
+    let ww = <wItem>{};
+    let howUsed: string = '';
+    let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
+    if (item && item.object) {
+      ww.path = item.path;
+      ww.path = Code4i.sysNameInLocal(item.path.replace(QSYS_PATTERN, ''));
+      ww.protected = item.filter.protected;
+      ww.library = item.object.library;
+      ww.library = scrubLibrary(ww.library, `${commandName}`);
+      ww.name = item.object.name;
+      ww.type = item.object.attribute;
+    }
+    else if (item && item.member) {
+      ww.path = Code4i.sysNameInLocal(item.path.replace(QSYS_PATTERN, ''));
+      ww.protected = item.member.protected;
+      ww.sourceFile = item.member.file;
+      ww.library = item.member.library;
+      ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
+      ww.name = item.member.name;
+      ww.type = getSourceObjectType(ww.path)[0];
+    }
+    else if (item) {
+      ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
+      const parts = Code4i.parserMemberPath( item._path );
+      ww.protected = item._readonly;
+      ww.sourceFile = parts.file;
+      ww.library = parts.library;
+      ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
+      ww.name = parts.name;
+      ww.type = getSourceObjectType(ww.path)[0];
+    }
+    else {
+      ww.library = Code4i.getConnection().currentUser;
+      ww.name = ``;
+      ww.type = ``;
+      ww.protected = true;
+    }
+
+    // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
+    let command: string = '';
+    const chosenAction = getHawkeyeAction(4); // DSPPRCU
+    chosenAction.command = replaceCommandDefault(chosenAction.command, 'PRC', ww.name);
+    command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
+    if (!command) { 
+      vscode.window.showInformationMessage(l10n.t(`Command HAWKEYE/${commandName}, canceled.` ));
+      return undefined; 
+    }
+
+    // Parse user input into values to pass on to secondary tools. 
+    let keywords = parseCommandString(command);
+    if (!keywords) {
+      return undefined;
+    } else {
+      // ww.path = keywords.OBJLIB + '/' + keywords.OBJ +'.'+keywords.OBJTYPE;
+      ww.path = keywords.PRC;
+      // ww.library = keywords.OBJLIB;
+      ww.name = keywords.PRC;
+      // ww.type = keywords.OBJTYPE;
+      ww.searchTerm = keywords.SCAN || '';
+      // howUsed = keywords.HOWUSED || '';
+    }
+
+    // Hawkeye-Pathfinder
+    if (ww.path) {
+
+      if (ww.name !== ` `) {
+
+        if (!ww.searchTerm) {
+          ww.searchTerm = await vscode.window.showInputBox({
+            prompt: l10n.t(`Select token to search within the results from ${commandName}`),
+            value: `*NONE`,
+            placeHolder: l10n.t(`Enter the search for term`),
+          }) || '';
+        }
+
+        if (ww.searchTerm) {
+          // if (!howUsed) {
+          //   howUsed = await vscode.window.showInputBox({
+          //     prompt: l10n.t(`Select the HOW USED string from ${commandName}`),
+          //     value: `*ALL`,
+          //     placeHolder: l10n.t(`Enter the how used value. See Hawkeye product for values.`),
+          //   }) || '';
+          // }
+
+          // if (howUsed) {
+            try {
+              searchMatch = await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: `Searching`,
+              }, async progress => {
+                progress.report({
+                  message: l10n.t(`Starting process to find where ${0} is used.`, ww.name)
+                });
+                // const memberCount = await getMemberCount({ library: ww.library });
+                const memberCount = 0;
+                let messageData = loadMessageData(ww, {commandName: commandName, memberCount: memberCount} );
+                const searchMessages = getRandomLocalizedMessages(messageData, 8);
+
+                // NOTE: if more messages are added, lower the timeout interval
+                const timeoutInternal = 9000;
+
+                let currentMessage = 0;
+                const messageTimeout = setInterval(() => {
+                  if (currentMessage < searchMessages.length) {
+                    progress.report({
+                      message: searchMessages[currentMessage]
+                    });
+                    currentMessage++;
+                  } else {
+                    clearInterval(messageTimeout);
+                  }
+                }, timeoutInternal);
+                // try { } catch(err) {}
+                let resultsDOU = await HawkeyeSearch.hwkdisplayProcedureUsed(ww.library, ww.name
+                  , ww.searchTerm, howUsed, ww.protected);
+
+                if (resultsDOU && resultsDOU.length > 0) {
+                  searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`, searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsDOU };
+                } else {
+                  vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/${commandName} {1}.`
+                    , ww.searchTerm, ww.path
+                  ));
+                }
+                return searchMatch;
+              });
+              
+            } catch (e) {
+              if (e instanceof Error) {
+                vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
+                return undefined;
+              }
+            }
+          // }
+        }
+      }
+
+    } else {
+      //Running from command.
+    }
+    return [searchMatch];
+  };
   export async function runPRTRPGPRT(memberItem: MemberItem): Promise<void> {
     //Run commands, print to output, etc
     const connection = Code4i.getConnection();

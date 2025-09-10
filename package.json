@@ -34,11 +34,6 @@
           "id": "Hawkeye-search",
           "title": "Hawkeye Pathfinder",
           "icon": "$(references)"
-        },
-        {
-          "id": "Hawkeye-search-2",
-          "title": "Hawkeye Pathfinder",
-          "icon": "$(references)"
         }
       ]
     },

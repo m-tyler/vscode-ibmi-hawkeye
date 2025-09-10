@@ -3,7 +3,6 @@
 import * as vscode from 'vscode';
 import { Code4i } from './tools';
 import { initializeHawkeyePathfinder } from "./HawkeyePathfinder";
-import { initializeProgressMessageDemo } from "./selectProgressMessages";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -11,7 +10,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	Code4i.initialize(context);
 
 	initializeHawkeyePathfinder(context);
-	initializeProgressMessageDemo(context);
 	vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:searchViewVisible`, true);
 
 	console.log(`Congratulations, extension "${context.extension.packageJSON.description}" "Version" :"${context.extension.packageJSON.version}" is now active!`);

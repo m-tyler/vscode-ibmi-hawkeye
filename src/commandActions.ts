@@ -1,8 +1,6 @@
 import { Action } from '@halcyontech/vscode-ibmi-types';
 
 export function getHawkeyeAction(id:number): Action {
-  // console.log(hawkeyeActions);
-  // console.log(JSON.stringify(hawkeyeActions,null,2));
   let workAction: Action = {} as Action;
   if (id >= 0 && id <= 4 ) {
     workAction = hawkeyeActions[id];

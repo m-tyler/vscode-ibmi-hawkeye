@@ -1,9 +1,8 @@
 import { l10n } from 'vscode';
 import { Code4i, sanitizeSearchTerm, checkObject } from '../tools';
 import { getIASP } from '../api/IBMiTools';
-import { SourceFileMatch } from '../types/types';
 import { CommandResult } from '@halcyontech/vscode-ibmi-types';
-
+import { SourceFileMatch } from '../types/types';
 export namespace HawkeyeSearch {
 
 

@@ -3,6 +3,7 @@ import { QsysFsOptions } from '@halcyontech/vscode-ibmi-types/';
 import  { Range } from "vscode";
 
 export const QSYS_PATTERN = /^(?:\/)|(?:QSYS\.LIB\/)|(?:\.LIB)|(?:\.FILE)|(?:\.MBR)/g;
+export const IBMI_OBJECT_NAME = /^([\w$#@][\w\d$#@_.]{0,9})$/i;
 export const NEWLINE = `\r\n`;
 
 export type OpenEditableOptions = QsysFsOptions & { position?: Range };

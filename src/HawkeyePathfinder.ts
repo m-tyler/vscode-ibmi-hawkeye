@@ -32,6 +32,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         const searchResults = await HwkI.displayFileSetsUsed(Item);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -44,6 +45,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         const searchResults = await HwkI.displayProgramObjects(Item);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -56,6 +58,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         const searchResults = await HwkI.displayObjectUsed(Item);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -68,6 +71,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         const searchResults = await HwkI.displayProcedureUsed(Item);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
         }
       } catch (e) {
         if (e instanceof Error) {

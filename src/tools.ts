@@ -34,15 +34,12 @@ export namespace Code4i {
   export function sysNameInLocal(string: string): string {
     return getInstance().getConnection().sysNameInLocal(string);
   }
-
   // export async function getTable(library: string, name: string): Promise<Tools.DB2Row[]> {
   //     return getContent().getTable(library, name, name, true);
   // }
-
   export async function runSQL(sqlStatement: string, options?: { fakeBindings?: (string | number)[]; forceSafe?: boolean; }): Promise<Tools.DB2Row[]> {
     return getContent().ibmi.runSQL(sqlStatement, options || undefined);
   }
-
   export async function runCommand(command: RemoteCommand): Promise<CommandResult> {
     return await getConnection().runCommand(command);
   }
@@ -62,8 +59,6 @@ export namespace Code4i {
     return await Code4i.getContent().checkObject({ library, name, type });
   };
 }
-
-export const IBMI_OBJECT_NAME = /^([\w$#@][\w\d$#@_.]{0,9})$/i;
 
 export function getQSYSObjectPath(library: string, name: string, type: string, member?: string, iasp?: string) {
   return `${iasp ? `/${iasp.toUpperCase()}` : ''}/QSYS.LIB/${library.toUpperCase()}.LIB/${name.toUpperCase()}.${type.toUpperCase()}${member ? `/${member.toUpperCase()}.MBR` : ''}`;

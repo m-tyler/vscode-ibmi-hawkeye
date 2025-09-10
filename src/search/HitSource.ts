@@ -4,7 +4,6 @@ import { Code4i, getSourceObjectType } from "../tools";
 import { LineHit } from '../search/LineHit';
 import { SourceFileMatch, QSYS_PATTERN } from '../types/types';
 
-
 export class HitSource extends vscode.TreeItem {
   private readonly _path: string;
   private readonly _readonly?: boolean;

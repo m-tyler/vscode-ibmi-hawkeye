@@ -34,11 +34,6 @@
           "id": "Hawkeye-search",
           "title": "Hawkeye Pathfinder",
           "icon": "$(references)"
-        },
-        {
-          "id": "Hawkeye-search-2",
-          "title": "Hawkeye Pathfinder",
-          "icon": "$(references)"
         }
       ]
     },
@@ -114,6 +109,11 @@
           "group": "1_pathfinderTools@2"
         },
         {
+          "command": "Hawkeye-Pathfinder.displayProcedureUsed",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /^.*/",
+          "group": "1_pathfinderTools@2"
+        },
+        {
           "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
           "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /(:rpgle|:sqlrpgle)/i",
           "group": "2_pathfinderTools@1"
@@ -172,6 +172,10 @@
         },
         {
           "command": "Hawkeye-Pathfinder.displayObjectUsed",
+          "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProcedureUsed",
           "when": "code-for-ibmi:connected"
         },
         {
@@ -257,6 +261,13 @@
         "icon": "$(search-fuzzy)"
       },
       {
+        "command": "Hawkeye-Pathfinder.displayProcedureUsed",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display Procedure Where Used",
+        "category": "Hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
         "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Spacing Chart-RPG Print File",
@@ -284,6 +295,11 @@
         "command": "Hawkeye-Pathfinder.getRandomMessage",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Get Random Messages",
+        "category": "Hawkeye"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.demoProgressMessages",
+        "title": "demo Progress Messages",
         "category": "Hawkeye"
       }
     ],

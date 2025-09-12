@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { HitSource } from './HitSource'; // Import HitSource
+import { HitSource } from './HitSource'; 
 
 export class SearchSession extends vscode.TreeItem {
   constructor(

@@ -47,7 +47,7 @@ export namespace HawkeyeSearch {
         begpos: `001`,
         endpos: `240`
       });
-      runDSPSCNSRC += `${stringofSearchTokens}`;
+      runDSPSCNSRC += ` SCAN(${stringofSearchTokens})`;
       let cmdResult: CommandResult;
       cmdResult = await Code4i.runCommand({ command: runDSPSCNSRC, environment: `ile`, noLibList: true });
       const resultsExist = await Code4i.checkObject(`${tempLibrary}`, `${tempName1}`, `*FILE`);
@@ -152,11 +152,12 @@ export namespace HawkeyeSearch {
     }
     return searchMatches;
   }
-  export async function displayProgramObjects(library: string, program: string, searchTerm: string, readOnly?: boolean): Promise<SourceFileMatch[]> {
+  export async function displayProgramObjects(library: string, program: string, type: string, searchTerm: string, readOnly?: boolean): Promise<SourceFileMatch[]> {
 
     const connection = Code4i.getConnection();
     library = (library !== '*ALL' ? connection.sysNameInAmerican(library).toLocaleUpperCase() : '*ALL');
     program = (program !== '*ALL' ? connection.sysNameInAmerican(program).toLocaleUpperCase() : '*ALL');
+    type = (type !== '*ALL' ? connection.sysNameInAmerican(type).toLocaleUpperCase() : '*PGM');
     const tempLibrary = Code4i.getTempLibrary();
     const tempName1 = Code4i.makeid();
     const tempName2 = Code4i.makeid();
@@ -172,6 +173,7 @@ export namespace HawkeyeSearch {
       let asp = await Code4i.getLibraryIAsp(library);
       let runDSPPGMOBJ = Code4i.getContent().toCl(`DSPPGMOBJ`, {
         pgm: `${library}/${program}`,
+        objtype: `${type}`,
         output: `*OUTFILE`,
         outfile: `${tempLibrary}/${tempName1}`.toLocaleUpperCase(),
         outmbr: `DSPPGMOBJ`,

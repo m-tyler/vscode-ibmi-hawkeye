@@ -4,11 +4,9 @@ import * as vscode from 'vscode';
 import path from 'path';
 import { HawkeyeSearch } from "../api/HawkeyeSearch";
 import { QsysFsOptions } from '@halcyontech/vscode-ibmi-types/';
-import {SearchTreeProvider} from '../newwork/SearchTreeProvider';
-import {registerCommandHandlers} from '../newwork/commandHandlers';
-import { SearchSession } from '../newwork/SearchSession';
-import { HitSource } from '../newwork/HitSource'; // Import HitSource
-import { LineHit } from '../newwork/LineHit'; // Import LineHit
+import { SearchSession } from '../tools/SearchSession';
+import { HitSource } from '../tools/HitSource'; 
+import { LineHit } from '../tools/LineHit'; 
 
 
 export type OpenEditableOptions = QsysFsOptions & { position?: Range };
@@ -25,7 +23,6 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
     // this._searchTreeProvider = new SearchTreeProvider;
     context.subscriptions.push(
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.refreshSearchView`, async () => {
-        // this._searchTreeProvider.refresh();
         this.refresh();
       }),
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.closeSearchView`, async () => {
@@ -61,17 +58,6 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
     vscode.commands.executeCommand(`hawkeyeSearchView.focus`);
   }
 
-  // getTreeItem(element: any): vscode.TreeItem |Thenable<vscode.TreeItem> {
-  //   return this._searchTreeProvider.getTreeItem(element);
-  // }
-  // getChildren(element?: any): vscode.ProviderResult<any[]> {
-  //   return this._searchTreeProvider.getChildren(element);
-  // }
-
-  // getTreeItem(element: vscode.TreeItem) {
-  //   return element;
-  // }
-
   collapse() {
     vscode.commands.executeCommand(`workbench.actions.treeView.hawkeyeSearchView.collapseAll`);
   }
@@ -91,6 +77,8 @@ export class HawkeyeSearchView implements TreeDataProvider<any> {
     const newSession = new SearchSession(sessionId, command, hitSources, searchTerm);
     this._searchSessions.push(newSession);
     this._onDidChangeTreeData.fire(undefined); // Refresh the entire tree
+    vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:searchViewVisible`, true);
+    vscode.commands.executeCommand(`hawkeyeSearchView.focus`);
   }
 
   /**

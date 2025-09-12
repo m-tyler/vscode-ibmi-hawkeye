@@ -2,8 +2,8 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "6.6.6",
-  "preview": true,
+  "version": "1.0.0",
+  "preview": false,
   "license": "MIT",
   "engines": {
     "vscode": "^1.71.0"
@@ -28,6 +28,17 @@
   "main": "./dist/extension.js",
   "l10n": "./l10n",
   "contributes": {
+    "configuration": [
+      {
+        "title": "Code for IBM i Spooled Files",
+        "properties": {
+          "vscode-ibmi-hawkeye.useActions": {
+            "type": "boolean",
+            "markdownDescription": "When checked, the extension will use the Code for IBM i Actions feature. \nUnchecked it will use the default VS Code input boxes."
+          }
+        }
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -50,12 +61,12 @@
     "viewsWelcome": [
       {
         "view": "hawkeyeSearchView",
-        "contents": "Hawkeye Tools, version 6.6.6. \n[Connect before using this tool](command:code-for-ibmi.connectTo)",
+        "contents": "Hawkeye Tools, version 1.0.0. \n[Connect before using this tool](command:code-for-ibmi.connectTo)",
         "when": "code-for-ibmi:connected == false"
       },
       {
         "view": "hawkeyeSearchView",
-        "contents": "Hawkeye Tools, version 6.6.6.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)",
+        "contents": "Hawkeye Tools, version 1.0.0.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)\n[Display Procedure Where Used](command:Hawkeye-Pathfinder.displayProcedureUsed)",
         "when": "code-for-ibmi:connected == true"
       }
     ],
@@ -70,7 +81,7 @@
         {
           "command": "Hawkeye-Pathfinder.closeSearchView",
           "group": "navigation@2",
-          "when": "view == hawkeyeSearchView",
+          "when": "view == hawkeyeSearchViewNOSHOW",
           "icon": "$(close)"
         },
         {
@@ -88,7 +99,7 @@
         {
           "command": "Hawkeye-Pathfinder.expandSearchView",
           "group": "navigation@1",
-          "when": "view == hawkeyeSearchView",
+          "when": "view == hawkeyeSearchViewNOSHOW",
           "icon": "$(search-expand-results)"
         }
       ],

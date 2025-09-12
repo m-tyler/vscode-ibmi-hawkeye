@@ -7,7 +7,6 @@ import { Code4i } from "./tools";
 import { HwkI } from "./commands";
 // import { SearchResultProvider } from "./search/SearchProvider";
 import { SearchTreeProvider } from "./search/SearchTreeProvider";
-import { getRandomLocalizedMessages, getCommandText } from "./localizedMessages";
 import { MemberItem } from '@halcyontech/vscode-ibmi-types';
 
 export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
@@ -28,6 +27,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         const searchResults = await HwkI.searchSourceFiles(memberItem);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye search source canceled`));
         }
       } catch (e: unknown) {
         if (e instanceof Error) {
@@ -41,6 +42,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye Display File Set Used canceled`));
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -54,6 +57,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Program Objects canceled`));
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -67,6 +72,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Object Useage canceled`));
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -80,6 +87,8 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Procedure Usage canceled`));
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -96,25 +105,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTDDSDSP', async (memberItem: MemberItem) => {
       await HwkI.runPRTDDSDSP(memberItem);
     }),
-    vscode.commands.registerCommand('Hawkeye-Pathfinder.getRandomMessage', async () => {
-      const commandName: string = `DSPOBJU`;
-      const myTestData = {
-        path: "/*LIBL/*ALL/PRP*.PGM",
-        library: "WFISRC",
-        name: "PRP06YRG",
-        sourceFile: "QRPGSRC",
-        type: "PGM",
-        searchItem: `PRP06YRG`,
-        searchTerm: ``,
-        memberCount: 3800,
-        commandName: commandName,
-        commandText: getCommandText(commandName.toLocaleLowerCase())
-      };
-      const randomLocalizedMessages = getRandomLocalizedMessages(myTestData, 8);
-      vscode.window.showInformationMessage(randomLocalizedMessages.map((msg, index) => `${index + 1}. ${msg}`).join('\n'), { modal: true });
-    }),
   );
-  // Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup", create_HWK_getObjectSourceInfo_Tools);
   Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup", run_on_connection);
   Code4i.getInstance().subscribe(context, `disconnected`, "Hawkeye Extension Cleanup", run_on_disconnection);
 }

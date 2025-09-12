@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import vscode, { l10n } from 'vscode';
 import path from 'path';
 import { Code4i, getSourceObjectType } from "../tools";
 import { LineHit } from '../search/LineHit';
@@ -19,12 +19,15 @@ export class HitSource extends vscode.TreeItem {
     this.iconPath = vscode.ThemeIcon.File;
     this.description = `${hits} hit${hits === 1 ? `` : `s`}`;
     this._readonly = false;
-    this.tooltip = ``
-      .concat(this.contextValue ? vscode.l10n.t(`\nSource Object Type: {0}`, this.contextValue) : ``)
-      .concat(result.howUsed    ? vscode.l10n.t(`\nHow Used:  {0}`, result.howUsed) : ``)
-      .concat(result.fileText   ? vscode.l10n.t(`\nText  \t\t: {0}`, result.fileText) : ``)
-      .concat(hits              ? vscode.l10n.t(`\nMatches \t: {0}`, hits) : ``)
-      ;
+    this.tooltip = new vscode.MarkdownString(`<table>`
+        .concat(`<thead>${this._path}</thead><hr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`Source Object Type:`)}</td><td>&nbsp;${l10n.t(this.contextValue)}</td></tr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`How Used:`)}</td><td>&nbsp;${l10n.t(result.howUsed)}</td></tr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`Text:`)}</td><td>&nbsp;${l10n.t(result.fileText)}</td></tr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`Matches:`)}</td><td>&nbsp;${l10n.t(String(hits))}</td></tr>`)
+        .concat(`</table>`) 
+    );
+    this.tooltip.supportHtml = true;
     vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:hitSource`, this.contextValue);
   }
 

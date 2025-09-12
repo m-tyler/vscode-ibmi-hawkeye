@@ -9,3 +9,4 @@
 * DSPJOBIMP
 * Create a webtool kit interface for each command
 * See if the actions prompting can be used for this.
+* Add configuration to use tools quick prompts or action prompt

@@ -37,7 +37,7 @@ export const myMessages = [
   `Wow. This really is taking a while. Let's hope you get the result you want.`,
 ];
 
-export function getRandomLocalizedMessages(
+export function setProgressWindowLocalizedMessages(
   params: { [key: string]: any},
   maxMessages: number,
   messages: string[] = myMessages

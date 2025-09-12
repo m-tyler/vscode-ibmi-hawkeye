@@ -10,6 +10,7 @@ This extension provides additional functionality for the source cross reference 
 * DSPSCNSRC - Display scanned source
 * DSPOBJU - Display Object Usage
 * DSPPGMOBJ - Display Program Objects
+* DSPPRCU - Display Procedure Usage
 
 All commands report results into a separate search view panel
 
@@ -21,4 +22,4 @@ All commands report results into a separate search view panel
 
   <img src="DSPFILSETU.png">
   
-  <img src="SpaceingCharts.png">
+  <img src="SpacingCharts.png">

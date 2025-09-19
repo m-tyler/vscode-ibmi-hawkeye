@@ -1,20 +1,22 @@
 import vscode, { l10n } from 'vscode';
 import path from 'path';
-import { Code4i, getSourceObjectType } from "../tools";
+import { Code4i, getSourceObjectType } from "../tools/tools";
 import { LineHit } from '../search/LineHit';
 import { SourceFileMatch, QSYS_PATTERN } from '../types/types';
 
 export class HitSource extends vscode.TreeItem {
   private readonly _path: string;
   private readonly _readonly?: boolean;
+  private readonly _sourceName: string;
+  private readonly _searchTerm: string;
 
-  constructor(readonly result: SourceFileMatch, readonly term: string) {
-    super(path.posix.basename(result.fileName), vscode.TreeItemCollapsibleState.Collapsed);
+  constructor(readonly result: SourceFileMatch, readonly searchTerm: string) {
+    super(path.posix.basename(result.filePath), vscode.TreeItemCollapsibleState.Collapsed);
 
     const hits = result.matches.length;
-    // this.contextValue = `hitSource`;
-    this._path = Code4i.sysNameInLocal(result.fileName.replace(QSYS_PATTERN, ''));
-    // this.contextValue = Code4i.parserMemberPath( this._path ).extension;
+    this._path = Code4i.sysNameInLocal(result.filePath.replace(QSYS_PATTERN, ''));
+    this._sourceName = Code4i.sysNameInLocal(result.fileName);
+    this._searchTerm = searchTerm ?searchTerm :this._sourceName;
     this.contextValue = getSourceObjectType( this._path )[1]+':'+Code4i.parserMemberPath( this._path ).extension;
     this.iconPath = vscode.ThemeIcon.File;
     this.description = `${hits} hit${hits === 1 ? `` : `s`}`;
@@ -32,7 +34,6 @@ export class HitSource extends vscode.TreeItem {
   }
 
   async getChildren(): Promise<LineHit[]> {
-   
-    return this.result.matches.map((match:any) => new LineHit(this.term, this._path, match, this._readonly));
+    return this.result.matches.map((match:any) => new LineHit(this._searchTerm, this._path, match, this._readonly));
   }
 }

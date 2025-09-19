@@ -120,11 +120,6 @@
           "group": "1_pathfinderTools@2"
         },
         {
-          "command": "Hawkeye-Pathfinder.displayProcedureUsed",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /^.*/",
-          "group": "1_pathfinderTools@2"
-        },
-        {
           "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
           "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /(:rpgle|:sqlrpgle)/i",
           "group": "2_pathfinderTools@1"

@@ -4,7 +4,7 @@ import type { MemberParts } from '@halcyontech/vscode-ibmi-types/api/IBMi';
 import { CustomUI } from '@halcyontech/vscode-ibmi-types/webviews/CustomUI';
 import { ExtensionContext } from "vscode";
 import { IBMiMember } from '@halcyontech/vscode-ibmi-types';
-import { loadBase, getBase } from './base';
+import { loadBase, getBase } from '../base';
 
 export namespace Code4i {
   export async function initialize(context: ExtensionContext) {
@@ -289,13 +289,15 @@ export function replaceCommandDefaultold(command: string, keyword: string, repla
  * Computes where to highlight the search result label text
  */
 export function computeHighlights(term: string, line: string): [number, number][] {
-  let index = 0;
   let HI: [number, number][] = [];
-  while (index >= 0) {
-    index = line.indexOf(term, index);
-    if (index >= 0) {
-      HI.push([index, index + term.length]);
-      index += term.length;
+  if (term > ''){
+    let index = 0;
+    while (index >= 0) {
+      index = line.indexOf(term, index);
+      if (index >= 0) {
+        HI.push([index, index + term.length]);
+        index += term.length;
+      }
     }
   }
   return HI;

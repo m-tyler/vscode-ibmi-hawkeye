@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { Code4i } from './tools';
+import { Code4i } from './tools/tools';
 import { initializeHawkeyePathfinder } from "./HawkeyePathfinder";
 import { TempFileManager } from './tools/tempFileManager'; 
 

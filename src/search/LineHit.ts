@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { OpenEditableOptions, SearchMatch } from '../types/types';
-import { computeHighlights } from "../tools";
+import { computeHighlights } from "../tools/tools";
 
 export class LineHit extends vscode.TreeItem {
   constructor(term: string, readonly path: string, line: SearchMatch, readonly?: boolean) {
@@ -11,7 +11,7 @@ export class LineHit extends vscode.TreeItem {
     const openOptions: OpenEditableOptions = { readonly };
     let index = 0;
 
-    // Calculate the highlights
+    // Calculate the cursor goto values
     if (term.length > 0) {
       const positionLine = line.lineNumber>= 1 ? line.lineNumber-1 :0;
       while (index >= 0) {
@@ -23,6 +23,11 @@ export class LineHit extends vscode.TreeItem {
           index += term.length;
         }
       }
+    }
+    else {
+      const positionLine = line.lineNumber>= 1 ? line.lineNumber-1 :0;
+      const index = 1;
+      openOptions.position = new vscode.Range(positionLine, index, positionLine, index);
     }
 
     highlights = computeHighlights(upperTerm ,upperContent.trimEnd());

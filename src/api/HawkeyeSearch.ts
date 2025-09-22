@@ -58,7 +58,7 @@ export namespace HawkeyeSearch {
       else {
         let statement = `
           with SEARCHMATCHES (SEARCHMATCH) 
-          as (select JSON_OBJECT( 'fileName' : SCDMBR
+          as (select JSON_OBJECT( 'fileName' : trim(SCDMBR)
                               , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                               ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                               , 'howUsed' : ''
@@ -68,7 +68,7 @@ export namespace HawkeyeSearch {
               left join QSYS2.SYSPARTITIONSTAT SP on SP.SYSTEM_TABLE_SCHEMA = SCDLIB and SP.SYSTEM_TABLE_NAME = SCDFIL and SP.SYSTEM_TABLE_MEMBER = SCDMBR
               group by SCDLIB,SCDFIL,SCDMBR,SP.SRCTYPE,SCDFIL) 
           select cast( SEARCHMATCH as varchar(32000)) SEARCHMATCH from SEARCHMATCHES order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
-        let queryResults = await Code4i.runSQL(statement,{forceSafe:true});
+        let queryResults = await Code4i.runSQL(statement, { forceSafe: true });
         const parsedRows = queryResults.map(row => parseSearchMatch(row.SEARCHMATCH));
         searchMatches = parsedRows.map(row => ({
           fileName: row.fileName,
@@ -125,7 +125,7 @@ export namespace HawkeyeSearch {
                                   listagg( distinct  (trim(right(TUDHOW, locate('-', TUDHOW) + 2))),  ':') within group (order by TUDPGM, TUDLIB, TUDATR) as HOW_USED
                                 , TUDSFL, TUDSLB, TUDSMB, TUDTXT from ${tempLibrary}.${tempName1} group by TUDSFL, TUDSLB, TUDSMB, TUDTXT)
                     ,  SEARCHMATCHES (SEARCHMATCH) 
-                      as ( select JSON_OBJECT('fileName' : SCDMBR
+                      as ( select JSON_OBJECT('fileName' : trim(SCDMBR)
                                             , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                                             ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                                             , 'howUsed' : ifnull(min(HOW_USED),'')
@@ -136,7 +136,7 @@ export namespace HawkeyeSearch {
                         left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=SCDLIB and SP.SYS_TNAME=SCDFIL and SP.SYS_MNAME=SCDMBR
                         group by SCDLIB,SCDFIL,SCDMBR,SP.SRCTYPE,SCDFIL)
                     select cast( SEARCHMATCH as varchar(32000)) SEARCHMATCH from SEARCHMATCHES order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
-        let queryResults = await Code4i.runSQL(statement, {forceSafe:true});
+        let queryResults = await Code4i.runSQL(statement, { forceSafe: true });
         const parsedRows = queryResults.map(row => parseSearchMatch(row.SEARCHMATCH));
         searchMatches = parsedRows
           .filter(row => row && Object.keys(row).length > 0) // filter out empty objects
@@ -147,6 +147,7 @@ export namespace HawkeyeSearch {
             howUsed: row.howUsed,
             matchCount: Array.isArray(row.matches) ? row.matches.length : 0,
             matches: Array.isArray(row.matches) ? row.matches : [],
+            searchTokens: [dbFile]
           } as SourceFileMatch));
       } else {
         throw new Error(l10n.t('No results for Display File Set Used.'));
@@ -202,7 +203,7 @@ export namespace HawkeyeSearch {
                     from ${tempLibrary}.${tempName1} left join table ( ${tempLibrary}.HWK_GetObjectSourceInfo(APITYP => '10',APIOPT => '80',APIOB => PODOBJ,APIOBL => PODLIB,APIOBM => ' ',APIOBA => PODTYP )) HWKF on 1=1 left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=PODSLB and SP.SYS_TNAME=PODSFL and SP.SYS_MNAME=PODSMB
                     where PODCMD not in ('BIND') group by APISF,PODSFL,POHSFL,APISFL,PODSLB,POHSLB,APISFM,PODSMB,POHSMB,APISTS)
             , SEARCHMATCHES (SEARCHMATCH) 
-              as ( select JSON_OBJECT('fileName' : SCDMBR
+              as ( select JSON_OBJECT('fileName' : trim(SCDMBR)
                                     , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                                     ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                                     , 'fileText' : ifnull(min(PODTXT),'')
@@ -215,18 +216,35 @@ export namespace HawkeyeSearch {
               select cast( SEARCHMATCH as varchar(32000)) SEARCHMATCH from SEARCHMATCHES
               order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
 
-        let queryResults = await Code4i.runSQL(statement, {forceSafe: true}); // make tool save results as CSV then read into DB2row type
+        let queryResults = await Code4i.runSQL(statement, { forceSafe: true }); // make tool save results as CSV then read into DB2row type
         const parsedRows = queryResults.map(row => parseSearchMatch(row.SEARCHMATCH));
+        let searchTokens: any[] = [];
+
         searchMatches = parsedRows
           .filter(row => row && Object.keys(row).length > 0) // filter out empty objects
-          .map(row => ({
-            fileName: row.fileName,
-            filePath: row.filePath,
-            fileText: row.fileText,
-            howUsed: row.howUsed,
-            matchCount: Array.isArray(row.matches) ? row.matches.length : 0,
-            matches: Array.isArray(row.matches) ? row.matches : [],
-          } as SourceFileMatch));
+          .map((row) => {
+            if (row.fileName !== program) {
+              // capture all  object tokens for later use
+              searchTokens.push(row.fileName);
+            }
+            return {
+              fileName: row.fileName,
+              filePath: row.filePath,
+              fileText: row.fileText,
+              howUsed: row.howUsed,
+              matchCount: Array.isArray(row.matches) ? row.matches.length : 0,
+              matches: Array.isArray(row.matches) ? row.matches : [],
+              searchTokens: [row.fileName]
+            } as SourceFileMatch;
+          }
+          );
+        // store captured object tokens for later use
+        searchMatches.forEach((row) => {
+          if (row.fileName === program) {
+            row.searchTokens = searchTokens;
+          }
+        });
+
       } else {
         throw new Error(l10n.t('No results for Display Program Objects.'));
       }
@@ -274,7 +292,7 @@ export namespace HawkeyeSearch {
                         from ${tempLibrary}.${tempName1} a where OUDHOW not in ('BIND')
                         group by OUHOBJ, OUDPGM, OUDLIB, OUDATR, OUDSFL, OUDSLB, OUDSMB)
                 ,  SEARCHMATCHES (SEARCHMATCH) 
-                  as (select JSON_OBJECT('fileName' : SCDMBR
+                  as (select JSON_OBJECT('fileName' : trim(SCDMBR)
                                       , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                                       ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                                       , 'fileText' : ifnull(min(OUDTXT),'')
@@ -286,7 +304,7 @@ export namespace HawkeyeSearch {
                       group by SCDLIB,SCDFIL,SCDMBR,SP.SRCTYPE,SCDFIL
                     )
                     select cast( SEARCHMATCH as varchar(32000)) SEARCHMATCH from SEARCHMATCHES order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
-        let queryResults = await Code4i.runSQL(statement,{forceSafe:true});
+        let queryResults = await Code4i.runSQL(statement, { forceSafe: true });
         const parsedRows = queryResults.map(row => parseSearchMatch(row.SEARCHMATCH));
         searchMatches = parsedRows
           .filter(row => row && Object.keys(row).length > 0) // filter out empty objects
@@ -297,6 +315,7 @@ export namespace HawkeyeSearch {
             howUsed: row.howUsed,
             matchCount: Array.isArray(row.matches) ? row.matches.length : 0,
             matches: Array.isArray(row.matches) ? row.matches : [],
+            searchTokens: [object]
           } as SourceFileMatch));
 
       } else {
@@ -309,7 +328,7 @@ export namespace HawkeyeSearch {
     }
     return searchMatches;
   }
-  export async function displayProcedureUsed( library: string, procedure: string, searchTerm: string, readOnly?: boolean ): Promise<SourceFileMatch[]> {
+  export async function displayProcedureUsed(library: string, procedure: string, searchTerm: string, readOnly?: boolean): Promise<SourceFileMatch[]> {
     const connection = Code4i.getConnection();
     const tempLibrary = Code4i.getTempLibrary();
     const tempName1 = Code4i.makeid();
@@ -338,7 +357,8 @@ export namespace HawkeyeSearch {
                         from ${tempLibrary}.${tempName1} a 
                         group by OUHPRC, OUDPGM, OUDLIB, OUDATR, OUDSFL, OUDSLB, OUDSMB)
                 ,  SEARCHMATCHES (SEARCHMATCH) 
-                  as (select JSON_OBJECT('filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
+                  as (select JSON_OBJECT('fileName' : trim(SCDMBR)
+                                      , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                                       ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                                       , 'fileText' : ifnull(min(OUDTXT),'')
                                       , 'howUsed' : ifnull(min(HOW_USED) ,'')
@@ -349,16 +369,18 @@ export namespace HawkeyeSearch {
                       group by SCDLIB,SCDFIL,SCDMBR,SP.SRCTYPE,SCDFIL
                     )
                     select cast( SEARCHMATCH as varchar(32000)) SEARCHMATCH from SEARCHMATCHES order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
-        let queryResults = await Code4i.runSQL(statement, {forceSafe:true});
+        let queryResults = await Code4i.runSQL(statement, { forceSafe: true });
         const parsedRows = queryResults.map(row => parseSearchMatch(row.SEARCHMATCH));
         searchMatches = parsedRows
           .filter(row => row && Object.keys(row).length > 0) // filter out empty objects
           .map(row => ({
+            fileName: row.fileName,
             filePath: row.filePath,
             fileText: row.fileText,
             howUsed: row.howUsed,
             matchCount: Array.isArray(row.matches) ? row.matches.length : 0,
             matches: Array.isArray(row.matches) ? row.matches : [],
+            searchTokens: [procedure]
           } as SourceFileMatch));
 
       } else {

@@ -16,7 +16,8 @@ interface wItem {
   library: string,
   name: string,
   sourceFile: string,
-  type: string,
+  sourceType: string,
+  objType: string,
   searchTerm: string,
   searchTerms: string[]
 };
@@ -33,24 +34,15 @@ export namespace HwkI {
       ww.library = memberItem.filter.library;
       ww.sourceFile = memberItem.filter.object;
       ww.name = memberItem.filter.member;
-      ww.type = memberItem.filter.memberType;
-      promptedValue = `${ww.library}/${ww.sourceFile}/${ww.name}.${ww.type}`;
+      ww.sourceType = memberItem.filter.memberType;
+      promptedValue = `${ww.library}/${ww.sourceFile}/${ww.name}.${ww.sourceType}`;
     }
-    // else if (item) {
-    //   ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
-    //   const parts = Code4i.parserMemberPath( item._path );
-    //   ww.protected = item._readonly;
-    //   ww.sourceFile = parts.file;
-    //   ww.library = parts.library;
-    //   ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
-    //   ww.name = parts.name;
-    //   ww.type = getSourceObjectType(ww.path)[0];
-    // }
     else {
       ww.library = ``;
       ww.sourceFile = ``;
       ww.name = ``;
-      ww.type = ``;
+      ww.objType = ``;
+      ww.sourceType = ``;
       ww.protected = true;
     }
     let keywords: Record<string, string>;
@@ -63,7 +55,7 @@ export namespace HwkI {
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCLIB', ww.library);
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCFILE', ww.sourceFile);
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCMBR', ww.name);
-      chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCTYPE', ww.type);
+      chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCTYPE', ww.sourceType);
       command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
       if (!command) { return undefined; }
 
@@ -79,7 +71,7 @@ export namespace HwkI {
         ww.library = keywords.SRCLIB;
         ww.sourceFile = keywords.SRCFILE;
         ww.name = keywords.SRCMBR;
-        ww.type = mbrtype;
+        ww.sourceType = mbrtype;
 
         if (keywords.SCAN1 !== '') {
           ww.searchTerms.push(keywords.SCAN1);
@@ -157,7 +149,7 @@ export namespace HwkI {
         ww.library = wpath[0];
         ww.sourceFile = wpath[1];
         ww.name = wmember[0]||'*ALL';
-        ww.type = wmember[1]||'*ALL';
+        ww.sourceType = wmember[1]||'*ALL';
         // connection.currentUser
       }
       keywords = {};
@@ -187,7 +179,7 @@ export namespace HwkI {
               progress.report({
                 message: l10n.t(`Fetching member count for {0}`, ww.path)
               });
-              const memberCount = await getMemberCount({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name, extensions: ww.type });
+              const memberCount = await getMemberCount({ library: ww.library, sourceFile: ww.sourceFile, members: ww.name, extensions: ww.sourceType });
               let messageData = loadMessageData(ww, { memberCount: memberCount, commandName: commandName });
               const searchMessages = setProgressWindowLocalizedMessages(messageData, 8);
 
@@ -207,7 +199,7 @@ export namespace HwkI {
                   }
                 }, timeoutInternal);
                 let resultsSCN = await HawkeyeSearch.searchMembers(ww.library, ww.sourceFile
-                  , `${ww.name || `*`}.${ww.type || `*`}`
+                  , `${ww.name || `*`}.${ww.sourceType || `*`}`
                   , ww.searchTerm, ww.protected);
 
                 if (resultsSCN) {
@@ -251,7 +243,7 @@ export namespace HwkI {
       ww.library = item.object.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.object.name;
-      ww.type = item.object.attribute;
+      ww.objType = item.object.attribute;
       promptedValue = `${ww.library}/${ww.name}`;
     }
     else if (item && item.member) {
@@ -260,18 +252,20 @@ export namespace HwkI {
       ww.library = item.member.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.member.name;
-      ww.type = item.member.extension;
+      ww.sourceType = item.member.extension;
       promptedValue = `${ww.library}/${ww.name}`;
+      ww.objType = getSourceObjectType(ww.path)[0];
     }
     else if (item) {
       ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
       const parts = Code4i.parserMemberPath(item._path);
       ww.protected = item._readonly;
       ww.sourceFile = parts.file;
+      ww.sourceType = parts.extension;
       ww.library = parts.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
       ww.name = parts.name;
-      ww.type = getSourceObjectType(ww.path)[0];
+      ww.objType = getSourceObjectType(ww.path)[0];
     }
     else {
       ww.library = ``;
@@ -300,7 +294,8 @@ export namespace HwkI {
         ww.library = keywords.FILELIB;
         ww.sourceFile = keywords.FILE;
         ww.name = keywords.FILE;
-        ww.type = ww.type ? ww.type : 'PF';
+        ww.sourceType = ww.sourceType ? ww.sourceType : 'PF';
+        ww.objType = ww.objType ? ww.objType : '*FILE';
         ww.searchTerm = keywords.SCAN || '';
         wwResultSequence = keywords.SEQUNCE || '*PGM';
       }
@@ -328,18 +323,18 @@ export namespace HwkI {
         ww.library = wpath[0];
         ww.name = wpath[1];
         if (wpath[2]) {
-          ww.type = wpath[2] ? wpath[2] : 'PF';
+          ww.sourceType = wpath[2] ? wpath[2] : 'PF';
         } else {
-          ww.type = 'PF';
+          ww.sourceType = 'PF';
         }
-        ww.path += '.'+ww.type;
+        ww.path += '.'+ww.sourceType;
       }
     }
 
     // Hawkeye-Pathfinder
     if (ww.path) {
-      if (ww.type === 'SQL' && (/.*(tb|pf|v.*)/gi.test(ww.name))
-        || ww.type === 'PF' || ww.type === '*FILE') {
+      if (ww.sourceType === 'SQL' && (/.*(tb|pf|v.*)/gi.test(ww.name))
+        || ww.sourceType === 'PF' || ww.objType === '*FILE') {
       } else {
         // if (ww && !(/.*(tb.*\.sql|pf.*\.pf|v.*\.sql)/.test(ww.path))) {
         vscode.window.showErrorMessage(l10n.t(`Display File Set Used is only value for database tables or views.`));
@@ -423,8 +418,8 @@ export namespace HwkI {
       ww.library = item.object.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.object.name;
-      ww.type = item.object.type;
-      promptedValue = `${ww.library}/${ww.name}.${ww.type}`;
+      ww.objType = item.object.type;
+      promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else if (item && item.member) {
       ww.path = item.path;
@@ -432,9 +427,9 @@ export namespace HwkI {
       ww.library = item.member.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.member.name;
-      ww.type = item.member.extension;
-      ww.type = getSourceObjectType(ww.path)[0];
-      promptedValue = `${ww.library}/${ww.name}.${ww.type}`;
+      ww.sourceType = item.member.extension;
+      ww.objType = getSourceObjectType(ww.path)[0];
+      promptedValue = `${ww.library}/${ww.name}.${ww.sourceType}`;
     }
     else if (item) {
       ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
@@ -444,13 +439,15 @@ export namespace HwkI {
       ww.library = parts.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
       ww.name = parts.name;
-      ww.type = getSourceObjectType(ww.path)[0];
-      promptedValue = `${ww.library}/${ww.name}.${ww.type}`;
+      ww.sourceType = parts.extension;
+      ww.objType = getSourceObjectType(ww.path)[0];
+      promptedValue = `${ww.library}/${ww.name}.${ww.sourceType}`;
     }
     else {
       ww.library = ``;
       ww.name = ``;
-      ww.type = ``;
+      ww.sourceType = ``;
+      ww.objType = ``;
       ww.protected = true;
     }
     const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
@@ -461,7 +458,7 @@ export namespace HwkI {
       const chosenAction = getHawkeyeAction(2); // DSPPGMOBJ
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJLIB', ww.library);
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJ', ww.name);
-      chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.type);
+      chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.objType);
       command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
       if (!command) { return undefined; }
 
@@ -473,7 +470,7 @@ export namespace HwkI {
         ww.path = keywords.OBJLIB + '/' + keywords.OBJ;
         ww.library = keywords.OBJLIB;
         ww.name = keywords.OBJ;
-        ww.type = keywords.OBJTYPE;
+        ww.objType = keywords.OBJTYPE;
         ww.searchTerm = keywords.SCAN || '';
       }
     } else {
@@ -497,13 +494,13 @@ export namespace HwkI {
         ww.path = [wpath[0], wpath[1]].join('/');
         ww.library = wpath[0];
         ww.name = wpath[1];
-        ww.type = wpath[2]||`*PGM`;
+        ww.objType = wpath[2]||`*PGM`;
       }
     }
 
     // Hawkeye-Pathfinder
     if (ww.path) {
-      if (item && !(/(\*PGM|\*SRVPGM|\*MENU|\*MODULE|\*QRYDFN|\*CMD|\*JOBD|\*SBSD|\*USRPRF|\*EXT|\*EXTSQL)/gi.test(ww.type)))   {
+      if (item && !(/(\*PGM|\*SRVPGM|\*MENU|\*MODULE|\*QRYDFN|\*CMD|\*JOBD|\*SBSD|\*USRPRF|\*EXT|\*EXTSQL)/gi.test(ww.objType)))   {
         vscode.window.showErrorMessage(l10n.t(`Display Program Objects is only value for *PGM or *SRVPGM types.`));
         return undefined;
       }
@@ -544,7 +541,7 @@ export namespace HwkI {
                   clearInterval(messageTimeout);
                 }
               }, timeoutInternal);
-              let resultsDPO = await HawkeyeSearch.displayProgramObjects(ww.library, ww.name, ww.type, ww.searchTerm, ww.protected);
+              let resultsDPO = await HawkeyeSearch.displayProgramObjects(ww.library, ww.name, ww.objType, ww.searchTerm, ww.protected);
 
               if (resultsDPO) {
                 searchMatch = { command: `${commandName}`
@@ -588,8 +585,8 @@ export namespace HwkI {
       ww.library = item.object.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.object.name;
-      ww.type = item.object.type;
-      promptedValue = `${ww.library}/${ww.name}.${ww.type}`;
+      ww.objType = item.object.type;
+      promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else if (item && item.member) {
       ww.path = Code4i.sysNameInLocal(item.path.replace(QSYS_PATTERN, ''));
@@ -598,8 +595,8 @@ export namespace HwkI {
       ww.library = item.member.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
       ww.name = item.member.name;
-      ww.type = getSourceObjectType(ww.path)[0];
-      promptedValue = `${ww.library}/${ww.name}.${ww.type}`;
+      ww.objType = getSourceObjectType(ww.path)[0];
+      promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else if (item) {
       ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
@@ -609,13 +606,13 @@ export namespace HwkI {
       ww.library = parts.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
       ww.name = parts.name;
-      ww.type = getSourceObjectType(ww.path)[0];
-      promptedValue = `${ww.library}/${ww.name}.${ww.type}`;
+      ww.objType = getSourceObjectType(ww.path)[0];
+      promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else {
       ww.library = ``;
       ww.name = ``;
-      ww.type = ``;
+      ww.objType = ``;
       ww.protected = true;
     }
 
@@ -627,7 +624,7 @@ export namespace HwkI {
       const chosenAction = getHawkeyeAction(3); // DSPOBJU
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJLIB', ww.library);
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJ', ww.name);
-      chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.type);
+      chosenAction.command = replaceCommandDefault(chosenAction.command, 'OBJTYPE', ww.objType);
       command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
       if (!command) {
         vscode.window.showInformationMessage(l10n.t(`Command HAWKEYE/${commandName}, canceled.`));
@@ -642,7 +639,7 @@ export namespace HwkI {
         ww.path = keywords.OBJLIB + '/' + keywords.OBJ + '.' + keywords.OBJTYPE;
         ww.library = keywords.OBJLIB;
         ww.name = keywords.OBJ;
-        ww.type = keywords.OBJTYPE;
+        ww.objType = keywords.OBJTYPE;
         ww.searchTerm = keywords.SCAN || '';
         howUsed = keywords.HOWUSED || '';
       }
@@ -670,7 +667,7 @@ export namespace HwkI {
         ww.library = wpath[0];
         wpath = wpath[1].split(`.`);// split wpath[1] into obj + type
         ww.name = wpath[0];
-        ww.type = wpath[1] ? wpath[1] : `*ALL`;
+        ww.objType = wpath[1] ? wpath[1] : `*ALL`;
       }
     }
 
@@ -724,7 +721,7 @@ export namespace HwkI {
                     clearInterval(messageTimeout);
                   }
                 }, timeoutInternal);
-                let resultsDOU = await HawkeyeSearch.displayObjectUsed(ww.library, ww.name, ww.type
+                let resultsDOU = await HawkeyeSearch.displayObjectUsed(ww.library, ww.name, ww.objType
                   , ww.searchTerm, howUsed, ww.protected);
 
                 if (resultsDOU && resultsDOU.length > 0) {
@@ -765,7 +762,7 @@ export namespace HwkI {
       ww.library = item.object.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.object.name;
-      ww.type = item.object.attribute;
+      ww.objType = item.object.attribute;
       promptedValue = `${ww.library}/${ww.name}`;
     }
     else if (item && item.member) {
@@ -775,7 +772,7 @@ export namespace HwkI {
       ww.library = item.member.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
       ww.name = item.member.name;
-      ww.type = getSourceObjectType(ww.path)[0];
+      ww.objType = getSourceObjectType(ww.path)[0];
       promptedValue = `${ww.library}/${ww.name}`;
     }
     else if (item) {
@@ -786,13 +783,13 @@ export namespace HwkI {
       ww.library = parts.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
       ww.name = parts.name;
-      ww.type = getSourceObjectType(ww.path)[0];
+      ww.objType = getSourceObjectType(ww.path)[0];
       promptedValue = `${ww.library}/${ww.name}`;
     }
     else {
       ww.library = Code4i.getConnection().currentUser;
       ww.name = ``;
-      ww.type = ``;
+      ww.objType = ``;
       ww.protected = true;
     }
 
@@ -818,7 +815,7 @@ export namespace HwkI {
         ww.path = keywords.PRC;
         // ww.library = keywords.OBJLIB;
         ww.name = keywords.PRC;
-        // ww.type = keywords.OBJTYPE;
+        // ww.objType = keywords.OBJTYPE;
         ww.searchTerm = keywords.SCAN || '';
         // howUsed = keywords.HOWUSED || '';
       }

@@ -25,6 +25,7 @@ export type SourceFileMatch = {
   protected: boolean;
   matchCount: number;
   matches: SearchMatch[]
+  searchTokens: string[]
 };
 // Level 3: Match object
 // export interface SearchMatch {

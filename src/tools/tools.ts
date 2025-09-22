@@ -110,6 +110,7 @@ export function getSourceObjectType(path: string): string[] {
       srcObjType = [`*FILE`,`*ALL`];
       break;
     }
+    break;
   case `QCLSRC`:
     srcObjType = [`*PGM`,`*PGM`];
     break;

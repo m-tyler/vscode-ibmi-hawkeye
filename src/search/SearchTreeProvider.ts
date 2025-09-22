@@ -49,9 +49,10 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
    * @param command The IBM i command that was executed (e.g., DSPSCNSRC)
    * @param results The results from the command execution
    */
-  addSearchSession(command: string, results: HawkeyeSearchMatches, searchTerm: string): void {
+  addSearchSession(command: string, results: HawkeyeSearchMatches, searchTerm: string=''): void {
     const timestamp = new Date().toLocaleTimeString();
     const sessionId = `${command}_${timestamp}`;
+    // TODO: when adding matches to tree object, I need to find a way to highlight all object fouond being used in program object in program object match results. 
     const hitSources = results.files.map((file: SourceFileMatch, idx: number) => new HitSource(file, searchTerm));
     const newSession = new SearchSession(sessionId, command, results.searchItem, hitSources, searchTerm);
     this._searchSessions.push(newSession);

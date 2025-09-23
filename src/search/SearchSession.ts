@@ -23,6 +23,6 @@ export class SearchSession extends vscode.TreeItem {
     this.contextValue = 'searchSession';
     
     // Add additional metadata
-    this.description = `${hitSources.length} results`;
+    this.description = `(${hitSources.length} results) ${searchItem}`;
   }
 }

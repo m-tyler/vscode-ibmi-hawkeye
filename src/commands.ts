@@ -129,7 +129,7 @@ export namespace HwkI {
         }
       });
 
-      if (!input) {return undefined;} else {
+      if (!input) { return undefined; } else {
         // split LIB/SRCF/MBR.ext into LIB,SRCF, MBR.ext
         // assumption
         const wpath = input.trim().toUpperCase().split(`/`);
@@ -148,8 +148,8 @@ export namespace HwkI {
         ww.path = [[wpath[0], wpath[1], wmember[0]].join(`/`), wmember[1]].join('.');
         ww.library = wpath[0];
         ww.sourceFile = wpath[1];
-        ww.name = wmember[0]||'*ALL';
-        ww.sourceType = wmember[1]||'*ALL';
+        ww.name = wmember[0] || '*ALL';
+        ww.sourceType = wmember[1] || '*ALL';
         // connection.currentUser
       }
       keywords = {};
@@ -170,7 +170,7 @@ export namespace HwkI {
           }) || 'searchCanceled';
         }
 
-        if (ww.searchTerm === 'searchCanceled') {} else {
+        if (ww.searchTerm === 'searchCanceled') { } else {
           try {
             searchMatch = await vscode.window.withProgress({
               location: vscode.ProgressLocation.Notification,
@@ -203,7 +203,13 @@ export namespace HwkI {
                   , ww.searchTerm, ww.protected);
 
                 if (resultsSCN) {
-                  searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`, searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsSCN };
+                  searchMatch = {
+                    command: `${commandName}`
+                    , searchDescription: `${commandName} ${new Date().toLocaleString()}`
+                    , searchItem: ww.name.toLocaleUpperCase()
+                    , searchTerm: ww.searchTerm
+                    , files: resultsSCN
+                  };
                 } else {
                   vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' in HAWKEYE/${commandName} {1}.`
                     , ww.searchTerm, ww.path
@@ -228,7 +234,7 @@ export namespace HwkI {
 
     } else {
     }
-    return searchMatch.command?searchMatch:undefined;
+    return searchMatch.command ? searchMatch : undefined;
   };
   export async function displayFileSetsUsed(item: any): Promise<HawkeyeSearchMatches | undefined> {
     const commandName = 'DSPFILSETU';
@@ -244,7 +250,7 @@ export namespace HwkI {
       ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.object.name;
       ww.objType = item.object.attribute;
-      promptedValue = `${ww.library}/${ww.name}`;
+      promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else if (item && item.member) {
       ww.path = item.path;
@@ -253,8 +259,8 @@ export namespace HwkI {
       ww.library = scrubLibrary(ww.library, `${commandName}`);
       ww.name = item.member.name;
       ww.sourceType = item.member.extension;
-      promptedValue = `${ww.library}/${ww.name}`;
       ww.objType = getSourceObjectType(ww.path)[0];
+      promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else if (item) {
       ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
@@ -266,6 +272,7 @@ export namespace HwkI {
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
       ww.name = parts.name;
       ww.objType = getSourceObjectType(ww.path)[0];
+      promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else {
       ww.library = ``;
@@ -316,7 +323,7 @@ export namespace HwkI {
         }
       });
 
-      if (!input) {return undefined;} else {
+      if (!input) { return undefined; } else {
         const wpath = input.trim().toUpperCase().split(/[/.]/);
         if (wpath.length === 1 || wpath[1] === ``) { wpath[1] = wpath[0]; wpath[0] = `*DOCLIBL`; }
         ww.path = [wpath[0], wpath[1]].join('/');
@@ -327,7 +334,7 @@ export namespace HwkI {
         } else {
           ww.sourceType = 'PF';
         }
-        ww.path += '.'+ww.sourceType;
+        ww.path += '.' + ww.sourceType;
       }
     }
 
@@ -351,7 +358,7 @@ export namespace HwkI {
           }) || 'searchCanceled';
         }
 
-        if (ww.searchTerm === 'searchCanceled') {} else {
+        if (ww.searchTerm === 'searchCanceled') { } else {
           try {
             ww.searchTerm = ww.searchTerm !== '*NONE' ? ww.searchTerm : '';
             searchMatch = await vscode.window.withProgress({
@@ -380,10 +387,16 @@ export namespace HwkI {
                 }
               }, timeoutInternal);
               // returns results member name with member type as extension
-              let resultsFSU = await HawkeyeSearch.displayFileSetsUsed(ww.library, ww.name, ww.searchTerm, ww.protected, wwResultSequence);
+              let resultsFSU = await HawkeyeSearch.displayFileSetsUsed(ww.library.toLocaleUpperCase(), ww.name.toLocaleUpperCase(), ww.searchTerm, ww.protected, wwResultSequence);
 
               if (resultsFSU) {
-                searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`, searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsFSU };
+                searchMatch = {
+                  command: `${commandName}`
+                  , searchDescription: `${commandName} ${new Date().toLocaleString()}`
+                  , searchItem: ww.name.toLocaleUpperCase()
+                  , searchTerm: ww.searchTerm
+                  , files: resultsFSU
+                };
               } else {
                 vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/${commandName} {1}.`
                   , ww.searchTerm, ww.path
@@ -404,7 +417,7 @@ export namespace HwkI {
     } else {
       //Running from command.
     };
-    return searchMatch.command?searchMatch:undefined;
+    return searchMatch.command ? searchMatch : undefined;
   };
   export async function displayProgramObjects(item: any): Promise<HawkeyeSearchMatches | undefined> {
     let commandName = 'DSPPGMOBJ';
@@ -488,19 +501,19 @@ export namespace HwkI {
         }
       });
 
-      if (!input) {return undefined;} else {
+      if (!input) { return undefined; } else {
         const wpath = input.trim().toUpperCase().split(/[./]/);
         if (wpath.length === 1 || wpath[1] === ``) { wpath[1] = wpath[0]; wpath[0] = `*ALL`; }
         ww.path = [wpath[0], wpath[1]].join('/');
         ww.library = wpath[0];
         ww.name = wpath[1];
-        ww.objType = wpath[2]||`*PGM`;
+        ww.objType = wpath[2] || `*PGM`;
       }
     }
 
     // Hawkeye-Pathfinder
     if (ww.path) {
-      if (item && !(/(\*PGM|\*SRVPGM|\*MENU|\*MODULE|\*QRYDFN|\*CMD|\*JOBD|\*SBSD|\*USRPRF|\*EXT|\*EXTSQL)/gi.test(ww.objType)))   {
+      if (item && !(/(\*PGM|\*SRVPGM|\*MENU|\*MODULE|\*QRYDFN|\*CMD|\*JOBD|\*SBSD|\*USRPRF|\*EXT|\*EXTSQL)/gi.test(ww.objType))) {
         vscode.window.showErrorMessage(l10n.t(`Display Program Objects is only value for *PGM or *SRVPGM types.`));
         return undefined;
       }
@@ -514,7 +527,7 @@ export namespace HwkI {
           }) || 'searchCanceled';
         }
 
-        if (ww.searchTerm === 'searchCanceled') {return undefined;} else {
+        if (ww.searchTerm === 'searchCanceled') { return undefined; } else {
           try {
             ww.searchTerm = ww.searchTerm !== '*NONE' ? ww.searchTerm : '';
             searchMatch = await vscode.window.withProgress({
@@ -541,14 +554,16 @@ export namespace HwkI {
                   clearInterval(messageTimeout);
                 }
               }, timeoutInternal);
-              let resultsDPO = await HawkeyeSearch.displayProgramObjects(ww.library, ww.name, ww.objType, ww.searchTerm, ww.protected);
+              let resultsDPO = await HawkeyeSearch.displayProgramObjects(ww.library.toLocaleUpperCase(), ww.name.toLocaleUpperCase(), ww.objType, ww.searchTerm, ww.protected);
 
               if (resultsDPO) {
-                searchMatch = { command: `${commandName}`
-                              , searchDescription: `${commandName} ${new Date().toLocaleString()}`
-                              , searchItem: ww.name
-                              , searchTerm: ww.searchTerm
-                              , files: resultsDPO };
+                searchMatch = {
+                  command: `${commandName}`
+                  , searchDescription: `${commandName} ${new Date().toLocaleString()}`
+                  , searchItem: ww.name.toLocaleUpperCase()
+                  , searchTerm: ww.searchTerm
+                  , files: resultsDPO
+                };
               } else {
                 vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/${commandName} {1}.`
                   , ww.searchTerm, ww.path
@@ -569,7 +584,7 @@ export namespace HwkI {
     } else {
       //Running from command.
     }
-    return searchMatch.command?searchMatch:undefined;
+    return searchMatch.command ? searchMatch : undefined;
   };
   export async function displayObjectUsed(item: any): Promise<HawkeyeSearchMatches | undefined> {
     let commandName = 'DSPOBJU';
@@ -659,7 +674,7 @@ export namespace HwkI {
         }
       });
 
-      if (!input) {return undefined;} else {
+      if (!input) { return undefined; } else {
         // ww = scrubInput(input, ww, `DSPOBJU`);
         let wpath = input.trim().toUpperCase().split(`/`);
         if (wpath.length === 1 || wpath[1] === ``) { wpath[1] = wpath[0]; wpath[0] = `*ALL`; }
@@ -684,7 +699,7 @@ export namespace HwkI {
           }) || 'searchCanceled';
         }
 
-        if (ww.searchTerm === 'searchCanceled') {} else {
+        if (ww.searchTerm === 'searchCanceled') { } else {
           if (!howUsed) {
             howUsed = await vscode.window.showInputBox({
               prompt: l10n.t(`Select the HOW USED string from ${commandName}`),
@@ -693,7 +708,7 @@ export namespace HwkI {
             }) || 'searchCanceled';
           }
 
-          if (howUsed === 'searchCanceled') {} else {
+          if (howUsed === 'searchCanceled') { } else {
             try {
               ww.searchTerm = ww.searchTerm !== '*NONE' ? ww.searchTerm : '';
               searchMatch = await vscode.window.withProgress({
@@ -721,11 +736,17 @@ export namespace HwkI {
                     clearInterval(messageTimeout);
                   }
                 }, timeoutInternal);
-                let resultsDOU = await HawkeyeSearch.displayObjectUsed(ww.library, ww.name, ww.objType
+                let resultsDOU = await HawkeyeSearch.displayObjectUsed(ww.library.toLocaleUpperCase(), ww.name.toLocaleUpperCase(), ww.objType
                   , ww.searchTerm, howUsed, ww.protected);
 
                 if (resultsDOU && resultsDOU.length > 0) {
-                  searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`, searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsDOU };
+                  searchMatch = {
+                    command: `${commandName}`
+                    , searchDescription: `${commandName} ${new Date().toLocaleString()}`
+                    , searchItem: ww.name.toLocaleUpperCase()
+                    , searchTerm: ww.searchTerm
+                    , files: resultsDOU
+                  };
                 } else {
                   vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/${commandName} {1}.`
                     , ww.searchTerm, ww.path
@@ -747,7 +768,7 @@ export namespace HwkI {
     } else {
       //Running from command.
     }
-    return searchMatch.command?searchMatch:undefined;
+    return searchMatch.command ? searchMatch : undefined;
   };
   export async function displayProcedureUsed(item: any): Promise<HawkeyeSearchMatches | undefined> {
     let commandName = 'DSPPRCU';
@@ -828,17 +849,17 @@ export namespace HwkI {
         placeHolder: l10n.t(`Enter **ProcedureName** or **PROCEDURENAME**`),
         validateInput: (input) => {
           input = input.trim();
-          const path = input.split('/\/./'); 
+          const path = input.split('/\/./');
           if (path.length > 1) {
             return l10n.t(`Please enter value in any case without object qualifiers. `);
           }
         }
       });
 
-      if (!input) {return undefined;} else {
+      if (!input) { return undefined; } else {
         ww.path = input.trim().toUpperCase();
         ww.name = ww.path;
-        ww.searchTerm ='';
+        ww.searchTerm = '';
       }
     }
 
@@ -855,7 +876,7 @@ export namespace HwkI {
           }) || 'searchCanceled';
         }
 
-        if (ww.searchTerm === 'searchCanceled') {} else {
+        if (ww.searchTerm === 'searchCanceled') { } else {
           // if (!howUsed) {
           //   howUsed = await vscode.window.showInputBox({
           //     prompt: l10n.t(`Select the HOW USED string from ${commandName}`),
@@ -894,10 +915,16 @@ export namespace HwkI {
                 }
               }, timeoutInternal);
               // try { } catch(err) {}
-              let resultsDOU = await HawkeyeSearch.displayProcedureUsed(ww.library, ww.name, ww.searchTerm, ww.protected);
+              let resultsDOU = await HawkeyeSearch.displayProcedureUsed(ww.library.toLocaleUpperCase(), ww.name.toLocaleUpperCase(), ww.searchTerm, ww.protected);
 
               if (resultsDOU && resultsDOU.length > 0) {
-                searchMatch = { command: `${commandName}`, searchDescription: `${commandName} ${new Date().toLocaleString()}`, searchItem: ww.name, searchTerm: ww.searchTerm, files: resultsDOU };
+                searchMatch = {
+                  command: `${commandName}`
+                  , searchDescription: `${commandName} ${new Date().toLocaleString()}`
+                  , searchItem: ww.name.toLocaleUpperCase()
+                  , searchTerm: ww.searchTerm
+                  , files: resultsDOU
+                };
               } else {
                 vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/${commandName} {1}.`
                   , ww.searchTerm, ww.path
@@ -919,7 +946,7 @@ export namespace HwkI {
     } else {
       //Running from command.
     }
-    return searchMatch.command?searchMatch:undefined;
+    return searchMatch.command ? searchMatch : undefined;
   };
   export async function runPRTRPGPRT(memberItem: MemberItem): Promise<void> {
     //Run commands, print to output, etc
@@ -1005,5 +1032,3 @@ export namespace HwkI {
     }
   };
 };
-
-

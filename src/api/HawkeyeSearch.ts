@@ -117,9 +117,11 @@ export namespace HawkeyeSearch {
         with t1 as (select distinct TUDFLL,TUDFL,TUDSLB,TUDSFL,TUDSMB 
           from ${tempLibrary}.${tempName1} 
           left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=TUDSLB and SP.SYS_TNAME=TUDSFL and SP.SYS_MNAME=TUDSMB where TUDSLB > '     ' ) 
-        select qcmdexc('DSPSCNSRC SRCFILE('||trim(TUDSLB)||'/'||trim(TUDSFL)||') SRCMBR('||trim(TUDSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKSEARCH *ADD) SCAN(${sanitizeSearchTerm(searchTerm) ? `''${sanitizeSearchTerm(searchTerm)}''  ` : ""}'''||trim(TUDFL)||''') CASE(*IGNORE) BEGPOS(001) ENDPOS(240)') 
+        select TUDFLL,TUDFL,qcmdexc('DSPSCNSRC SRCFILE('||trim(TUDSLB)||'/'||trim(TUDSFL)||') SRCMBR('||trim(TUDSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKSEARCH *ADD) SCAN(${sanitizeSearchTerm(searchTerm) ? `''${sanitizeSearchTerm(searchTerm)}''  ` : ""}'''||trim(TUDFL)||''') CASE(*IGNORE) BEGPOS(001) ENDPOS(240)') 
         from T1 order by TUDFLL,TUDSLB,TUDSFL`.replace(/\n\s*/g, ' '));
       if (fsuSourceScanResults && fsuSourceScanResults.length > 0) {
+        // get distinct list of db items used for DSPFILSETU results
+        const distinctNames: string[] = [...new Set(fsuSourceScanResults.map(item => String(item.TUDFL) || ''))];
         let statement = `with HOW_USED_CONDENSED (HOW_USED, TUDSFL, TUDSLB, TUDSMB, TUDTXT) 
                       as (select min(trim(left(TUDHOW, ( case locate('-', TUDHOW) when 0 then length(TUDHOW) else locate('-', TUDHOW) end))))||''||
                                   listagg( distinct  (trim(right(TUDHOW, locate('-', TUDHOW) + 2))),  ':') within group (order by TUDPGM, TUDLIB, TUDATR) as HOW_USED
@@ -147,14 +149,14 @@ export namespace HawkeyeSearch {
             howUsed: row.howUsed,
             matchCount: Array.isArray(row.matches) ? row.matches.length : 0,
             matches: Array.isArray(row.matches) ? row.matches : [],
-            searchTokens: [dbFile]
+            searchTokens: distinctNames
           } as SourceFileMatch));
       } else {
         throw new Error(l10n.t('No results for Display File Set Used.'));
       }
     }
     else {
-      throw new Error(l10n.t('Please connect to an IBM i.'));
+      throw new Error(l10n.t('Please connect to your IBM i.'));
     }
     return searchMatches;
   }
@@ -250,7 +252,7 @@ export namespace HawkeyeSearch {
       }
     }
     else {
-      throw new Error(l10n.t('Please connect to an IBM i.'));
+      throw new Error(l10n.t('Please connect to your IBM i.'));
     }
     return searchMatches;
   }
@@ -324,7 +326,7 @@ export namespace HawkeyeSearch {
       }
     }
     else {
-      throw new Error(l10n.t('Please connect to an IBM i.'));
+      throw new Error(l10n.t('Please connect to your IBM i.'));
     }
     return searchMatches;
   }
@@ -389,7 +391,7 @@ export namespace HawkeyeSearch {
       }
     }
     else {
-      throw new Error(l10n.t('Please connect to an IBM i.'));
+      throw new Error(l10n.t('Please connect to your IBM i.'));
     }
     return searchMatches;
   }

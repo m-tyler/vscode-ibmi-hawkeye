@@ -305,7 +305,7 @@ export function computeHighlights(term: string, line: string): [number, number][
 }
 
 /**
- * Use this function to alter the library reference if the source passes something like WFISRC 
+ * Use this function to alter the library reference if the source passes something like PRDSRC 
  * This will be needed if the calling tool is triggered off a source file member reference.
  *  
  * @param library 

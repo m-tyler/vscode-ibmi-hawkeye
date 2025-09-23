@@ -11,7 +11,7 @@ export class HitSource extends vscode.TreeItem {
   private readonly _searchTerm: string;
   private readonly _searchTokens: string[];
 
-  constructor(readonly result: SourceFileMatch, readonly searchTerm: string) {
+  constructor(readonly result: SourceFileMatch, readonly searchTerm: string, descCycle: boolean = false) {
     super(path.posix.basename(result.filePath), vscode.TreeItemCollapsibleState.Collapsed);
 
     const hits = result.matches.length;
@@ -21,7 +21,11 @@ export class HitSource extends vscode.TreeItem {
     this._searchTokens = result.searchTokens;
     this.contextValue = getSourceObjectType( this._path )[1]+':'+Code4i.parserMemberPath( this._path ).extension;
     this.iconPath = vscode.ThemeIcon.File;
-    this.description = `${hits} hit${hits === 1 ? `` : `s`}`;
+    if (!descCycle) {
+      this.description = `(${hits} hit${hits === 1 ? `` : `s`}) ${result.fileText} `;
+    } else {
+      this.description = `${result.fileText} (${hits} hit${hits === 1 ? `` : `s`})`;
+    }
     this._readonly = false;
     this.tooltip = new vscode.MarkdownString(`<table>`
         .concat(`<thead>${this._path}</thead><hr>`)

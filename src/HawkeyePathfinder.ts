@@ -26,9 +26,9 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (anyItem) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (fileItem) => {
       try {
-        const searchResults = await HwkI.displayFileSetsUsed(anyItem);
+        const searchResults = await HwkI.displayFileSetsUsed(fileItem);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm> ''?searchResults.searchTerm:'');
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);

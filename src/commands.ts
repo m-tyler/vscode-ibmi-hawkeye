@@ -353,7 +353,7 @@ export namespace HwkI {
         if (!ww.searchTerm) {
           ww.searchTerm = await vscode.window.showInputBox({
             prompt: l10n.t(`Select token to search results from ${commandName}`),
-            value: `*NA`,
+            value: `*NONE`,
             placeHolder: l10n.t(`Enter the search for term`),
           }) || 'searchCanceled';
         }

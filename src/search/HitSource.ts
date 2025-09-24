@@ -33,6 +33,7 @@ export class HitSource extends vscode.TreeItem {
         .concat(`<tr><td style="text-align: right;">${l10n.t(`How Used:`)}</td><td>&nbsp;${l10n.t(result.howUsed)}</td></tr>`)
         .concat(`<tr><td style="text-align: right;">${l10n.t(`Text:`)}</td><td>&nbsp;${l10n.t(result.fileText)}</td></tr>`)
         .concat(`<tr><td style="text-align: right;">${l10n.t(`Matches:`)}</td><td>&nbsp;${l10n.t(String(hits))}</td></tr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`Search Tokens:`)}</td><td>&nbsp;${l10n.t(String(this._searchTokens))}</td></tr>`)
         .concat(`</table>`) 
     );
     this.tooltip.supportHtml = true;

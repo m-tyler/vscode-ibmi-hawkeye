@@ -4,6 +4,15 @@ X Add search result entry for no results found instead of pop up error
 * DSPJOBEXP
 * DSPJOBIMP
 * Update readme for new changes
+  * Images for command 
+    * DSPSCNSRC
+    * DSPOBJU
+    * DSPFILSETU
+    * DSPPGMOBJ
+    * DSPPRCU
+    * PRTRPGPRT
+    * PRTDDSPRT
+    * runPRTDDSDSP
 * Check system for Pathfinder install.  Default library name = HAWKEYE.  Could it be installed under another name?
 
 # COMPLETED

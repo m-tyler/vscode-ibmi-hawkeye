@@ -77,6 +77,7 @@ export namespace HawkeyeSearch {
           howUsed: row.howUsed,
           matchCount: row.matches.length,
           matches: row.matches,
+          searchTokens: arrayofSearchTokens,
         } as SourceFileMatch));
       }
     }
@@ -117,7 +118,7 @@ export namespace HawkeyeSearch {
         with t1 as (select distinct TUDFLL,TUDFL,TUDSLB,TUDSFL,TUDSMB 
           from ${tempLibrary}.${tempName1} 
           left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=TUDSLB and SP.SYS_TNAME=TUDSFL and SP.SYS_MNAME=TUDSMB where TUDSLB > '     ' ) 
-        select TUDFLL,TUDFL,qcmdexc('DSPSCNSRC SRCFILE('||trim(TUDSLB)||'/'||trim(TUDSFL)||') SRCMBR('||trim(TUDSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKSEARCH *ADD) SCAN(${sanitizeSearchTerm(searchTerm) ? `''${sanitizeSearchTerm(searchTerm)}''  ` : ""}'''||trim(TUDFL)||''') CASE(*IGNORE) BEGPOS(001) ENDPOS(240)') 
+        select TUDFLL,TUDFL,qcmdexc('DSPSCNSRC SRCFILE('||trim(TUDSLB)||'/'||trim(TUDSFL)||') SRCMBR('||trim(TUDSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKDSPFSU *ADD) SCAN(${sanitizeSearchTerm(searchTerm) ? `''${sanitizeSearchTerm(searchTerm)}''  ` : ""}'''||trim(TUDFL)||''') CASE(*IGNORE) BEGPOS(001) ENDPOS(240)') 
         from T1 order by TUDFLL,TUDSLB,TUDSFL`.replace(/\n\s*/g, ' '));
       if (fsuSourceScanResults && fsuSourceScanResults.length > 0) {
         // get distinct list of db items used for DSPFILSETU results
@@ -191,8 +192,8 @@ export namespace HawkeyeSearch {
       const resultSetQty = await Code4i!.runSQL(`select count(*) as RS_QTY from ${tempLibrary}.${tempName1}`);
       if (resultSetQty.length === 0 || resultSetQty[0].RS_QTY === 0) { throw new Error(`No records found in Hawkeye database.`); }
       let dpoSourceScanResults = await Code4i.runSQL(`with t1 as (select distinct PODLIB,PODOBJ,case when APISTS='1' then APISF when PODSFL=' ' then POHSFL else PODSFL end PODSFL,case when APISTS='1' then APISFL when PODSLB=' ' then POHSLB else PODSLB end PODSLB,case when APISTS='1' then APISFM when PODSMB=' ' then POHSMB else PODSMB end PODSMB from ${tempLibrary}.${tempName1} left join table ( ${tempLibrary}.HWK_GetObjectSourceInfo(APITYP => '10', APIOPT => '80', APIOB => PODOBJ, APIOBL => PODLIB, APIOBM => ' ',APIOBA => PODTYP )) HWKF on 1=1 left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=PODSLB and SP.SYS_TNAME=PODSFL and SP.SYS_MNAME=PODSMB where (PODLIB not in ('*NONE','QTEMP') and PODCMD not in ('RPG-COPY') and case when PODSLB=' ' then POHSLB else PODSLB end > '     ')),T2 as (select PODLIB,PODOBJ,PODSFL,PODSLB,PODSMB,case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and PODSFL='QSQDSRC' then 'SQL' else 'MBR' end PODATR from T1 left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=PODSLB and SP.SYS_TNAME=PODSFL and SP.SYS_MNAME=PODSMB) 
-      select qcmdexc('DSPSCNSRC SRCFILE('||trim(PODSLB)||'/'||trim(PODSFL)||') SRCMBR('||trim(PODSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKSEARCH *ADD) SCAN(${sanitizeSearchTerm(searchTerm) ? `''${sanitizeSearchTerm(searchTerm)}''  ` : ""} '''||trim(PODOBJ)||''') LOGIC(*AND) CASE(*IGNORE) BEGPOS(001) ENDPOS(240)')
-    ,  qcmdexc('DSPSCNSRC SRCFILE(*SRCL/Q*) SRCMBR(${program}) TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKSEARCH *ADD) SCAN(${sanitizeSearchTerm(searchTerm) ? `''${sanitizeSearchTerm(searchTerm)}''  ` : ""}'''||trim(PODOBJ)||''') CASE(*IGNORE) BEGPOS(001) ENDPOS(240)') from T1 where PODSMB <> '${program}'`.replace(/\n\s*/g, ' '));
+      select qcmdexc('DSPSCNSRC SRCFILE('||trim(PODSLB)||'/'||trim(PODSFL)||') SRCMBR('||trim(PODSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKDSPPO *ADD) SCAN(${sanitizeSearchTerm(searchTerm) ? `''${sanitizeSearchTerm(searchTerm)}''  ` : ""} '''||trim(PODOBJ)||''') LOGIC(*AND) CASE(*IGNORE) BEGPOS(001) ENDPOS(240)')
+    ,  qcmdexc('DSPSCNSRC SRCFILE(*SRCL/Q*) SRCMBR(${program}) TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKDSPPO *ADD) SCAN(${sanitizeSearchTerm(searchTerm) ? `''${sanitizeSearchTerm(searchTerm)}''  ` : ""}'''||trim(PODOBJ)||''') CASE(*IGNORE) BEGPOS(001) ENDPOS(240)') from T1 where PODSMB <> '${program}'`.replace(/\n\s*/g, ' '));
       if (dpoSourceScanResults && dpoSourceScanResults.length > 0) {
 
         const statement = `with HOW_USED_CONDENSED (HOW_USED, PODSFL, PODSLB, PODSMB, PODTXT) 
@@ -285,7 +286,7 @@ export namespace HawkeyeSearch {
       // discover output quantity
       const resultSetQty = await Code4i!.runSQL(`select count(*) as RS_QTY from ${tempLibrary}.${tempName1}`);
       if (resultSetQty.length === 0 || resultSetQty[0].RS_QTY === 0) { throw new Error(`No records found in Hawkeye database.`); }
-      let douSourceScanResults = await Code4i.runSQL(`with t1 as (select distinct OUDLIB,OUDPGM,case when APISTS='1' then APISF else OUDSFL end OUDSFL,case when APISTS='1' then APISFL else OUDSLB end OUDSLB,case when APISTS='1' then APISFM else OUDSMB end OUDSMB from ${tempLibrary}.${tempName1} left join table ( ${tempLibrary}.HWK_GetObjectSourceInfo(APITYP => '10', APIOPT => '80', APIOB => OUDPGM, APIOBL => OUDLIB, APIOBM => ' ',APIOBA => OUDATR )) HWKF on 1=1 left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=OUDSLB and SP.SYS_TNAME=OUDSFL and SP.SYS_MNAME=OUDSMB where OUDSLB > '     ' ) select qcmdexc('DSPSCNSRC SRCFILE('||trim(OUDSLB)||'/'||trim(OUDSFL)||') SRCMBR('||trim(OUDSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKSEARCH *ADD) CASE(*IGNORE) BEGPOS(001) ENDPOS(240) SCAN(''${connection.sysNameInAmerican(object)}'')') from T1 order by OUDLIB,OUDSLB,OUDSFL`.replace(/\n\s*/g, ' '));
+      let douSourceScanResults = await Code4i.runSQL(`with t1 as (select distinct OUDLIB,OUDPGM,case when APISTS='1' then APISF else OUDSFL end OUDSFL,case when APISTS='1' then APISFL else OUDSLB end OUDSLB,case when APISTS='1' then APISFM else OUDSMB end OUDSMB from ${tempLibrary}.${tempName1} left join table ( ${tempLibrary}.HWK_GetObjectSourceInfo(APITYP => '10', APIOPT => '80', APIOB => OUDPGM, APIOBL => OUDLIB, APIOBM => ' ',APIOBA => OUDATR )) HWKF on 1=1 left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=OUDSLB and SP.SYS_TNAME=OUDSFL and SP.SYS_MNAME=OUDSMB where OUDSLB > '     ' ) select qcmdexc('DSPSCNSRC SRCFILE('||trim(OUDSLB)||'/'||trim(OUDSFL)||') SRCMBR('||trim(OUDSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKDSPOBJU *ADD) CASE(*IGNORE) BEGPOS(001) ENDPOS(240) SCAN(''${connection.sysNameInAmerican(object)}'')') DSS from T1 order by OUDLIB,OUDSLB,OUDSFL`.replace(/\n\s*/g, ' '));
       if (douSourceScanResults && douSourceScanResults.length > 0) {
         const statement = `with HOW_USED_CONDENSED (HOW_USED, OUHOBJ, OUDPGM, OUDLIB, OUDATR, OUDSFL, OUDSLB, OUDSMB, OUDTXT ) 
                   as ( select min(trim(left(OUDHOW, ( case locate('-', OUDHOW) when 0 then length(OUDHOW) else locate('-', OUDHOW) end))))||''||
@@ -341,19 +342,19 @@ export namespace HawkeyeSearch {
       Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName1} MBR(HWKDSPPRCU)`, noLibList: true });
       Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName2} MBR(HWKDSPPRCU)`, noLibList: true });
       let asp = await Code4i.getLibraryIAsp(library);
-      let runDSPOBJU = Code4i.getContent().toCl(`DSPPRCU`, {
+      let runDSPPRCU = Code4i.getContent().toCl(`DSPPRCU`, {
         prc: `${connection.sysNameInAmerican(procedure)}`.toLocaleUpperCase(),
         output: `*OUTFILE`,
         outfile: `${tempLibrary.toLocaleUpperCase()}/${tempName1.toLocaleUpperCase()}`,
         outmbr: `DSPPRCU`,
       });
-      let cmdResult = await Code4i.runCommand({ command: runDSPOBJU, environment: `ile`, noLibList: true });
+      let cmdResult = await Code4i.runCommand({ command: runDSPPRCU, environment: `ile`, noLibList: true });
       if (cmdResult.code !== 0) { throw new Error(`${connection.sysNameInAmerican(procedure)}    \n` + cmdResult.stderr); }
       // discover output quantity
       const resultSetQty = await Code4i!.runSQL(`select count(*) as RS_QTY from ${tempLibrary}.${tempName1}`);
       if (resultSetQty.length === 0 || resultSetQty[0].RS_QTY === 0) { throw new Error(`No records found in Hawkeye database.`); }
-      let douSourceScanResults = await Code4i.runSQL(`with t1 as (select distinct OUDLIB,OUDPGM,case when APISTS='1' then APISF else OUDSFL end OUDSFL,case when APISTS='1' then APISFL else OUDSLB end OUDSLB,case when APISTS='1' then APISFM else OUDSMB end OUDSMB from ${tempLibrary}.${tempName1} left join table ( ${tempLibrary}.HWK_GetObjectSourceInfo(APITYP => '10', APIOPT => '80', APIOB => OUDPGM, APIOBL => OUDLIB, APIOBM => ' ',APIOBA => OUDATR )) HWKF on 1=1 left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=OUDSLB and SP.SYS_TNAME=OUDSFL and SP.SYS_MNAME=OUDSMB where OUDSLB > '     ' ) select qcmdexc('DSPSCNSRC SRCFILE('||trim(OUDSLB)||'/'||trim(OUDSFL)||') SRCMBR('||trim(OUDSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKSEARCH *ADD) CASE(*IGNORE) BEGPOS(001) ENDPOS(240) SCAN(''${connection.sysNameInAmerican(procedure)}'')') from T1 order by OUDLIB,OUDSLB,OUDSFL`.replace(/\n\s*/g, ' '));
-      if (douSourceScanResults && douSourceScanResults.length > 0) {
+      let dpuSourceScanResults = await Code4i.runSQL(`with t1 as (select distinct OUDLIB,OUDPGM,case when APISTS='1' then APISF else OUDSFL end OUDSFL,case when APISTS='1' then APISFL else OUDSLB end OUDSLB,case when APISTS='1' then APISFM else OUDSMB end OUDSMB from ${tempLibrary}.${tempName1} left join table ( ${tempLibrary}.HWK_GetObjectSourceInfo(APITYP => '10', APIOPT => '80', APIOB => OUDPGM, APIOBL => OUDLIB, APIOBM => ' ',APIOBA => OUDATR )) HWKF on 1=1 left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=OUDSLB and SP.SYS_TNAME=OUDSFL and SP.SYS_MNAME=OUDSMB where OUDSLB > '     ' ) select qcmdexc('DSPSCNSRC SRCFILE('||trim(OUDSLB)||'/'||trim(OUDSFL)||') SRCMBR('||trim(OUDSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) OUTMBR(HWKDSPPRCU *ADD) CASE(*IGNORE) BEGPOS(001) ENDPOS(240) SCAN(''${connection.sysNameInAmerican(procedure)}'')') from T1 order by OUDLIB,OUDSLB,OUDSFL`.replace(/\n\s*/g, ' '));
+      if (dpuSourceScanResults && dpuSourceScanResults.length > 0) {
         const statement = `with HOW_USED_CONDENSED (HOW_USED, OUHPRC, OUDPGM, OUDLIB, OUDATR, OUDSFL, OUDSLB, OUDSMB, OUDTXT ) 
                   as ( select 'CALLPRC' HOW_USED, OUHPRC, OUDPGM, OUDLIB, OUDATR, OUDSFL, OUDSLB, OUDSMB, min(trim(OUDTXT))
                         from ${tempLibrary}.${tempName1} a 

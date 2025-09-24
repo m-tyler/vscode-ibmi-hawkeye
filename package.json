@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "preview": false,
   "license": "MIT",
   "engines": {
@@ -206,21 +206,21 @@
       {
         "command": "Hawkeye-Pathfinder.searchSourceFiles",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Hawkeye Scan Source Files",
+        "title": "Hawkeye Scan Source Files (DSPSCNSRC)",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Display File Set Where Used",
+        "title": "Display File Set Where Used (DSPFILSETU)",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayProgramObjects",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Display Program Objects",
+        "title": "Display Program Objects (DSPPGMOBJ)",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
@@ -262,14 +262,14 @@
       {
         "command": "Hawkeye-Pathfinder.displayObjectUsed",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Display Object Where Used",
+        "title": "Display Object Where Used (DSPOBJU)",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "Hawkeye-Pathfinder.displayProcedureUsed",
         "enablement": "code-for-ibmi:connected == true",
-        "title": "Display Procedure Where Used",
+        "title": "Display Procedure Where Used (DSPPRCU)",
         "category": "Hawkeye",
         "icon": "$(search-fuzzy)"
       },

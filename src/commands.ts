@@ -206,7 +206,7 @@ export namespace HwkI {
                   searchMatch = {
                     command: `${commandName}`
                     , searchDescription: `${commandName} ${new Date().toLocaleString()}`
-                    , searchItem: ww.name.toLocaleUpperCase()
+                    , searchItem: ww.searchTerm
                     , searchTerm: ww.searchTerm
                     , files: resultsSCN
                   };

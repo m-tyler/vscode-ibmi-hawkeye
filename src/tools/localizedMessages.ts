@@ -32,12 +32,12 @@ export const myMessages = [
   `What's so special about '{searchTerm}' anyway?`,
   `While you wait, why not get a snack?`,
   `While you wait, why not stretch your legs?`,
-  `While you wait, your getting sleepy...`,
+  `While you're waiting, your getting sleeepyy...`,
   `Why was six afraid of seven?`,
   `Wow. This really is taking a while. Let's hope you get the result you want.`,
 ];
 
-export function getRandomLocalizedMessages(
+export function setProgressWindowLocalizedMessages(
   params: { [key: string]: any},
   maxMessages: number,
   messages: string[] = myMessages

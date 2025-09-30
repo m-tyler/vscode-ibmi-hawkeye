@@ -1,9 +1,12 @@
-// searchtreeprovider.ts
+import { Range } from "vscode";
 import * as vscode from 'vscode';
+import { QsysFsOptions } from '@halcyontech/vscode-ibmi-types/';
 import { SearchSession } from './SearchSession';
-import { HitSource } from './HitSource'; // Import HitSource
-import { LineHit } from '../search/LineHit'; // Import LineHit
+import { HitSource } from './HitSource';
+import { LineHit } from './LineHit';
+import { HawkeyeSearchMatches, SourceFileMatch } from '../types/types';
 
+export type OpenEditableOptions = QsysFsOptions & { position?: Range };
 /**
  * TreeDataProvider for the Hawkeye search results view
  * Maintains a collection of search sessions rather than replacing them
@@ -16,7 +19,6 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
   readonly onDidChangeTreeData: vscode.Event<SearchSession | HitSource | LineHit | undefined | null> = this._onDidChangeTreeData.event;
   constructor(context: vscode.ExtensionContext) {
     context.subscriptions.push(
-      // vscode.window.registerTreeDataProvider('hawkeyeSearchView', this._searchTreeProvider),
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.refreshSearchView`, async () => {
         this.refresh();
       }),
@@ -29,15 +31,16 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.clearSessions`, async () => {
         this.clearSessions();
       }),
-      vscode.commands.registerCommand(`Hawkeye-Pathfinder.removeSession`, async (sessionId) => {
-        this.removeSession(sessionId);
+      vscode.commands.registerCommand(`Hawkeye-Pathfinder.removeSession`, async (session) => {
+        this.removeSession(session.id);
       }),
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.setViewVisible`, async (visible?: boolean) => {
-        visible = visible||false;
+        visible = visible || false;
         this.setViewVisible(visible);
       }),
     );
   }
+
   setViewVisible(visible: boolean) {
     vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:searchViewVisible`, visible);
   }
@@ -46,13 +49,15 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
    * @param command The IBM i command that was executed (e.g., DSPSCNSRC)
    * @param results The results from the command execution
    */
-  addSearchSession(command: string, results: any[], searchItem: string): void {
+  addSearchSession(command: string, results: HawkeyeSearchMatches, searchTerm: string=''): void {
     const timestamp = new Date().toLocaleTimeString();
     const sessionId = `${command}_${timestamp}`;
-    const hitSources = results[0].files.map((file: any) => new HitSource(file, searchItem));
-    const newSession = new SearchSession(sessionId, command, hitSources, searchItem);
+    const hitSources = results.files.map((file: SourceFileMatch, idx: number) => new HitSource(file, searchTerm));
+    const newSession = new SearchSession(sessionId, command, results.searchItem, hitSources, searchTerm);
     this._searchSessions.push(newSession);
     this._onDidChangeTreeData.fire(undefined); // Refresh the entire tree
+    vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:searchViewVisible`, true);
+    vscode.commands.executeCommand(`hawkeyeSearchView.focus`);
   }
 
   /**

@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import vscode, { l10n, } from 'vscode';
-import { Code4i } from "./tools";
+import { Code4i } from "./tools/tools";
 import { HwkI } from "./commands";
-// import { SearchResultProvider } from "./search/SearchProvider";
 import { SearchTreeProvider } from "./search/SearchTreeProvider";
-import { getRandomLocalizedMessages, getCommandText } from "./localizedMessages";
 import { MemberItem } from '@halcyontech/vscode-ibmi-types';
 
 export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
@@ -19,7 +16,9 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       try {
         const searchResults = await HwkI.searchSourceFiles(memberItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye search source canceled`));
         }
       } catch (e: unknown) {
         if (e instanceof Error) {
@@ -27,55 +26,63 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (Item) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (fileItem) => {
       try {
-        const searchResults = await HwkI.displayFileSetsUsed(Item);
+        const searchResults = await HwkI.displayFileSetsUsed(fileItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm> ''?searchResults.searchTerm:'');
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye Display File Set Used canceled`));
         }
       } catch (e) {
         if (e instanceof Error) {
-          vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
+          vscode.window.showErrorMessage(l10n.t(`Error(12): {0}`, e.message));
         }
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (Item) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (anyItem) => {
       try {
-        const searchResults = await HwkI.displayProgramObjects(Item);
+        const searchResults = await HwkI.displayProgramObjects(anyItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm> ''?searchResults.searchTerm:'');
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Program Objects canceled`));
         }
       } catch (e) {
         if (e instanceof Error) {
-          vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
+          vscode.window.showErrorMessage(l10n.t(`Error(13): {0}`, e.message));
         }
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (Item) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (anyItem) => {
       try {
-        const searchResults = await HwkI.displayObjectUsed(Item);
+        const searchResults = await HwkI.displayObjectUsed(anyItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm> ''?searchResults.searchTerm:'');
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Object Useage canceled`));
         }
       } catch (e) {
         if (e instanceof Error) {
-          vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
+          vscode.window.showErrorMessage(l10n.t(`Error(14): {0}`, e.message));
         }
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, async (Item) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, async (anyItem) => {
       try {
-        const searchResults = await HwkI.displayProcedureUsed(Item);
+        const searchResults = await HwkI.displayProcedureUsed(anyItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm);
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm> ''?searchResults.searchTerm:'');
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Procedure Usage canceled`));
         }
       } catch (e) {
         if (e instanceof Error) {
-          vscode.window.showErrorMessage(l10n.t(`Error: {0}`, e.message));
+          vscode.window.showErrorMessage(l10n.t(`Error(15): {0}`, e.message));
         }
       }
     }),
@@ -88,58 +95,40 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTDDSDSP', async (memberItem: MemberItem) => {
       await HwkI.runPRTDDSDSP(memberItem);
     }),
-    vscode.commands.registerCommand('Hawkeye-Pathfinder.getRandomMessage', async () => {
-      const commandName: string = `DSPOBJU`;
-      const myTestData = {
-        path: "/*LIBL/*ALL/PRP*.PGM",
-        library: "WFISRC",
-        name: "PRP06YRG",
-        sourceFile: "QRPGSRC",
-        type: "PGM",
-        searchItem: `PRP06YRG`,
-        searchTerm: ``,
-        memberCount: 3800,
-        commandName: commandName,
-        commandText: getCommandText(commandName.toLocaleLowerCase())
-      };
-      const randomLocalizedMessages = getRandomLocalizedMessages(myTestData, 8);
-      vscode.window.showInformationMessage(randomLocalizedMessages.map((msg, index) => `${index + 1}. ${msg}`).join('\n'), { modal: true });
-    }),
   );
-  // Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup", create_HWK_getObjectSourceInfo_Tools);
-  Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup", run_on_connection);
-  Code4i.getInstance().subscribe(context, `disconnected`, "Hawkeye Extension Cleanup", run_on_disconnection);
+  Code4i.getInstance().subscribe(context, `connected`, "Hawkeye Extension Setup", runOnConnection);
+  Code4i.getInstance().subscribe(context, `disconnected`, "Hawkeye Extension Cleanup", runOnDisconnection);
 }
-function run_on_connection() {
+function runOnConnection() {
   // msgqBrowserObj.populateData(Code4i.getConfig().messageQueues);
-  create_HWK_getObjectSourceInfo_Tools();
+  createHWKgetObjectSourceInfoTools();
 }
-async function run_on_disconnection() {
+async function runOnDisconnection() {
   vscode.commands.executeCommand(`Hawkeye-Pathfinder.clearSessions`);
   vscode.commands.executeCommand(`Hawkeye-Pathfinder.refreshSearchView`);
 }
-async function create_HWK_getObjectSourceInfo_Tools(): Promise<void> {
+async function createHWKgetObjectSourceInfoTools(): Promise<void> {
   const library = Code4i.getTempLibrary();
   // let obj_exists = await getContent()?.checkObject({ library: library, name: "VSC00AFN86", type: "*PGM" });
   if ((await Code4i.runSQL(`select 1 as PROC_EXISTS from QSYS2.SYSPROCS where ROUTINE_NAME = 'VSC00AFN86'`)).length = 0) { // PROC not found
     // }
     // if (!obj_exists) {
     Code4i.runCommand({
-      command: `RUNSQL SQL('${getHWK_getObjectSourceInfo_sp_src(library)}') COMMIT(*NONE) NAMING(*SQL)`,
+      command: `RUNSQL SQL('${getHWKgetObjectSourceInfoSpSrc(library)}') COMMIT(*NONE) NAMING(*SQL)`,
       cwd: `/`,
       noLibList: true
     });
   }
   if (!await Code4i.getContent()?.checkObject({ library: library, name: "VSC00AFN87", type: "*SRVPGM" })) {
     Code4i.runCommand({
-      command: `RUNSQL SQL('${getHWK_getObjectSourceInfo_func_src(library)}') COMMIT(*NONE) NAMING(*SQL)`,
+      command: `RUNSQL SQL('${getHWKgetObjectSourceInfoFuncSrc(library)}') COMMIT(*NONE) NAMING(*SQL)`,
       cwd: `/`,
       noLibList: true
     });
   }
-  // searchTreeProvider.addSearchSession(searchResults[0].command, searchResults, searchResults[0].searchTerm)
+  // searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm)
 }
-function getHWK_getObjectSourceInfo_sp_src(library: string): string {
+function getHWKgetObjectSourceInfoSpSrc(library: string): string {
   return [
     `create or replace procedure ${library}.HWK_getObjectSourceInfo_sp`,
     `( in APITYP CHAR(2)`,
@@ -159,7 +148,7 @@ function getHWK_getObjectSourceInfo_sp_src(library: string): string {
     `external name HAWKEYE.H$APISRC`,
   ].join(` `);
 }
-function getHWK_getObjectSourceInfo_func_src(library: string): string {
+function getHWKgetObjectSourceInfoFuncSrc(library: string): string {
   return [`create or replace function ${library}.HWK_GetObjectSourceInfo`,
     `(`,
     ` APITYP CHAR(2)`,

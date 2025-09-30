@@ -1,4 +1,4 @@
-import { Code4i } from '../tools';
+import { Code4i } from '../tools/tools';
 
 /**
    *

@@ -27,7 +27,7 @@ const hawkeyeActions: Action[] =
       ]
     }, {
       "name": `DSPFILSET`,
-      "command": "DSPFILSETU FILELIB(${FILELIB|File Library . . . : <b>Name, *ALL, *CURLIB, *DOCLIBL</b>|*DOCLIBL}) FILE(${FILE|File name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) HOWUSED(${HOWUSED|How used . . . . . :|*ALL,RPG-COPY,RPG-FILE,RPG-INP,RPG-OUT,RPG-UPD,RPG-CMB,RPG-INP/AD,RPG-OUT/AD,RPG-UPD/AD,RPG-CMB/AD,RPG-***/AD,RPG-WRITE,SQL-CALL,SQL-INP,SQL-OUT,SQL-UPD,SQL-I-O,SQL-INP/AD,SQL-OUT/AD,SQL-UPD/AD,SQL-I-O/AD,SQL-***/AD,DFUFILE,QRYFILE}) SEQUENCE(${SEQUENCE|Sequence results by <b>*PGM</b> or <b>*FILE</b>|*PGM, *FILE}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
+      "command": "DSPFILSETU FILELIB(${FILELIB|File Library . . . : <b>Name, *ALL, *CURLIB, *DOCLIBL</b>|*ALL,*CURLIB,*DOCLIBL}) FILE(${FILE|File name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) HOWUSED(${HOWUSED|How used . . . . . :|*ALL,RPG-COPY,RPG-FILE,RPG-INP,RPG-OUT,RPG-UPD,RPG-CMB,RPG-INP/AD,RPG-OUT/AD,RPG-UPD/AD,RPG-CMB/AD,RPG-***/AD,RPG-WRITE,SQL-CALL,SQL-INP,SQL-OUT,SQL-UPD,SQL-I-O,SQL-INP/AD,SQL-OUT/AD,SQL-UPD/AD,SQL-I-O/AD,SQL-***/AD,DFUFILE,QRYFILE}) SEQUENCE(${SEQUENCE|Sequence results by <b>*PGM</b> or <b>*FILE</b>|*PGM, *FILE}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
       "environment": "ile",
       "type": "file",
       "extensions": [
@@ -38,9 +38,9 @@ const hawkeyeActions: Action[] =
         "tmp/"
       ]
     }
-    , {
+  , {
       "name": `DSPPGMOBJ`,
-      "command": "DSPPGMOBJ OBJLIB(${OBJLIB|Object Library . . . : <b>Name, *ALL, *CURLIB</b>|*ALL}) OBJ(${OBJ|Object name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) OBJTYPE(${OBJTYPE|Object Type  . . . . : |*PGM ,*MENU ,*MODULE ,*QRYDFN ,*SRVPGM ,*CMD ,*JOBD ,*SBSD ,*USRPRF ,*EXT}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
+      "command": "DSPPGMOBJ OBJLIB(${OBJLIB|Object Library . . . : <b>Name, *ALL, *CURLIB</b>|*ALL,*CURLIB}) OBJ(${OBJ|Object name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) OBJTYPE(${OBJTYPE|Object Type  . . . . : |*PGM,*MENU,*MODULE,*QRYDFN,*SRVPGM,*CMD,*JOBD,*SBSD,*USRPRF,*EXT}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
       "environment": "ile",
       "type": "file",
       "extensions": [
@@ -51,7 +51,7 @@ const hawkeyeActions: Action[] =
         "tmp/"
       ]
     }
-    , {
+  , {
       "name": `DSPOBJU`,
       "command": "DSPOBJU OBJLIB(${OBJLIB|Object Library . . . : <b>Name, *ALL, *CURLIB, *VARIABLE</b>|*ALL}) OBJ(${OBJ|Object name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) OBJTYPE(${OBJTYPE|Object Type  . . . . : |*ALL ,*PGM ,*CMD ,*FILE ,*MODULE ,*SRVPGM ,*BNDDIR ,*DTAARA ,*DTAQ ,*PNLGRP ,*LIB ,*MENU ,*MSGF ,*MSGQ ,*OUTQ ,*JRN ,*JRNRCV ,*AUTL ,*EXITRG ,*OVL ,*PAGDFN ,*PAGSEG ,*QMFORM ,*QMQRY ,*SQLPKG ,*USRIDX ,*USRPRF ,*USRQ ,*USRSPC ,*WSCST}) HOWUSED(${HOWUSED|How used . . . . . . :|*ALL ,RPG-COPY ,RPG-FILE ,RPG-INP ,RPG-OUT ,RPG-UPD ,RPG-CMB ,RPG-INP/AD ,RPG-OUT/AD ,RPG-UPD/AD ,RPG-CMB/AD ,RPG-***/AD ,RPG-WRITE ,SQL-CALL ,SQL-INP ,SQL-OUT ,SQL-UPD ,SQL-I-O ,SQL-INP/AD ,SQL-OUT/AD ,SQL-UPD/AD ,SQL-I-O/AD ,SQL-***/AD ,DFUFILE ,QRYFILE}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
       "environment": "ile",

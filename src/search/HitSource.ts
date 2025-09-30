@@ -1,35 +1,46 @@
-import * as vscode from 'vscode';
+import vscode, { l10n } from 'vscode';
 import path from 'path';
-import { Code4i, getSourceObjectType } from "../tools";
+import { Code4i, getSourceObjectType } from "../tools/tools";
 import { LineHit } from '../search/LineHit';
 import { SourceFileMatch, QSYS_PATTERN } from '../types/types';
 
 export class HitSource extends vscode.TreeItem {
   private readonly _path: string;
   private readonly _readonly?: boolean;
+  private readonly _sourceName: string;
+  private readonly _searchTerm: string;
+  private readonly _searchTokens: string[];
 
-  constructor(readonly result: SourceFileMatch, readonly term: string) {
-    super(path.posix.basename(result.fileName), vscode.TreeItemCollapsibleState.Collapsed);
+  constructor(readonly result: SourceFileMatch, readonly searchTerm: string, descCycle: boolean = false) {
+    super(path.posix.basename(result.filePath), vscode.TreeItemCollapsibleState.Collapsed);
 
     const hits = result.matches.length;
-    // this.contextValue = `hitSource`;
-    this._path = Code4i.sysNameInLocal(result.fileName.replace(QSYS_PATTERN, ''));
-    // this.contextValue = Code4i.parserMemberPath( this._path ).extension;
+    this._path = Code4i.sysNameInLocal(result.filePath.replace(QSYS_PATTERN, ''));
+    this._sourceName = Code4i.sysNameInLocal(result.fileName);
+    this._searchTerm = searchTerm ?searchTerm :this._sourceName;
+    this._searchTokens = result.searchTokens;
     this.contextValue = getSourceObjectType( this._path )[1]+':'+Code4i.parserMemberPath( this._path ).extension;
     this.iconPath = vscode.ThemeIcon.File;
-    this.description = `${hits} hit${hits === 1 ? `` : `s`}`;
+    if (!descCycle) {
+      this.description = `(${hits} hit${hits === 1 ? `` : `s`}) ${result.fileText} `;
+    } else {
+      this.description = `${result.fileText} (${hits} hit${hits === 1 ? `` : `s`})`;
+    }
     this._readonly = false;
-    this.tooltip = ``
-      .concat(this.contextValue ? vscode.l10n.t(`\nSource Object Type: {0}`, this.contextValue) : ``)
-      .concat(result.howUsed    ? vscode.l10n.t(`\nHow Used:  {0}`, result.howUsed) : ``)
-      .concat(result.fileText   ? vscode.l10n.t(`\nText  \t\t: {0}`, result.fileText) : ``)
-      .concat(hits              ? vscode.l10n.t(`\nMatches \t: {0}`, hits) : ``)
-      ;
+    this.tooltip = new vscode.MarkdownString(`<table>`
+        .concat(`<thead>${this._path}</thead><hr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`Source Object Type:`)}</td><td>&nbsp;${l10n.t(this.contextValue)}</td></tr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`How Used:`)}</td><td>&nbsp;${l10n.t(result.howUsed)}</td></tr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`Text:`)}</td><td>&nbsp;${l10n.t(result.fileText)}</td></tr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`Matches:`)}</td><td>&nbsp;${l10n.t(String(hits))}</td></tr>`)
+        .concat(`<tr><td style="text-align: right;">${l10n.t(`Search Tokens:`)}</td><td>&nbsp;${l10n.t(String(this._searchTokens))}</td></tr>`)
+        .concat(`</table>`) 
+    );
+    this.tooltip.supportHtml = true;
     vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:hitSource`, this.contextValue);
   }
 
   async getChildren(): Promise<LineHit[]> {
-   
-    return this.result.matches.map((match:any) => new LineHit(this.term, this._path, match, this._readonly));
+    return this.result.matches.map((match:any) => new LineHit(this._searchTokens, this._path, match, this._readonly));
   }
 }

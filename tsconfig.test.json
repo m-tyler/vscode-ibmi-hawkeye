@@ -11,6 +11,8 @@
       "resolveJsonModule": true,
       "skipLibCheck": true,  // This will skip type checking of declaration files
       "types": [
+        "node",
+        "vscode",
         "chai",
         "mocha"
       ]

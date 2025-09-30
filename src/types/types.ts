@@ -18,12 +18,14 @@ export type HawkeyeSearchMatches = {
 };
 // Level 2: File object
 export type SourceFileMatch = {
-  fileName: string; // e.g.; /wiasp/QSYS.LIB/WFISRC.LIB/QRPGSRC.FILE/PRP11JRG.RPGLE
+  fileName: string; // e.g.; PGMNAME
+  filePath: string; // e.g.; /iasp/QSYS.LIB/PRDSRC.LIB/QRPGSRC.FILE/PGMNAME.RPGLE
   fileText: string; 
   howUsed: string;
   protected: boolean;
   matchCount: number;
   matches: SearchMatch[]
+  searchTokens: string[]
 };
 // Level 3: Match object
 // export interface SearchMatch {

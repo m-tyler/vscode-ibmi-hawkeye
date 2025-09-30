@@ -4,7 +4,7 @@ import type { MemberParts } from '@halcyontech/vscode-ibmi-types/api/IBMi';
 import { CustomUI } from '@halcyontech/vscode-ibmi-types/webviews/CustomUI';
 import { ExtensionContext } from "vscode";
 import { IBMiMember } from '@halcyontech/vscode-ibmi-types';
-import { loadBase, getBase } from './base';
+import { loadBase, getBase } from '../base';
 
 export namespace Code4i {
   export async function initialize(context: ExtensionContext) {
@@ -43,9 +43,6 @@ export namespace Code4i {
   export async function runCommand(command: RemoteCommand): Promise<CommandResult> {
     return await getConnection().runCommand(command);
   }
-  export async function getMemberInfo(library: string, sourceFile: string, member: string): Promise<IBMiMember | undefined> {
-    return await getConnection().getContent().getMemberInfo(library, sourceFile, member);
-  }
   export function makeid(length?: number) {
     return getBase()!.tools.makeid(length);
   }
@@ -58,6 +55,9 @@ export namespace Code4i {
   export function lookupLibraryIAsp(library: string): Promise<string | undefined> {
     return getConnection().lookupLibraryIAsp(library);
   }
+  export async function checkObject(library: string, name: string, type: string) {
+    return await Code4i.getContent().checkObject({ library, name, type });
+  };
 }
 
 export function getQSYSObjectPath(library: string, name: string, type: string, member?: string, iasp?: string) {
@@ -110,6 +110,7 @@ export function getSourceObjectType(path: string): string[] {
       srcObjType = [`*FILE`,`*ALL`];
       break;
     }
+    break;
   case `QCLSRC`:
     srcObjType = [`*PGM`,`*PGM`];
     break;
@@ -129,9 +130,9 @@ export function getSourceObjectType(path: string): string[] {
     srcObjType = [`*ALL`,`*ALL`];
     break;
   }
-
   return srcObjType;
 }
+
 /**
  * @param  name action's name
  * @param command action's command string
@@ -272,9 +273,9 @@ export function replaceCommandDefaultold(command: string, keyword: string, repla
         if (initialValue.indexOf(replaceValue) === 0) {
           initialValue += replaceValue + `,` + initialValue;
         }
-        // let pipe = command.indexOf(`|`, start);
-        // pipe = command.indexOf(`|`, pipe + 1);
-        // command = command.substring(0, pipe) + `${replaceValue},` + command.substring(pipe + 1);
+        let pipe = command.indexOf(`|`, start);
+        pipe = command.indexOf(`|`, pipe + 1);
+        command = command.substring(0, pipe) + `${replaceValue},` + command.substring(pipe + 1);
 
       } else {
         loop = false;
@@ -289,20 +290,22 @@ export function replaceCommandDefaultold(command: string, keyword: string, repla
  * Computes where to highlight the search result label text
  */
 export function computeHighlights(term: string, line: string): [number, number][] {
-  let index = 0;
   let HI: [number, number][] = [];
-  while (index >= 0) {
-    index = line.indexOf(term, index);
-    if (index >= 0) {
-      HI.push([index, index + term.length]);
-      index += term.length;
+  if (term > ''){
+    let index = 0;
+    while (index >= 0) {
+      index = line.indexOf(term, index);
+      if (index >= 0) {
+        HI.push([index, index + term.length]);
+        index += term.length;
+      }
     }
   }
   return HI;
 }
 
 /**
- * Use this function to alter the library reference if the source passes something like WFISRC 
+ * Use this function to alter the library reference if the source passes something like PRDSRC 
  * This will be needed if the calling tool is triggered off a source file member reference.
  *  
  * @param library 

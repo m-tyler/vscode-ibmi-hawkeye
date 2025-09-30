@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { capitalize } from '../utils';
+import { capitalize } from '../tools/utils';
 
 describe('Utils', () => {
     describe('capitalize', () => {

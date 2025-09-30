@@ -61,12 +61,12 @@
     "viewsWelcome": [
       {
         "view": "hawkeyeSearchView",
-        "contents": "Hawkeye Tools, version 1.0.0. \n[Connect before using this tool](command:code-for-ibmi.connectTo)",
+        "contents": "Hawkeye Tools, version 1.0.3. \n[Connect before using this tool](command:code-for-ibmi.connectTo)",
         "when": "code-for-ibmi:connected == false"
       },
       {
         "view": "hawkeyeSearchView",
-        "contents": "Hawkeye Tools, version 1.0.0.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)\n[Display Procedure Where Used](command:Hawkeye-Pathfinder.displayProcedureUsed)",
+        "contents": "Hawkeye Tools, version 1.0.3.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)\n[Display Procedure Where Used](command:Hawkeye-Pathfinder.displayProcedureUsed)",
         "when": "code-for-ibmi:connected == true"
       }
     ],
@@ -296,17 +296,6 @@
         "enablement": "code-for-ibmi:connected == true",
         "title": "Does nothing",
         "category": "Hawkeye"
-      },
-      {
-        "command": "Hawkeye-Pathfinder.getRandomMessage",
-        "enablement": "code-for-ibmi:connected == true",
-        "title": "Get Random Messages",
-        "category": "Hawkeye"
-      },
-      {
-        "command": "Hawkeye-Pathfinder.demoProgressMessages",
-        "title": "demo Progress Messages",
-        "category": "Hawkeye"
       }
     ],
     "keybindings": []
@@ -317,11 +306,8 @@
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "tsc -p ./tsconfig.test.json",
-    "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "lint": "eslint src --ext ts"
   },
   "devDependencies": {
     "@halcyontech/vscode-ibmi-types": "^2.15.3",

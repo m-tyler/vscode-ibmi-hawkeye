@@ -31,8 +31,8 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.clearSessions`, async () => {
         this.clearSessions();
       }),
-      vscode.commands.registerCommand(`Hawkeye-Pathfinder.removeSession`, async (sessionId) => {
-        this.removeSession(sessionId);
+      vscode.commands.registerCommand(`Hawkeye-Pathfinder.removeSession`, async (session) => {
+        this.removeSession(session.id);
       }),
       vscode.commands.registerCommand(`Hawkeye-Pathfinder.setViewVisible`, async (visible?: boolean) => {
         visible = visible || false;

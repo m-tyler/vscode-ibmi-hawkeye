@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "preview": false,
   "license": "MIT",
   "engines": {
@@ -61,12 +61,12 @@
     "viewsWelcome": [
       {
         "view": "hawkeyeSearchView",
-        "contents": "Hawkeye Tools, version 1.0.3. \n[Connect before using this tool](command:code-for-ibmi.connectTo)",
+        "contents": "Hawkeye Cross Reference Tools \n[Connect before using this tool](command:code-for-ibmi.connectTo)\n\n[Show tool version](command:Hawkeye-Pathfinder.showVersion)",
         "when": "code-for-ibmi:connected == false"
       },
       {
         "view": "hawkeyeSearchView",
-        "contents": "Hawkeye Tools, version 1.0.3.\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n\n\n\n\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)\n[Display Procedure Where Used](command:Hawkeye-Pathfinder.displayProcedureUsed)",
+        "contents": "Hawkeye Cross Reference Tools\n[Connected!!](command:Hawkeye-Pathfinder.doNothing)\n[Show tool version](command:Hawkeye-Pathfinder.showVersion)\nNo search results. \n[Scan Source Files](command:Hawkeye-Pathfinder.searchSourceFiles) \n[Display Object Usage](command:Hawkeye-Pathfinder.displayObjectUsed) \n[Display File Set Where Used](command:Hawkeye-Pathfinder.displayFileSetsUsed) \n[Display Program Objects](command:Hawkeye-Pathfinder.displayProgramObjects)\n[Display Procedure Where Used](command:Hawkeye-Pathfinder.displayProcedureUsed)",
         "when": "code-for-ibmi:connected == true"
       }
     ],

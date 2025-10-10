@@ -24,17 +24,23 @@ This extension provides functionality for the source cross reference tool Hawkey
 
 ## PICS
 * Start up view
+<img src="/images/Intro before connection.png">
 * Once connected
-* Running commands from Hawkeye Activity Bar view
-* Running commands from command palette
+<img src="/images/Intro after connection.png">
+* Running commands from command palette without config set to use Code for IBM i actions
+  <img src="/images/Inputs samples showing when configuration not set-1.png">
+  <img src="/images/Inputs samples showing when configuration not set-2.png">
+  <img src="/images/Supply a comma separated list of search terms-1.png">
+  <img src="/images/Supply a comma separated list of search terms-2.png">
+* Running commands from command palette *with* config set to use Code for IBM i actions
+  <img src="/images/Inputs samples showing when configuration set-1.png">
+  <img src="/images/Inputs samples showing when configuration set-2.png">
+  <img src="/images/Inputs samples showing when configuration set-3.png">
 * Running commands from Code for IBM i object browser
+  <img src="/images/Activate command from right click.png">
+* Command Results View
+  <img src="/images/Results view.png">
 * Running commands from Hawkeye Pathfinder search results
-
-
-  <img src="menu_selections.png">
-
-  <img src="source scan.png">
-
-  <img src="DSPFILSETU.png">
-  
-  <img src="SpacingCharts.png">
+  <img src="/images/Additional Hawkeye commands from search results view.png">
+* Viewing Report Spacing Chart
+  <img src="/images/SpacingCharts.png">

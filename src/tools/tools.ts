@@ -2,12 +2,13 @@ import { CommandResult, RemoteCommand, } from '@halcyontech/vscode-ibmi-types';
 import type { Tools } from '@halcyontech/vscode-ibmi-types/api/Tools';
 import type { MemberParts } from '@halcyontech/vscode-ibmi-types/api/IBMi';
 import { CustomUI } from '@halcyontech/vscode-ibmi-types/webviews/CustomUI';
-import { ExtensionContext } from "vscode";
-import { IBMiMember } from '@halcyontech/vscode-ibmi-types';
 import { loadBase, getBase } from '../base';
+import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
 
 export namespace Code4i {
-  export async function initialize(context: ExtensionContext) {
+  export async function initialize(context: vscode.ExtensionContext) {
     loadBase(context);
   }
   export function getInstance() {
@@ -46,7 +47,7 @@ export namespace Code4i {
   export function makeid(length?: number) {
     return getBase()!.tools.makeid(length);
   }
-  export function getLibraryIAsp(library: string):string | undefined {
+  export function getLibraryIAsp(library: string): string | undefined {
     return getConnection().getLibraryIAsp(library);
   }
   export function getCurrentIAspName(): string | undefined {
@@ -97,37 +98,37 @@ export function getSourceObjectType(path: string): string[] {
     case `PF`:
     case `LF`:
     case `SQL`:
-      srcObjType = [`*FILE`,`*DBF`];
+      srcObjType = [`*FILE`, `*DBF`];
       break;
 
     case `DSPF`:
-      srcObjType = [`*FILE`,`*DSPF`];
+      srcObjType = [`*FILE`, `*DSPF`];
       break;
     case `PRTF`:
-      srcObjType = [`*FILE`,`*PRTF`];
+      srcObjType = [`*FILE`, `*PRTF`];
       break;
     default:
-      srcObjType = [`*FILE`,`*ALL`];
+      srcObjType = [`*FILE`, `*ALL`];
       break;
     }
     break;
   case `QCLSRC`:
-    srcObjType = [`*PGM`,`*PGM`];
+    srcObjType = [`*PGM`, `*PGM`];
     break;
   case `QRPGSRC`:
-    srcObjType = [`*PGM`,`*PGM`];
+    srcObjType = [`*PGM`, `*PGM`];
     break;
   case `QTXTSRC`:
     if (parts[4] === `SQL`) {
-      srcObjType = [`*PGM`,`*PGM`];
+      srcObjType = [`*PGM`, `*PGM`];
       break;
     }
     else {
-      srcObjType = [`*ALL`,`*ALL`];
+      srcObjType = [`*ALL`, `*ALL`];
       break;
     }
   default:
-    srcObjType = [`*ALL`,`*ALL`];
+    srcObjType = [`*ALL`, `*ALL`];
     break;
   }
   return srcObjType;
@@ -244,7 +245,7 @@ export function replaceCommandDefault(command: string, keyword: string, replaceV
         // pass default value not the same as defined default so add value.
         // const pos = initialValue.indexOf(replaceValue);
         // if (pos < 0) {
-          initialValue = replaceValue + `,` + initialValue;
+        initialValue = replaceValue + `,` + initialValue;
         // }
         newCommand += `${key}(${name}|${label}|${initialValue}) `;
       }
@@ -291,7 +292,7 @@ export function replaceCommandDefaultold(command: string, keyword: string, repla
  */
 export function computeHighlights(term: string, line: string): [number, number][] {
   let HI: [number, number][] = [];
-  if (term > ''){
+  if (term > '') {
     let index = 0;
     while (index >= 0) {
       index = line.indexOf(term, index);
@@ -358,4 +359,25 @@ export function setProtectMode(library: string, command: String): boolean {
     if (Code4i.getConnection().currentUser === library) { protection = false; }
   }
   return protection;
+}
+export function showExtensionVersion(extensionId: string) {
+  try {
+    const extensionPath = vscode.extensions.getExtension(extensionId)?.extensionPath;
+    if (!extensionPath) {
+      vscode.window.showErrorMessage('Could not determine extension path.');
+      return;
+    }
+    const packageJsonPath = path.join(extensionPath, 'package.json');
+
+    const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf8');
+    const packageJson = JSON.parse(packageJsonContent);
+
+    const description = packageJson.description || 'No description available.';
+    const version = packageJson.version || 'Unknown version.';
+
+    vscode.window.showInformationMessage(`Extension: ${description}\tVersion: ${version}`);
+
+  } catch (error: any) {
+    vscode.window.showErrorMessage(`Error getting extension info: ${error.message}`);
+  }
 }

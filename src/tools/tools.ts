@@ -375,7 +375,7 @@ export function showExtensionVersion(extensionId: string) {
     const description = packageJson.description || 'No description available.';
     const version = packageJson.version || 'Unknown version.';
 
-    vscode.window.showInformationMessage(`Extension: ${description}\tVersion: ${version}`);
+    vscode.window.showInformationMessage(`Extension: ${description}\nVersion  : ${version}`, { modal: true });
 
   } catch (error: any) {
     vscode.window.showErrorMessage(`Error getting extension info: ${error.message}`);

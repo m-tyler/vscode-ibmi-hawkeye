@@ -13,6 +13,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     searchTreeView,
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFiles`, async (memberItem: MemberItem) => {
+      if (!await checkPathfinderExistence()) { return; }
       try {
         const searchResults = await HwkI.searchSourceFiles(memberItem);
         if (searchResults) {
@@ -27,11 +28,12 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (fileItem) => {
+      if (!await checkPathfinderExistence()) { return; }
       try {
         const searchResults = await HwkI.displayFileSetsUsed(fileItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm> ''?searchResults.searchTerm:'');
-          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
         } else {
           vscode.window.showInformationMessage(l10n.t(`Hawkeye Display File Set Used canceled`));
         }
@@ -42,11 +44,12 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (anyItem) => {
+      if (!await checkPathfinderExistence()) { return; }
       try {
         const searchResults = await HwkI.displayProgramObjects(anyItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm> ''?searchResults.searchTerm:'');
-          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
         } else {
           vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Program Objects canceled`));
         }
@@ -57,11 +60,12 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (anyItem) => {
+      if (!await checkPathfinderExistence()) { return; }
       try {
         const searchResults = await HwkI.displayObjectUsed(anyItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm> ''?searchResults.searchTerm:'');
-          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
         } else {
           vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Object Useage canceled`));
         }
@@ -72,11 +76,12 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, async (anyItem) => {
+      if (!await checkPathfinderExistence()) { return; }
       try {
         const searchResults = await HwkI.displayProcedureUsed(anyItem);
         if (searchResults) {
-          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm> ''?searchResults.searchTerm:'');
-          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`,true);
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
         } else {
           vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Procedure Usage canceled`));
         }
@@ -87,12 +92,15 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTRPGPRT', async (memberItem: MemberItem) => {
+      if (!await checkPathfinderExistence()) { return; }
       await HwkI.runPRTRPGPRT(memberItem);
     }),
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTDDSPRT', async (memberItem: MemberItem) => {
+      if (!await checkPathfinderExistence()) { return; }
       await HwkI.runPRTDDSPRT(memberItem);
     }),
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTDDSDSP', async (memberItem: MemberItem) => {
+      if (!await checkPathfinderExistence()) { return; }
       await HwkI.runPRTDDSDSP(memberItem);
     }),
   );
@@ -190,4 +198,16 @@ function getHWKgetObjectSourceInfoFuncSrc(library: string): string {
     `return select * from table(values (APISTS,APISF,APISFL,APISFM ) ) x (APISTS,APISF,APISFL,APISFM);`,
     `end`,
   ].join(` `);
+}
+async function checkPathfinderExistence(): Promise<boolean> {
+
+  const itsThere = await Code4i.checkObject(`HAWKEYE`, `HAWKBAR`, `*CMD`);
+  if (!itsThere) {
+    const message = `Hawkeye Pathfinder is not installed on system ${Code4i.getConnection().currentConnectionName}`;
+    vscode.window.showErrorMessage(l10n.t(message), { modal: true });
+    // let message = l10n.t(`Are you sure you want to delete the spooled file filter,'{0}'?`, removeItem);
+    // vscode.window.showWarningMessage(message, { modal: true, detail }, l10n.t(`Yes`), l10n.t(`No`))
+    return false;
+  }
+  return true;
 }

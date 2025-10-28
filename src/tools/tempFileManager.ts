@@ -22,14 +22,14 @@ export class TempFileManager {
      * Should be called during extension deactivation.
      */
     public async cleanUpTempFiles(): Promise<void> {
-        console.log(this.tempFiles.size);
+        // console.log(this.tempFiles.size);
         for (const filePath of this.tempFiles) {
             try {
                 await fs.unlink(filePath); // Delete the file
-                console.log(`Deleted temporary file: ${filePath}`);
+                // console.log(`Deleted temporary file: ${filePath}`);
             } catch (error: any) {
                 // Log the error but continue with other files
-                console.error(`Failed to delete temporary file ${filePath}: ${error.message}`);
+                // console.error(`Failed to delete temporary file ${filePath}: ${error.message}`);
             }
         }
         this.tempFiles.clear(); // Clear the set after cleanup

@@ -2,16 +2,6 @@
 
 * Add search source from within search results, so looking for another token within the results.  Mimics option 25 on Hawkeye results panels.
 X Add search result entry for no results found instead of pop up error 
-* Update readme for new changes
-  * Images for command 
-    * DSPSCNSRC
-    * DSPOBJU
-    * DSPFILSETU
-    * DSPPGMOBJ
-    * DSPPRCU
-    * RUNPRTRPGPRT
-    * RUNPRTDDSPRT
-    * runPRTDDSDSP
 * Check system for Pathfinder install.  Default library name = HAWKEYE.  Could it be installed under another name?
 
 # COMPLETED

@@ -18,7 +18,7 @@ export class HitSource extends vscode.TreeItem {
     this._path = Code4i.sysNameInLocal(result.filePath.replace(QSYS_PATTERN, ''));
     this._sourceName = Code4i.sysNameInLocal(result.fileName);
     this._searchTerm = searchTerm ?searchTerm :this._sourceName;
-    this._searchTokens = result.searchTokens;
+    this._searchTokens = result.searchTokens.map(str => str.replace(/'/g, ''));
     this.contextValue = getSourceObjectType( this._path )[1]+':'+Code4i.parserMemberPath( this._path ).extension;
     this.iconPath = vscode.ThemeIcon.File;
     if (!descCycle) {

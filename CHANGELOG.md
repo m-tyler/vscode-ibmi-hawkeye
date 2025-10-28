@@ -1,4 +1,10 @@
 # Change log
+## Version 0.1.4
+  * Fixed bug where DSPSCNSRC results would not open source and position to match
+  * Updated README
+  * Added check of Hawkeye Pathfinder on server connected to. 
+## Version 0.1.3
+  * Added multiple search results in search results view
 ## Version 0.1.2
   * Fixed bug where search results line path was formatted incorrectly.
 ## Version 0.1.1

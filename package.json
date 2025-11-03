@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "preview": false,
   "license": "MIT",
   "engines": {
@@ -30,7 +30,7 @@
   "contributes": {
     "configuration": [
       {
-        "title": "Code for IBM i Spooled Files",
+        "title": "Hawkeye Pathfinder",
         "properties": {
           "vscode-ibmi-hawkeye.useActions": {
             "type": "boolean",

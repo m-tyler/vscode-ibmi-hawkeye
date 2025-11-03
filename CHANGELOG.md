@@ -1,4 +1,6 @@
 # Change log
+## Version 0.1.5
+  * Configuration label was specifying the wrong extension name
 ## Version 0.1.4
   * Fixed bug where DSPSCNSRC results would not open source and position to match
   * Updated README

@@ -35,6 +35,10 @@
           "vscode-ibmi-hawkeye.useActions": {
             "type": "boolean",
             "markdownDescription": "When checked, the extension will use the Code for IBM i Actions feature. \nUnchecked it will use the default VS Code input boxes."
+          },
+          "vscode-ibmi-hawkeye.collapseResults": {
+            "type": "boolean",
+            "markdownDescription": "When checked, the extension will collaspse the each search results added to search view."
           }
         }
       }

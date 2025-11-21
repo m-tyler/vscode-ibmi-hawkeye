@@ -11,8 +11,9 @@ export class HitSource extends vscode.TreeItem {
   private readonly _searchTerm: string;
   private readonly _searchTokens: string[];
 
-  constructor(readonly result: SourceFileMatch, readonly searchTerm: string, descCycle: boolean = false) {
-    super(path.posix.basename(result.filePath), vscode.TreeItemCollapsibleState.Collapsed);
+  constructor(readonly result: SourceFileMatch, readonly searchTerm: string, collapseResults: vscode.TreeItemCollapsibleState, descCycle: boolean = false) {
+    // super(path.posix.basename(result.filePath), vscode.TreeItemCollapsibleState.Expanded);
+    super(path.posix.basename(result.filePath), collapseResults);
 
     const hits = result.matches.length;
     this._path = Code4i.sysNameInLocal(result.filePath.replace(QSYS_PATTERN, ''));

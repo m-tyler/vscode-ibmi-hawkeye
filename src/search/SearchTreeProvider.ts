@@ -51,7 +51,7 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
    */
   addSearchSession(command: string, results: HawkeyeSearchMatches, searchTerm: string=''): void {
     const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
-    const collaspseState:vscode.TreeItemCollapsibleState = config.collapseReseult?vscode.TreeItemCollapsibleState.Collapsed:vscode.TreeItemCollapsibleState.Expanded;
+    const collaspseState:vscode.TreeItemCollapsibleState = config.collapseResults?vscode.TreeItemCollapsibleState.Collapsed:vscode.TreeItemCollapsibleState.Expanded;
     const timestamp = new Date().toLocaleTimeString();
     const sessionId = `${command}_${timestamp}`;
     const hitSources = results.files.map((file: SourceFileMatch, idx: number) => new HitSource(file, searchTerm, collaspseState));

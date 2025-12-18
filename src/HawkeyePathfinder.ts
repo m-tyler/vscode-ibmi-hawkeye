@@ -43,6 +43,32 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsedEditorSelection`, async (fileItem) => {
+      if (!await checkPathfinderExistence()) { return; }
+      try {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          const selection = editor.selection;
+
+          // Check if there is a non-empty selection
+          if (!selection.isEmpty) {
+            const selectedText = editor.document.getText(selection);
+            fileItem.path = `*ALL/${selectedText}`;
+            const searchResults = await HwkI.displayFileSetsUsed(fileItem);
+            if (searchResults) {
+              searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
+              vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
+            } else {
+              vscode.window.showInformationMessage(l10n.t(`Hawkeye Display File Set Used canceled`));
+            }
+          }
+        }
+      } catch (e) {
+        if (e instanceof Error) {
+          vscode.window.showErrorMessage(l10n.t(`Error(12): {0}`, e.message));
+        }
+      }
+    }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (anyItem) => {
       if (!await checkPathfinderExistence()) { return; }
       try {
@@ -52,6 +78,32 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
         } else {
           vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Program Objects canceled`));
+        }
+      } catch (e) {
+        if (e instanceof Error) {
+          vscode.window.showErrorMessage(l10n.t(`Error(13): {0}`, e.message));
+        }
+      }
+    }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjectsEditorSelection`, async (anyItem) => {
+      if (!await checkPathfinderExistence()) { return; }
+      try {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          const selection = editor.selection;
+
+          // Check if there is a non-empty selection
+          if (!selection.isEmpty) {
+            const selectedText = editor.document.getText(selection);
+            anyItem.path = `*ALL/${selectedText}`;
+            const searchResults = await HwkI.displayProgramObjects(anyItem);
+            if (searchResults) {
+              searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
+              vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
+            } else {
+              vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Program Objects canceled`));
+            }
+          }
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -75,6 +127,32 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsedEditorSelection`, async (anyItem) => {
+      if (!await checkPathfinderExistence()) { return; }
+      try {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          const selection = editor.selection;
+
+          // Check if there is a non-empty selection
+          if (!selection.isEmpty) {
+            const selectedText = editor.document.getText(selection);
+            anyItem.path = `*ALL/${selectedText}`;
+            const searchResults = await HwkI.displayObjectUsed(anyItem);
+            if (searchResults) {
+              searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
+              vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
+            } else {
+              vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Object Useage canceled`));
+            }
+          }
+        }
+      } catch (e) {
+        if (e instanceof Error) {
+          vscode.window.showErrorMessage(l10n.t(`Error(14): {0}`, e.message));
+        }
+      }
+    }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, async (anyItem) => {
       if (!await checkPathfinderExistence()) { return; }
       try {
@@ -84,6 +162,32 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
         } else {
           vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Procedure Usage canceled`));
+        }
+      } catch (e) {
+        if (e instanceof Error) {
+          vscode.window.showErrorMessage(l10n.t(`Error(15): {0}`, e.message));
+        }
+      }
+    }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProcedureUsedEditorSelection`, async (anyItem) => {
+      if (!await checkPathfinderExistence()) { return; }
+      try {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          const selection = editor.selection;
+
+          // Check if there is a non-empty selection
+          if (!selection.isEmpty) {
+            const selectedText = editor.document.getText(selection);
+            anyItem.path = `*ALL/${selectedText}`;
+            const searchResults = await HwkI.displayProcedureUsed(anyItem);
+            if (searchResults) {
+              searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
+              vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
+            } else {
+              vscode.window.showInformationMessage(l10n.t(`Hawkeye Display Procedure Usage canceled`));
+            }
+          }
         }
       } catch (e) {
         if (e instanceof Error) {

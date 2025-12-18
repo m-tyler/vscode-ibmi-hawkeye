@@ -35,6 +35,9 @@ export namespace Code4i {
   export function sysNameInLocal(string: string): string {
     return getInstance().getConnection().sysNameInLocal(string);
   }
+  export function upperCaseName(string: string): string {
+    return getInstance().getConnection().upperCaseName(string);
+  }
   // export async function getTable(library: string, name: string): Promise<Tools.DB2Row[]> {
   //     return getContent().getTable(library, name, name, true);
   // }

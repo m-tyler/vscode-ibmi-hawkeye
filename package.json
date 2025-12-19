@@ -251,7 +251,7 @@
         {
           "submenu": "Hawkeye-Pathfinder.EditorTools.menu",
           "when": "editorHasSelection",
-          "group":"99_HawkeyePathfinder"
+          "group":"0_HawkeyePathfinder"
         }
       ]
     },

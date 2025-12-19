@@ -16,7 +16,7 @@ export class HitSource extends vscode.TreeItem {
     super(path.posix.basename(result.filePath), collapseResults);
 
     const hits = result.matches.length;
-    this.path = Code4i.sysNameInLocal(result.filePath);
+    this.path = Code4i.sysNameInLocal(result.filePath.replace(QSYS_PATTERN, ''));
     this.sourceName = Code4i.sysNameInLocal(result.fileName);
     this._searchTerm = searchTerm ?searchTerm :this.sourceName;
     this.searchTokens = result.searchTokens.map(str => str.replace(/'/g, ''));

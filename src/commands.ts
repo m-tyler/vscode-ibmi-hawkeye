@@ -264,13 +264,20 @@ export namespace HwkI {
     }
     else if (item) {
       ww.path = Code4i.sysNameInLocal(item.path);
-      const parts = Code4i.parserMemberPath(item.path);
+      const upperCasedString = Code4i.upperCaseName(ww.path);
+      const parts = upperCasedString.startsWith(`/`) ? upperCasedString.substring(1).split(`/`) : upperCasedString.split(`/`);;
       ww.protected = item._readonly;
-      ww.sourceFile = parts.file;
-      ww.sourceType = parts.extension;
-      ww.library = parts.library;
+      ww.library = parts[0];
+      if (parts.length > 2){
+        ww.sourceFile = parts[1];
+        ww.name = parts[2];
+      }
+      else {
+        ww.sourceFile = ``;
+        ww.name = parts[1];
+      }
+      ww.protected = item._readonly;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
-      ww.name = parts.name;
       ww.objType = getSourceObjectType(ww.path)[0];
       promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
@@ -446,14 +453,21 @@ export namespace HwkI {
     }
     else if (item) {
       ww.path = Code4i.sysNameInLocal(item.path);
-      const parts = Code4i.parserMemberPath(item.path);
+      const upperCasedString = Code4i.upperCaseName(ww.path);
+      const parts = upperCasedString.startsWith(`/`) ? upperCasedString.substring(1).split(`/`) : upperCasedString.split(`/`);;
       ww.protected = item._readonly;
-      ww.sourceFile = parts.file;
-      ww.library = parts.library;
+      ww.library = parts[0];
+      if (parts.length > 2){
+        ww.sourceFile = parts[1];
+        ww.name = parts[2];
+      }
+      else {
+        ww.sourceFile = ``;
+        ww.name = parts[1];
+      }
+      ww.protected = item._readonly;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
-      ww.name = parts.name;
-      ww.sourceType = parts.extension;
-      ww.objType = getSourceObjectType(ww.path)[0];
+      ww.objType = getSourceObjectType(ww.path, commandName)[0];
       promptedValue = `${ww.library}/${ww.name}.${ww.sourceType}`;
     }
     else {
@@ -619,7 +633,7 @@ export namespace HwkI {
       // Can be from the search results list
       ww.path = Code4i.sysNameInLocal(item.path);
       const upperCasedString = Code4i.upperCaseName(ww.path);
-      const parts = upperCasedString.startsWith(`/`) ? upperCasedString.substring(1).split(`/`) : upperCasedString.split(`/`);;
+      const parts = upperCasedString.startsWith(`/`) ? upperCasedString.substring(1).split(`/`) : upperCasedString.split(`/`);
       ww.protected = item.readonly;
       ww.library = parts[0];
       if (parts.length > 2){
@@ -809,12 +823,19 @@ export namespace HwkI {
     }
     else if (item) {
       ww.path = Code4i.sysNameInLocal(item.path);
-      const parts = Code4i.parserMemberPath(item.path);
+      const upperCasedString = Code4i.upperCaseName(ww.path);
+      const parts = upperCasedString.startsWith(`/`) ? upperCasedString.substring(1).split(`/`) : upperCasedString.split(`/`);;
       ww.protected = item._readonly;
-      ww.sourceFile = parts.file;
-      ww.library = parts.library;
+      ww.library = parts[0];
+      if (parts.length > 2){
+        ww.sourceFile = parts[1];
+        ww.name = parts[2];
+      }
+      else {
+        ww.sourceFile = ``;
+        ww.name = parts[1];
+      }
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
-      ww.name = parts.name;
       ww.objType = getSourceObjectType(ww.path)[0];
       promptedValue = `${ww.library}/${ww.name}`;
     }

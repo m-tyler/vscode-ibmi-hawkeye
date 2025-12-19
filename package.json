@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "preview": false,
   "license": "MIT",
   "engines": {
@@ -187,12 +187,36 @@
           "when": "code-for-ibmi:connected"
         },
         {
+          "command": "Hawkeye-Pathfinder.displayObjectUsed",
+          "when": "code-for-ibmi:connected"
+        },
+        {
           "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
           "when": "code-for-ibmi:connected"
         },
         {
           "command": "Hawkeye-Pathfinder.displayProgramObjects",
           "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProcedureUsed",
+          "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayObjectUsedEditorSelection",
+          "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayFileSetsUsedEditorSelection",
+          "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProgramObjectsEditorSelection",
+          "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProcedureUsedEditorSelection",
+          "when": "never"
         },
         {
           "command": "Hawkeye-Pathfinder.closeSearchView",
@@ -205,14 +229,6 @@
         {
           "command": "Hawkeye-Pathfinder.expandSearchView",
           "when": "never"
-        },
-        {
-          "command": "Hawkeye-Pathfinder.displayObjectUsed",
-          "when": "code-for-ibmi:connected"
-        },
-        {
-          "command": "Hawkeye-Pathfinder.displayProcedureUsed",
-          "when": "code-for-ibmi:connected"
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTRPGPRT",

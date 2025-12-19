@@ -1,11 +1,15 @@
 # Change log
+## Version 1.1.0
+  * Added feature where user can select text in editor, right-click on new menu to run a Hawkeye command.
+  * Configuration setting to control expanded or collapsed results
+  * Fixed issue where generic name pattern on DSPSCNSRC was not working.
 ## Version 0.1.5
   * Configuration label was specifying the wrong extension name
-## Version 0.1.4
+## Version 1.0.4
   * Fixed bug where DSPSCNSRC results would not open source and position to match
   * Updated README
   * Added check of Hawkeye Pathfinder on server connected to. 
-## Version 0.1.3
+## Version 1.0.0
   * Added multiple search results in search results view
 ## Version 0.1.2
   * Fixed bug where search results line path was formatted incorrectly.

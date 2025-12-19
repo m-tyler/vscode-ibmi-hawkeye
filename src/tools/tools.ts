@@ -81,7 +81,7 @@ export function nthIndex(aString: string, pattern: string, n: number) {
   }
   return index;
 }
-export function getSourceObjectType(path: string): string[] {
+export function getSourceObjectType(path: string, command?: string): string[] {
   let srcObjType: string[];
   let parts: string[] = [];
   let i: number = 0;
@@ -131,7 +131,15 @@ export function getSourceObjectType(path: string): string[] {
       break;
     }
   default:
-    srcObjType = [`*ALL`, `*ALL`];
+    // Some commands have a different default
+    switch (command) {
+    case `DSPPGMOBJ`:
+      srcObjType = [`*PGM`, `*PGM`];
+      break;
+    default:
+      srcObjType = [`*ALL`, `*ALL`];
+      break;
+    }
     break;
   }
   return srcObjType;

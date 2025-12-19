@@ -263,14 +263,21 @@ export namespace HwkI {
       promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else if (item) {
-      ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
-      const parts = Code4i.parserMemberPath(item._path);
+      ww.path = Code4i.sysNameInLocal(item.path);
+      const upperCasedString = Code4i.upperCaseName(ww.path);
+      const parts = upperCasedString.startsWith(`/`) ? upperCasedString.substring(1).split(`/`) : upperCasedString.split(`/`);;
       ww.protected = item._readonly;
-      ww.sourceFile = parts.file;
-      ww.sourceType = parts.extension;
-      ww.library = parts.library;
+      ww.library = parts[0];
+      if (parts.length > 2){
+        ww.sourceFile = parts[1];
+        ww.name = parts[2];
+      }
+      else {
+        ww.sourceFile = ``;
+        ww.name = parts[1];
+      }
+      ww.protected = item._readonly;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
-      ww.name = parts.name;
       ww.objType = getSourceObjectType(ww.path)[0];
       promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
@@ -445,15 +452,22 @@ export namespace HwkI {
       promptedValue = `${ww.library}/${ww.name}.${ww.sourceType}`;
     }
     else if (item) {
-      ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
-      const parts = Code4i.parserMemberPath(item._path);
+      ww.path = Code4i.sysNameInLocal(item.path);
+      const upperCasedString = Code4i.upperCaseName(ww.path);
+      const parts = upperCasedString.startsWith(`/`) ? upperCasedString.substring(1).split(`/`) : upperCasedString.split(`/`);;
       ww.protected = item._readonly;
-      ww.sourceFile = parts.file;
-      ww.library = parts.library;
+      ww.library = parts[0];
+      if (parts.length > 2){
+        ww.sourceFile = parts[1];
+        ww.name = parts[2];
+      }
+      else {
+        ww.sourceFile = ``;
+        ww.name = parts[1];
+      }
+      ww.protected = item._readonly;
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
-      ww.name = parts.name;
-      ww.sourceType = parts.extension;
-      ww.objType = getSourceObjectType(ww.path)[0];
+      ww.objType = getSourceObjectType(ww.path, commandName)[0];
       promptedValue = `${ww.library}/${ww.name}.${ww.sourceType}`;
     }
     else {
@@ -594,8 +608,9 @@ export namespace HwkI {
     let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
     let promptedValue;
     if (item && item.object) {
+      // Selection from object browser non-source objects
       ww.path = item.path;
-      ww.path = Code4i.sysNameInLocal(item.path.replace(QSYS_PATTERN, ''));
+      ww.path = Code4i.sysNameInLocal(item.path);
       ww.protected = item.filter.protected;
       ww.library = item.object.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`);
@@ -604,7 +619,8 @@ export namespace HwkI {
       promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else if (item && item.member) {
-      ww.path = Code4i.sysNameInLocal(item.path.replace(QSYS_PATTERN, ''));
+      // Selection from object browser source member
+      ww.path = Code4i.sysNameInLocal(item.path);
       ww.protected = item.member.protected;
       ww.sourceFile = item.member.file;
       ww.library = item.member.library;
@@ -614,17 +630,26 @@ export namespace HwkI {
       promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else if (item) {
-      ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
-      const parts = Code4i.parserMemberPath(item._path);
-      ww.protected = item._readonly;
-      ww.sourceFile = parts.file;
-      ww.library = parts.library;
+      // Can be from the search results list
+      ww.path = Code4i.sysNameInLocal(item.path);
+      const upperCasedString = Code4i.upperCaseName(ww.path);
+      const parts = upperCasedString.startsWith(`/`) ? upperCasedString.substring(1).split(`/`) : upperCasedString.split(`/`);
+      ww.protected = item.readonly;
+      ww.library = parts[0];
+      if (parts.length > 2){
+        ww.sourceFile = parts[1];
+        ww.name = parts[2];
+      }
+      else {
+        ww.sourceFile = ``;
+        ww.name = parts[1];
+      }
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
-      ww.name = parts.name;
       ww.objType = getSourceObjectType(ww.path)[0];
       promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
     }
     else {
+      // from the command button or command pallete
       ww.library = ``;
       ww.name = ``;
       ww.objType = ``;
@@ -633,7 +658,7 @@ export namespace HwkI {
 
     const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
     // let namePattern: string = config.get<string>('useActions') || '';
-    if (config.useActions) {
+    if (config. useActions) {
       // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
       let command: string = '';
       const chosenAction = getHawkeyeAction(3); // DSPOBJU
@@ -778,7 +803,7 @@ export namespace HwkI {
     let promptedValue;
     if (item && item.object) {
       ww.path = item.path;
-      ww.path = Code4i.sysNameInLocal(item.path.replace(QSYS_PATTERN, ''));
+      ww.path = Code4i.sysNameInLocal(item.path);
       ww.protected = item.filter.protected;
       ww.library = item.object.library;
       ww.library = scrubLibrary(ww.library, `${commandName}`);
@@ -787,7 +812,7 @@ export namespace HwkI {
       promptedValue = `${ww.library}/${ww.name}`;
     }
     else if (item && item.member) {
-      ww.path = Code4i.sysNameInLocal(item.path.replace(QSYS_PATTERN, ''));
+      ww.path = Code4i.sysNameInLocal(item.path);
       ww.protected = item.member.protected;
       ww.sourceFile = item.member.file;
       ww.library = item.member.library;
@@ -797,13 +822,20 @@ export namespace HwkI {
       promptedValue = `${ww.library}/${ww.name}`;
     }
     else if (item) {
-      ww.path = Code4i.sysNameInLocal(item._path.replace(QSYS_PATTERN, ''));
-      const parts = Code4i.parserMemberPath(item._path);
+      ww.path = Code4i.sysNameInLocal(item.path);
+      const upperCasedString = Code4i.upperCaseName(ww.path);
+      const parts = upperCasedString.startsWith(`/`) ? upperCasedString.substring(1).split(`/`) : upperCasedString.split(`/`);;
       ww.protected = item._readonly;
-      ww.sourceFile = parts.file;
-      ww.library = parts.library;
+      ww.library = parts[0];
+      if (parts.length > 2){
+        ww.sourceFile = parts[1];
+        ww.name = parts[2];
+      }
+      else {
+        ww.sourceFile = ``;
+        ww.name = parts[1];
+      }
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
-      ww.name = parts.name;
       ww.objType = getSourceObjectType(ww.path)[0];
       promptedValue = `${ww.library}/${ww.name}`;
     }

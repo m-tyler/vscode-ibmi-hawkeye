@@ -23,7 +23,7 @@ export namespace HawkeyeSearch {
     library = (library !== '*ALL' ? library : '*ALL');
     sourceFile = (sourceFile !== '*ALL' ? sourceFile : '*ALL');
     let mbrExt = memberFilter.split(`.`);
-    const member = (mbrExt[0] !== '*ALL' ? mbrExt[0] : '*ALL');
+    const member = (mbrExt[0] !== '*ALL' && mbrExt[0] !== '*' ? mbrExt[0] : '*ALL');
     const memberExt = (mbrExt[1] !== '*ALL' ? mbrExt[1] : '*ALL');
     const tempLibrary = Code4i.getTempLibrary();
     const tempName1 = Code4i.makeid();
@@ -45,6 +45,7 @@ export namespace HawkeyeSearch {
         outfile: `${tempLibrary}/${tempName1}`.toLocaleUpperCase(),
         outmbr: `HWKSEARCH`,
         case: `*IGNORE`,
+        logic: `*AND`, 
         begpos: `001`,
         endpos: `240`
       });

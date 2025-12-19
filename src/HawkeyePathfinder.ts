@@ -43,6 +43,19 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsedEditorSelection`, async (fileItem) => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const selection = editor.selection;
+
+        // Check if there is a non-empty selection
+        if (!selection.isEmpty) {
+          const selectedText = editor.document.getText(selection);
+          fileItem.path = `*ALL/${selectedText}`;
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, fileItem);
+        }
+      }
+    }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (anyItem) => {
       if (!await checkPathfinderExistence()) { return; }
       try {
@@ -59,6 +72,19 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjectsEditorSelection`, async (anyItem) => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          const selection = editor.selection;
+
+          // Check if there is a non-empty selection
+          if (!selection.isEmpty) {
+            const selectedText = editor.document.getText(selection);
+            anyItem.path = `*ALL/${selectedText}`;
+            vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProgramObjects`, anyItem);
+          }
+        }
+    }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (anyItem) => {
       if (!await checkPathfinderExistence()) { return; }
       try {
@@ -72,6 +98,19 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       } catch (e) {
         if (e instanceof Error) {
           vscode.window.showErrorMessage(l10n.t(`Error(14): {0}`, e.message));
+        }
+      }
+    }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsedEditorSelection`, async (anyItem) => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const selection = editor.selection;
+
+        // Check if there is a non-empty selection
+        if (!selection.isEmpty) {
+          const selectedText = editor.document.getText(selection);
+          anyItem.path = `*ALL/${selectedText}`;
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayObjectUsed`, anyItem);
         }
       }
     }),
@@ -90,6 +129,19 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
           vscode.window.showErrorMessage(l10n.t(`Error(15): {0}`, e.message));
         }
       }
+    }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProcedureUsedEditorSelection`, async (anyItem) => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          const selection = editor.selection;
+
+          // Check if there is a non-empty selection
+          if (!selection.isEmpty) {
+            const selectedText = editor.document.getText(selection);
+            anyItem.path = `*ALL/${selectedText}`;
+            vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, anyItem);
+          }
+        }
     }),
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTRPGPRT', async (memberItem: MemberItem) => {
       if (!await checkPathfinderExistence()) { return; }

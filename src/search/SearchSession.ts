@@ -7,11 +7,14 @@ export class SearchSession extends vscode.TreeItem {
     public readonly runCommand: string,
     public readonly searchItem: string,
     public readonly hitSources: HitSource[],
-    public readonly searchTerm: string
+    public readonly searchTerm: string,
+    public readonly collaspseState: vscode.TreeItemCollapsibleState
+
   ) {
     super(
       `${runCommand} (${new Date().toLocaleTimeString()})`, 
-      vscode.TreeItemCollapsibleState.Collapsed
+      // vscode.TreeItemCollapsibleState.Collapsed
+      collaspseState
     );
     
     this.tooltip = 

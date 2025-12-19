@@ -9,6 +9,7 @@ This extension provides functionality for the source cross reference tool Hawkey
 * Configuration option to choose between using standard VS Code prompts or Code for IBM i actions.
 * Keep all your search results for the life of the VS Code session, or until you choose to dismiss them.
 * Perform additional Hawkeye Pathfinder commands on search result items. 
+* Trigger Hawkeye Display commands from within source
 
 ## Hawkeye Pathfinder commands utilized:
 
@@ -44,3 +45,5 @@ This extension provides functionality for the source cross reference tool Hawkey
   <img src="/images/Additional Hawkeye commands from search results view.png">
 * Viewing Report Spacing Chart
   <img src="/images/SpacingCharts.png">
+* Triggering Display commands from within source
+  <img src="/images/ToolsFromSourceEditor.png">

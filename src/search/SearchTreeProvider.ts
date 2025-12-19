@@ -50,10 +50,12 @@ export class SearchTreeProvider implements vscode.TreeDataProvider<SearchSession
    * @param results The results from the command execution
    */
   addSearchSession(command: string, results: HawkeyeSearchMatches, searchTerm: string=''): void {
+    const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
+    const collaspseState:vscode.TreeItemCollapsibleState = config.collapseResults?vscode.TreeItemCollapsibleState.Collapsed:vscode.TreeItemCollapsibleState.Expanded;
     const timestamp = new Date().toLocaleTimeString();
     const sessionId = `${command}_${timestamp}`;
-    const hitSources = results.files.map((file: SourceFileMatch, idx: number) => new HitSource(file, searchTerm));
-    const newSession = new SearchSession(sessionId, command, results.searchItem, hitSources, searchTerm);
+    const hitSources = results.files.map((file: SourceFileMatch, idx: number) => new HitSource(file, searchTerm, collaspseState));
+    const newSession = new SearchSession(sessionId, command, results.searchItem, hitSources, searchTerm, collaspseState);
     this._searchSessions.push(newSession);
     this._onDidChangeTreeData.fire(undefined); // Refresh the entire tree
     vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:searchViewVisible`, true);

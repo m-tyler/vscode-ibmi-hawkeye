@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "preview": false,
   "license": "MIT",
   "engines": {
@@ -35,6 +35,10 @@
           "vscode-ibmi-hawkeye.useActions": {
             "type": "boolean",
             "markdownDescription": "When checked, the extension will use the Code for IBM i Actions feature. \nUnchecked it will use the default VS Code input boxes."
+          },
+          "vscode-ibmi-hawkeye.collapseResults": {
+            "type": "boolean",
+            "markdownDescription": "When checked, the extension will collaspse the each search results added to search view."
           }
         }
       }
@@ -73,7 +77,11 @@
     "submenus": [
       {
         "id": "Hawkeye-Pathfinder.Tools.menu",
-        "label": "Hawkeye tools"
+        "label": "Hawkeye Pathfinder Tools"
+      },
+      {
+        "id": "Hawkeye-Pathfinder.EditorTools.menu",
+        "label": "Hawkeye Pathfinder Tools"
       }
     ],
     "menus": {
@@ -126,18 +134,40 @@
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTDDSPRT",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~  /\\*PRTF/i",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~  /\\*PRTF/i && editorLangId =~ /^PRTF$/i",
           "group": "2_pathfinderTools@2"
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTDDSDSP",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~  /\\*DSPF/i",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~  /\\*DSPF/i && editorLangId =~ /^DSPF$/i",
           "group": "2_pathfinderTools@3"
         },
         {
           "command": "Hawkeye-Pathfinder.removeSession",
           "when": "view =~ /^hawkeyeSearchView$/ && viewItem =~ /^.*/",
           "group": "2_pathfinderTools@3"
+        }
+      ],
+      "Hawkeye-Pathfinder.EditorTools.menu": [
+        {
+          "command": "Hawkeye-Pathfinder.displayFileSetsUsedEditorSelection",
+          "when": "editorTextFocus && resourceScheme==member",
+          "group": "1_pathfinderTools@2"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProgramObjectsEditorSelection",
+          "when": "editorTextFocus && resourceScheme==member",
+          "group": "1_pathfinderTools@2"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayObjectUsedEditorSelection",
+          "when": "editorTextFocus && resourceScheme==member",
+          "group": "1_pathfinderTools@2"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProcedureUsedEditorSelection",
+          "when": "editorTextFocus && resourceScheme==member",
+          "group": "1_pathfinderTools@2"
         }
       ],
       "view/item/context": [
@@ -157,12 +187,36 @@
           "when": "code-for-ibmi:connected"
         },
         {
+          "command": "Hawkeye-Pathfinder.displayObjectUsed",
+          "when": "code-for-ibmi:connected"
+        },
+        {
           "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
           "when": "code-for-ibmi:connected"
         },
         {
           "command": "Hawkeye-Pathfinder.displayProgramObjects",
           "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProcedureUsed",
+          "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayObjectUsedEditorSelection",
+          "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayFileSetsUsedEditorSelection",
+          "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProgramObjectsEditorSelection",
+          "when": "never"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProcedureUsedEditorSelection",
+          "when": "never"
         },
         {
           "command": "Hawkeye-Pathfinder.closeSearchView",
@@ -175,14 +229,6 @@
         {
           "command": "Hawkeye-Pathfinder.expandSearchView",
           "when": "never"
-        },
-        {
-          "command": "Hawkeye-Pathfinder.displayObjectUsed",
-          "when": "code-for-ibmi:connected"
-        },
-        {
-          "command": "Hawkeye-Pathfinder.displayProcedureUsed",
-          "when": "code-for-ibmi:connected"
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
@@ -199,6 +245,13 @@
         {
           "command": "Hawkeye-Pathfinder.doNothing",
           "when": "never"
+        }
+      ],
+      "editor/context":[
+        {
+          "submenu": "Hawkeye-Pathfinder.EditorTools.menu",
+          "when": "editorHasSelection",
+          "group":"0_HawkeyePathfinder"
         }
       ]
     },
@@ -218,7 +271,21 @@
         "icon": "$(search-fuzzy)"
       },
       {
+        "command": "Hawkeye-Pathfinder.displayFileSetsUsedEditorSelection",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display File Set Where Used (DSPFILSETU)",
+        "category": "Hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
         "command": "Hawkeye-Pathfinder.displayProgramObjects",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display Program Objects (DSPPGMOBJ)",
+        "category": "Hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.displayProgramObjectsEditorSelection",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Display Program Objects (DSPPGMOBJ)",
         "category": "Hawkeye",
@@ -267,7 +334,21 @@
         "icon": "$(search-fuzzy)"
       },
       {
+        "command": "Hawkeye-Pathfinder.displayObjectUsedEditorSelection",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display Object Where Used (DSPOBJU)",
+        "category": "Hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
         "command": "Hawkeye-Pathfinder.displayProcedureUsed",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display Procedure Where Used (DSPPRCU)",
+        "category": "Hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.displayProcedureUsedEditorSelection",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Display Procedure Where Used (DSPPRCU)",
         "category": "Hawkeye",
@@ -296,7 +377,13 @@
         "enablement": "code-for-ibmi:connected == true",
         "title": "Does nothing",
         "category": "Hawkeye"
-      }
+      },
+      {
+        "command":"ThisIsACommand",
+          "when": "editorHasSelection",
+          "group":"navigation",
+          "title": "THIS_IS_A_COMMAND"
+        }
     ],
     "keybindings": []
   },

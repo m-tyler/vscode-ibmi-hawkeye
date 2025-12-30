@@ -113,19 +113,28 @@
       ],
       "Hawkeye-Pathfinder.Tools.menu": [
         {
+          "command": "Hawkeye-Pathfinder.searchSourceFiles",
+          "group": "1_pathfinderTools@6"
+        },
+        {
           "command": "Hawkeye-Pathfinder.displayFileSetsUsed",
           "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /\\*DBF/i",
-          "group": "1_pathfinderTools@2"
+          "group": "1_pathfinderTools@4"
         },
         {
           "command": "Hawkeye-Pathfinder.displayProgramObjects",
-          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /\\*PGM/i",
-          "group": "1_pathfinderTools@2"
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && (viewItem =~ /\\*PGM/i || viewItem == lineHit)",
+          "group": "1_pathfinderTools@3"
         },
         {
           "command": "Hawkeye-Pathfinder.displayObjectUsed",
           "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem =~ /^.*/",
           "group": "1_pathfinderTools@2"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.displayProcedureUsed",
+          "when": "view =~ /^objectBrowser$/ && viewItem =~ /^(member.*|object.*)$/ || view =~ /^hawkeyeSearchView$/ && viewItem == lineHit",
+          "group": "1_pathfinderTools@5"
         },
         {
           "command": "Hawkeye-Pathfinder.runPRTRPGPRT",
@@ -150,14 +159,18 @@
       ],
       "Hawkeye-Pathfinder.EditorTools.menu": [
         {
+          "command": "Hawkeye-Pathfinder.searchSourceFiles",
+          "group": "1_pathfinderTools@6"
+        },
+        {
           "command": "Hawkeye-Pathfinder.displayFileSetsUsedEditorSelection",
           "when": "editorTextFocus && resourceScheme==member",
-          "group": "1_pathfinderTools@2"
+          "group": "1_pathfinderTools@3"
         },
         {
           "command": "Hawkeye-Pathfinder.displayProgramObjectsEditorSelection",
           "when": "editorTextFocus && resourceScheme==member",
-          "group": "1_pathfinderTools@2"
+          "group": "1_pathfinderTools@4"
         },
         {
           "command": "Hawkeye-Pathfinder.displayObjectUsedEditorSelection",
@@ -167,7 +180,7 @@
         {
           "command": "Hawkeye-Pathfinder.displayProcedureUsedEditorSelection",
           "when": "editorTextFocus && resourceScheme==member",
-          "group": "1_pathfinderTools@2"
+          "group": "1_pathfinderTools@5"
         }
       ],
       "view/item/context": [

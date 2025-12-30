@@ -32,8 +32,6 @@ export namespace HawkeyeSearch {
 
     if (connection) {
       await Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName1} MBR(HWKSEARCH)`, noLibList: true });
-      const asp = await getIASP(library);
-
       let arrayofSearchTokens = searchTerm.split(',').map(term => `'` + term.substring(0, 30).replace(/['"]/g, '').trim() + `'`);// wrapped in single quotes for DSPSCNSRC SCAN() keyword
       let stringofSearchTokens = sanitizeSearchTerm(arrayofSearchTokens.join(` `));
 
@@ -60,7 +58,7 @@ export namespace HawkeyeSearch {
         let statement = `
           with SEARCHMATCHES (SEARCHMATCH) 
           as (select JSON_OBJECT( 'fileName' : trim(SCDMBR)
-                              , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
+                              , 'filePath' : '/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                               ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                               , 'howUsed' : ''
                               , 'fileText' : ifnull(min(trim(SCDTXT)),'')
@@ -93,7 +91,6 @@ export namespace HawkeyeSearch {
     // 2. pass items from DSPFILSETU into DSPSCNSRC to find the source used to display in search results.
     // 3. reprocess the results from DSPFILSETU and DSPSCNSRC into presentable results in the custom search view. 
     const connection = Code4i.getConnection();
-    const asp = await getIASP(library);
     library = (library !== '*ALL' ? library : '*ALL');
     dbFile = (dbFile !== '*ALL' ? dbFile : '*ALL');
     const tempLibrary = Code4i.getTempLibrary();
@@ -130,7 +127,7 @@ export namespace HawkeyeSearch {
                                 , TUDSFL, TUDSLB, TUDSMB, TUDTXT from ${tempLibrary}.${tempName1} group by TUDSFL, TUDSLB, TUDSMB, TUDTXT)
                     ,  SEARCHMATCHES (SEARCHMATCH) 
                       as ( select JSON_OBJECT('fileName' : trim(SCDMBR)
-                                            , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
+                                            , 'filePath' : '/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                                             ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                                             , 'howUsed' : ifnull(min(HOW_USED),'')
                                             , 'fileText' : ifnull(min(trim(TUDTXT)),'')
@@ -180,7 +177,6 @@ export namespace HawkeyeSearch {
 
       await Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName1} MBR(HWKDSPPGMO)`, noLibList: true });
       await Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName2} MBR(HWKDSPPGMO)`, noLibList: true });
-      let asp = await Code4i.getLibraryIAsp(library);
       let runDSPPGMOBJ = Code4i.getContent().toCl(`DSPPGMOBJ`, {
         pgm: `${library}/${program}`,
         objtype: `${type}`,
@@ -208,7 +204,7 @@ export namespace HawkeyeSearch {
                     where PODCMD not in ('BIND') group by APISF,PODSFL,POHSFL,APISFL,PODSLB,POHSLB,APISFM,PODSMB,POHSMB,APISTS)
             , SEARCHMATCHES (SEARCHMATCH) 
               as ( select JSON_OBJECT('fileName' : trim(SCDMBR)
-                                    , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
+                                    , 'filePath' : '/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                                     ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                                     , 'fileText' : ifnull(min(PODTXT),'')
                                     , 'howUsed' : ifnull(min(HOW_USED),'')
@@ -272,7 +268,6 @@ export namespace HawkeyeSearch {
     if (connection) {
       Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName1} MBR(HWKDSPOBJU)`, noLibList: true });
       Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName2} MBR(HWKDSPOBJU)`, noLibList: true });
-      let asp = await Code4i.getLibraryIAsp(library);
       let runDSPOBJU = Code4i.getContent().toCl(`DSPOBJU`, {
         obj: `${connection.sysNameInAmerican(library)}/${connection.sysNameInAmerican(object)}`.toLocaleUpperCase(),
         objtype: `${connection.sysNameInAmerican(objType).toLocaleUpperCase()}`,
@@ -297,7 +292,7 @@ export namespace HawkeyeSearch {
                         group by OUHOBJ, OUDPGM, OUDLIB, OUDATR, OUDSFL, OUDSLB, OUDSMB)
                 ,  SEARCHMATCHES (SEARCHMATCH) 
                   as (select JSON_OBJECT('fileName' : trim(SCDMBR)
-                                      , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
+                                      , 'filePath' : '/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                                       ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                                       , 'fileText' : ifnull(min(OUDTXT),'')
                                       , 'howUsed' : ifnull(min(HOW_USED),'')
@@ -362,7 +357,7 @@ export namespace HawkeyeSearch {
                         group by OUHPRC, OUDPGM, OUDLIB, OUDATR, OUDSFL, OUDSLB, OUDSMB)
                 ,  SEARCHMATCHES (SEARCHMATCH) 
                   as (select JSON_OBJECT('fileName' : trim(SCDMBR)
-                                      , 'filePath' : '${asp ? `${asp}` : ``}/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
+                                      , 'filePath' : '/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
                                                       ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
                                       , 'fileText' : ifnull(min(OUDTXT),'')
                                       , 'howUsed' : ifnull(min(HOW_USED) ,'')

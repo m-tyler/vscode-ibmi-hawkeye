@@ -87,17 +87,27 @@ export function getSourceObjectType(path: string, command?: string): string[] {
   let i: number = 0;
   parts = path.split('/');
   let mbrExt: string[];
+  //    0   1    2   3
   // /iasp/lib/file/mbr.ext - if iasp length = 4
-  if (parts.length === 4) { parts.slice(0); } // take away any iasp value
-  i = parts.length - 1;
+  // if (parts.length === 4) { parts = parts.slice(0); } // take away any iasp value
+  if (parts.length === 4) { parts = parts.slice(1, 4); } // take away any iasp value
+  // if 3 parts then source reference (no chg)
+  // if 2 parts then source file/member or object reference (add fake library)
+  // if 1 part then member or object reference (add fake library and file)
+  if (parts.length === 2) {parts = [...['l'],...parts];}
+  if (parts.length === 1) {parts = [...['l','f'],...parts];}
+  //    0   1    2  
+  // /lib/file/mbr.ext 
   // DO we have member extenstion? get it separated out.
-  if (i !== 0) {
+  if (parts.length !== 0) {
+    let i = parts.length -1;
     mbrExt = parts[i].split('.');
     parts.push(mbrExt[1]);
+    parts[i] = mbrExt[0];
   }
-  switch (parts[2]) { // source file
+  switch (parts[1]) { // source file
   case `QDDSSRC`:
-    switch (parts[4]) {
+    switch (parts[3]) {
     case `PF`:
     case `LF`:
     case `SQL`:
@@ -122,7 +132,7 @@ export function getSourceObjectType(path: string, command?: string): string[] {
     srcObjType = [`*PGM`, `*PGM`];
     break;
   case `QTXTSRC`:
-    if (parts[4] === `SQL`) {
+    if (parts[3] === `SQL`) {
       srcObjType = [`*PGM`, `*PGM`];
       break;
     }
@@ -135,6 +145,12 @@ export function getSourceObjectType(path: string, command?: string): string[] {
     switch (command) {
     case `DSPPGMOBJ`:
       srcObjType = [`*PGM`, `*PGM`];
+      break;
+    case `DSPFILSETU`:
+      srcObjType = [`*FILE`, `*FILE`];
+      break;
+    case `DSPPRCU`:
+      srcObjType = [` `, ` `];
       break;
     default:
       srcObjType = [`*ALL`, `*ALL`];
@@ -322,6 +338,7 @@ export function computeHighlights(term: string, line: string): [number, number][
  *  
  * @param library 
  * @param command
+ * @param fromSourceFile value to tell condition if ref is a source file that doesnt match the basic SRC library name. 
  * @returns the adjusted lib value
  */
 export function scrubLibrary(lib: string, command: string, fromSourceFile?: boolean): string {

@@ -23,9 +23,9 @@ export class HitSource extends vscode.TreeItem {
     this.contextValue = getSourceObjectType( this.path )[1]+':'+Code4i.parserMemberPath( this.path ).extension;
     this.iconPath = vscode.ThemeIcon.File;
     if (!descCycle) {
-      this.description = `(${hits} hit${hits === 1 ? `` : `s`}) ${result.fileText} `;
+      this.description = `(${hits} hit${hits === 1 ? `` : `s`}) ${result.fileText} (${result.howUsed})`;
     } else {
-      this.description = `${result.fileText} (${hits} hit${hits === 1 ? `` : `s`})`;
+      this.description = `${result.fileText} (${hits} hit${hits === 1 ? `` : `s`}) (${result.howUsed})`;
     }
     this.readonly = false;
     this.tooltip = new vscode.MarkdownString(`<table>`
@@ -40,6 +40,7 @@ export class HitSource extends vscode.TreeItem {
     this.tooltip.supportHtml = true;
     vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:hitSource`, this.contextValue);
   }
+  getPath(){return this.path;}
 
   async getChildren(): Promise<LineHit[]> {
     return this.result.matches.map((match:any) => new LineHit(this.searchTokens, this.path, match, this.readonly));

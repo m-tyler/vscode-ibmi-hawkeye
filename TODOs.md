@@ -1,6 +1,7 @@
 # TODO
 
 X Add search source from within search results, so looking for another token within the results.  Mimics option 25 on Hawkeye results panels.
+X Need a method to know in the commands.ts for DISPLAY commands that the entry is from the editor text selection and not from the search list. 
 X Add search result entry for no results found instead of pop up error 
 
 # COMPLETED

@@ -51,7 +51,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         // Check if there is a non-empty selection
         if (!selection.isEmpty) {
           const selectedText = editor.document.getText(selection);
-          fileItem.path = `*ALL/${selectedText}`;
+          fileItem.path = `*DOCLIBL/${selectedText}`;
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, fileItem);
         }
       }
@@ -138,7 +138,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
           // Check if there is a non-empty selection
           if (!selection.isEmpty) {
             const selectedText = editor.document.getText(selection);
-            anyItem.path = `*ALL/${selectedText}`;
+            anyItem.path = `${selectedText}`;
             vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, anyItem);
           }
         }

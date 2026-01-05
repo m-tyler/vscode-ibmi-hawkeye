@@ -3,7 +3,6 @@ import { OpenEditableOptions, SearchMatch } from '../types/types';
 import { computeHighlights } from "../tools/tools";
 
 export class LineHit extends vscode.TreeItem {
-  // private readonly highlights: [number, number][] = [];
   constructor(searchTokens: string[], readonly path: string, line: SearchMatch, readonly?: boolean) {
     let highlights: [number, number][] = [];
 

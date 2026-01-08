@@ -3,6 +3,7 @@ import { Code4i } from "./tools/tools";
 import { HwkI } from "./commands";
 import { SearchTreeProvider } from "./search/SearchTreeProvider";
 import { MemberItem } from '@halcyontech/vscode-ibmi-types';
+import { SearchSession } from './search/SearchSession';
 
 export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
   const searchTreeProvider = new SearchTreeProvider(context);
@@ -12,10 +13,14 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
   });
   context.subscriptions.push(
     searchTreeView,
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFiles`, async (memberItem: MemberItem) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFiles`, async (memberItem: MemberItem|SearchSession , searchText: string) => {
       if (!await checkPathfinderExistence()) { return; }
       try {
-        const searchResults = await HwkI.searchSourceFiles(memberItem);
+        if (!searchText && memberItem instanceof SearchSession) {
+          // some times when triggered from the search results view, the initial search text is found at tree level 1. 
+          searchText = memberItem.searchItem;
+        }
+        const searchResults = await HwkI.searchSourceFiles(memberItem,searchText);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm);
         } else {
@@ -24,6 +29,18 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       } catch (e: unknown) {
         if (e instanceof Error) {
           vscode.window.showErrorMessage(l10n.t(`Error searching source members: {0}`, e.message));
+        }
+      }
+    }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.searchSourceFilesEditorSelection`, async (anyItem: MemberItem) => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const selection = editor.selection;
+
+        // Check if there is a non-empty selection
+        if (!selection.isEmpty) {
+          const selectedText = editor.document.getText(selection);
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.searchSourceFiles`, anyItem, selectedText);
         }
       }
     }),
@@ -73,17 +90,17 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjectsEditorSelection`, async (anyItem) => {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-          const selection = editor.selection;
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const selection = editor.selection;
 
-          // Check if there is a non-empty selection
-          if (!selection.isEmpty) {
-            const selectedText = editor.document.getText(selection);
-            anyItem.path = `*ALL/${selectedText}`;
-            vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProgramObjects`, anyItem);
-          }
+        // Check if there is a non-empty selection
+        if (!selection.isEmpty) {
+          const selectedText = editor.document.getText(selection);
+          anyItem.path = `*ALL/${selectedText}`;
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProgramObjects`, anyItem);
         }
+      }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayObjectUsed`, async (anyItem) => {
       if (!await checkPathfinderExistence()) { return; }
@@ -131,17 +148,17 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProcedureUsedEditorSelection`, async (anyItem) => {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-          const selection = editor.selection;
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const selection = editor.selection;
 
-          // Check if there is a non-empty selection
-          if (!selection.isEmpty) {
-            const selectedText = editor.document.getText(selection);
-            anyItem.path = `${selectedText}`;
-            vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, anyItem);
-          }
+        // Check if there is a non-empty selection
+        if (!selection.isEmpty) {
+          const selectedText = editor.document.getText(selection);
+          anyItem.path = `${selectedText}`;
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, anyItem);
         }
+      }
     }),
     vscode.commands.registerCommand('Hawkeye-Pathfinder.runPRTRPGPRT', async (memberItem: MemberItem) => {
       if (!await checkPathfinderExistence()) { return; }

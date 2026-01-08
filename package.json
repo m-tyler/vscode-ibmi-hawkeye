@@ -159,7 +159,7 @@
       ],
       "Hawkeye-Pathfinder.EditorTools.menu": [
         {
-          "command": "Hawkeye-Pathfinder.searchSourceFiles",
+          "command": "Hawkeye-Pathfinder.searchSourceFilesEditorSelection",
           "group": "1_pathfinderTools@6"
         },
         {
@@ -214,6 +214,10 @@
         {
           "command": "Hawkeye-Pathfinder.displayProcedureUsed",
           "when": "code-for-ibmi:connected"
+        },
+        {
+          "command": "Hawkeye-Pathfinder.searchSourceFilesEditorSelection",
+          "when": "never"
         },
         {
           "command": "Hawkeye-Pathfinder.displayObjectUsedEditorSelection",
@@ -271,6 +275,13 @@
     "commands": [
       {
         "command": "Hawkeye-Pathfinder.searchSourceFiles",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Hawkeye Scan Source Files (DSPSCNSRC)",
+        "category": "Hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.searchSourceFilesEditorSelection",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Hawkeye Scan Source Files (DSPSCNSRC)",
         "category": "Hawkeye",

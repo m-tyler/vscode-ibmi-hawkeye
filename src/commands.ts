@@ -25,28 +25,43 @@ interface wItem {
   searchTerms: string[]
 };
 export namespace HwkI {
-  export async function searchSourceFiles(memberItem: MemberItem): Promise<HawkeyeSearchMatches | undefined> {
+  export async function searchSourceFiles(memberItem: any, searchText: string): Promise<HawkeyeSearchMatches | undefined> {
     const commandName = 'DSPSCNSRC';
     let ww = <wItem>{};
     let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
     let promptedValue = ``;
     ww.searchTerms = [];
-    if (memberItem) {
-      ww.path = memberItem.path;
-      ww.protected = memberItem.filter.protected;
-      ww.library = memberItem.filter.library;
-      ww.sourceFile = memberItem.filter.object;
-      ww.name = memberItem.filter.member;
-      ww.sourceType = memberItem.filter.memberType;
-      promptedValue = `${ww.library}/${ww.sourceFile}/${ww.name}.${ww.sourceType}`;
+    ww = parseItem(memberItem, commandName, searchText);
+    if (!ww) {
+      vscode.window.showErrorMessage(l10n.t(`No item selected for HAWKEYE/${commandName}.`));
+      return undefined;
     }
     else {
-      ww.library = ``;
-      ww.sourceFile = '';
-      ww.name = ``;
-      ww.objType = ``;
-      ww.sourceType = ``;
-      ww.protected = true;
+      if (ww && ww.library !== '' && ww.name !== '' && ww.objType !== '') {
+        if (!searchText) {
+          // Does request come from the OBJECT view if base object browser
+          if (/^object\./.test(memberItem.contextValue)) {
+            promptedValue = `*DOCLIBL/Q*.*ALL`;
+            searchText = ww.name;
+            ww.name = '';
+          }
+          else if (/^member_/.test(memberItem.contextValue)) {
+            promptedValue = `${ww.library}/${ww.sourceFile}`;
+            searchText = ww.name;
+            ww.name = '';
+          }
+          else {
+            promptedValue = `${ww.library}/${ww.sourceFile !== '' ? ww.sourceFile + '/' : ''}${ww.name}.${ww.sourceType}`;
+          }
+        }
+        else {
+          if (ww.sourceFile) {
+            promptedValue = `${ww.library}/${ww.sourceFile}`;
+          } else {
+            promptedValue = `${ww.library}/${ww.name}`;
+          }
+        }
+      }
     }
     let keywords: Record<string, string>;
     const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
@@ -132,28 +147,19 @@ export namespace HwkI {
         }
       });
 
-      if (!input) { return undefined; } else {
-        // split LIB/SRCF/MBR.ext into LIB,SRCF, MBR.ext
-        // assumption
-        const wpath = input.trim().toUpperCase().split(`/`);
-        let wmember: string[] = [];
-        // LIB/SRCF no member or ext
-        if (wpath.length < 3 || wpath[2] === ``) {
-          wmember = [`*ALL`, `*ALL`];
+      if (!input) { return undefined; }
+      else {
+        // edit user input
+        ww = parseItem(input, commandName, searchText);
+        // Does request come from the OBJECT view if base object browser
+        if (/^object\./.test(memberItem.contextValue)) {
+          ww.name = '';
         }
-        // LIB/SRCF/MBR no ext
-        else if (!wpath[2].includes(`.`)) {
-          wmember = [wpath[2], ``];
-        } else {
-          wmember = wpath[2].split(`.`);
+        else if (/^member_/.test(memberItem.contextValue)) {
+          ww.name = '';
         }
-        if (wpath.length === 1 || wpath[1] === ``) { wpath[1] = `Q*`; }
-        ww.path = [[wpath[0], wpath[1], wmember[0]].join(`/`), wmember[1]].join('.');
-        ww.library = wpath[0];
-        ww.sourceFile = wpath[1];
-        ww.name = wmember[0] || '*ALL';
-        ww.sourceType = wmember[1] || '*ALL';
-        // connection.currentUser
+        else {
+        }
       }
       keywords = {};
     }
@@ -165,13 +171,12 @@ export namespace HwkI {
     if (ww.path) {
 
       if (ww.sourceFile !== ` `) {
-        if (!ww.searchTerm || ww.searchTerm === ` `) {
 
-          ww.searchTerm = await vscode.window.showInputBox({
-            prompt: l10n.t(`Use command ${commandName} to search {0}.`, ww.path),
-            placeHolder: l10n.t(`Enter the search for term`),
-          }) || 'searchCanceled';
-        }
+        ww.searchTerm = await vscode.window.showInputBox({
+          prompt: l10n.t(`Use command ${commandName} to search {0}.`, ww.path),
+          placeHolder: l10n.t(`Enter the search for term`),
+          value: ww.searchTerm,
+        }) || 'searchCanceled';
 
         if (ww.searchTerm === 'searchCanceled') { } else {
           try {
@@ -202,7 +207,7 @@ export namespace HwkI {
                   }
                 }, timeoutInternal);
                 let resultsSCN = await HawkeyeSearch.searchMembers(ww.library, ww.sourceFile
-                  , `${ww.name || `*`}.${ww.sourceType || `*`}`
+                  , `${ww.name || `*ALL`}.${ww.sourceType || `*ALL`}`
                   , ww.searchTerm, ww.protected);
 
                 if (resultsSCN) {
@@ -971,7 +976,7 @@ export namespace HwkI {
       }
     }
   };
-  function parseItem(item: any, commandName: string): wItem {
+  function parseItem(item: any, commandName: string, searchText?: string): wItem {
     let ww = <wItem>{};
     ww.path = '';
     ww.library = '';
@@ -980,7 +985,7 @@ export namespace HwkI {
     ww.sourceFile = '';
     ww.sourceType = '';
     ww.protected = false;
-    ww.searchTerm = '';
+    ww.searchTerm = searchText ?? '';
 
     if (item && item.object) {
       // Selection from object browser non-source objects
@@ -1004,8 +1009,14 @@ export namespace HwkI {
     else if (item) {
       let newpath = ``;
       if (item instanceof Uri) {
-        newpath = item.path;
         // This more than likely comes from right clicking in editor area
+        // if (commandName !== 'DSPSCNSRC') {
+          newpath = item.path;
+        // }
+        // else {
+        //   // 
+        //   newpath = '*DOCLIBL/Q*.*ALL';
+        // }
       }
       else if (item instanceof HitSource) {
         // This more than likely comes from the search results, right click
@@ -1017,39 +1028,62 @@ export namespace HwkI {
           if (typeof item.label !== 'string' && item.label.highlights) {
             const startValue: number = item.label.highlights[0][0];   // The first number in the tuple
             const endValue: number = item.label.highlights[0][1];   // The second number in the tuple
-            newpath = '*ALL/' + item.label.label.substring(startValue, endValue);
+            ww.searchTerm = item.label.label.substring(startValue, endValue);
+            if (commandName !== 'DSPSCNSRC') {
+              newpath = '*ALL/' + ww.searchTerm;
+            }
+            else {
+              newpath = '*DOCLIBL/Q*.*ALL';
+              // newpath = '*ALL/' + item.label.label.substring(startValue, endValue);
+            }
             console.log('newpath: ', newpath);
           }
         }
       }
       else if (item instanceof SearchSession) {
-        newpath = item.searchItem;
+        if (commandName === 'DSPSCNSRC') {
+          newpath = `*DOCLIBL/Q*.*ALL`;
+        }
+        else { newpath = item.searchItem; }
       }
       else {
       }
       // Can be from the search results list
       ww.path = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
-      const pathParts = ww.path.startsWith(`/`) ? ww.path.substring(1).split(`/`) : ww.path.split(`/`);
-      if (pathParts.length === 4) { pathParts.slice(0); } // take away any iasp value
+      ww.objType = getSourceObjectType(ww.path, commandName)[0];
+      // const pathPartss = Code4i.parserMemberPath( ww.path );
+      let pathParts = ww.path.startsWith(`/`) ? ww.path.substring(1).split(`/`) : ww.path.split(`/`);
+      if (pathParts.length === 4) { pathParts = pathParts.slice(0); } // take away any iasp value
+      if (pathParts.length === 4) { pathParts = pathParts.splice(1); } // take away any iasp value
+      // knowing how many path separators gives a hint at what type of object reference is passed
+      // 3 = leading IASP name
+      // 2 = lib/srcf/mbr
+      // 1 = lib/object
+      const slashCount = pathParts.length - 1;
+      let mbrExtn = [];
       ww.protected = item.readonly;
       ww.library = pathParts[0];
-      if (pathParts.length > 2) {
+      // lib/srcf/mbr
+      if (slashCount === 2) {
         ww.sourceFile = pathParts[1];
-        ww.name = pathParts[2].split('.')[0];
-        ww.sourceType = pathParts[2].split('.')[1];
+        mbrExtn = pathParts[2].split('.');
+        ww.name = mbrExtn[0];
+        if (mbrExtn.length === 2) { ww.sourceType = mbrExtn[1]; }
       }
-      else if (pathParts.length > 1) {
-        ww.sourceFile = '';
-        ww.name = pathParts[1].split('.')[0];
-        ww.sourceType = pathParts[1].split('.')[1];
+      // lib/object
+      if (slashCount === 1) {
+        mbrExtn = pathParts[1].split('.');
+        ww.name = mbrExtn[0];
+        if (mbrExtn.length === 2) { ww.sourceType = mbrExtn[1]; }
       }
-      else {
-        ww.sourceFile = '';
-        ww.name = pathParts[0];
-        ww.sourceType = '';
+      // object
+      if (slashCount === 0) {
+        ww.library = '';
+        mbrExtn = pathParts[0].split('.');
+        ww.name = mbrExtn[0];
+        if (mbrExtn.length === 2) { ww.sourceType = mbrExtn[1]; }
       }
       ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
-      ww.objType = getSourceObjectType(ww.path)[0];
     }
     else {
       // from the command button or command pallete

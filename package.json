@@ -2,7 +2,7 @@
   "name": "vscode-ibmi-hawkeye",
   "displayName": "Hawkeye Pathfinder",
   "description": "Hawkeye cross reference research",
-  "version": "1.2.0",
+  "version": "1.2.1-dev",
   "preview": false,
   "license": "MIT",
   "engines": {
@@ -264,11 +264,11 @@
           "when": "never"
         }
       ],
-      "editor/context":[
+      "editor/context": [
         {
           "submenu": "Hawkeye-Pathfinder.EditorTools.menu",
           "when": "editorHasSelection",
-          "group":"0_HawkeyePathfinder"
+          "group": "0_HawkeyePathfinder"
         }
       ]
     },
@@ -403,11 +403,11 @@
         "category": "Hawkeye"
       },
       {
-        "command":"ThisIsACommand",
-          "when": "editorHasSelection",
-          "group":"navigation",
-          "title": "THIS_IS_A_COMMAND"
-        }
+        "command": "ThisIsACommand",
+        "when": "editorHasSelection",
+        "group": "navigation",
+        "title": "THIS_IS_A_COMMAND"
+      }
     ],
     "keybindings": []
   },
@@ -442,6 +442,6 @@
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "i": "^0.3.7",
-    "npm": "^10.9.2"
+    "npm": "^11.7.0"
   }
 }

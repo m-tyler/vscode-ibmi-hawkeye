@@ -7,7 +7,7 @@ import { SearchSession } from '../search/SearchSession';
 
 export interface IBMiIdentity {
   library: string;
-  file?: string;
+  object?: string;
   name?: string;
   extension?: string;
 }
@@ -17,8 +17,8 @@ export interface wItem {
   protected: boolean,
   library: string,
   name: string,
-  sourceFile: string,
-  sourceType: string,
+  object: string,
+  nameType: string,
   objType: string,
   searchTerm: string,
   searchTerms: string[]
@@ -29,8 +29,8 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
   ww.library = '';
   ww.name = '';
   ww.objType = '';
-  ww.sourceFile = '';
-  ww.sourceType = '';
+  ww.object = '';
+  ww.nameType = '';
   ww.protected = false;
   ww.searchTerm = searchText ?? '';
 
@@ -38,8 +38,7 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
     // Selection from object browser non-source objects
     ww.path = Code4i.sysNameInLocal(item.path);
     ww.protected = item.filter.protected;
-    ww.library = item.object.library;
-    ww.library = scrubLibrary(ww.library, `${commandName}`);
+    ww.library = scrubLibrary(item.object.library, `${commandName}`);
     ww.name = item.object.name;
     ww.objType = item.object.type;
   }
@@ -47,9 +46,8 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
     // Selection from object browser source member
     ww.path = Code4i.sysNameInLocal(item.path);
     ww.protected = item.member.protected;
-    ww.sourceFile = item.member.file;
-    ww.library = item.member.library;
-    ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
+    ww.object = item.member.file;
+    ww.library = scrubLibrary(item.member.library, `${commandName}`, (ww.object >= ''));
     ww.name = item.member.name;
     ww.objType = getSourceObjectType(ww.path)[0];
   }
@@ -71,7 +69,7 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
           const endValue: number = item.label.highlights[0][1];   // The second number in the tuple
           ww.searchTerm = item.label.label.substring(startValue, endValue);
           if (commandName === 'DSPSCNSRC') {
-            newpath = '*DOCLIBL/Q*/*ALL.*ALL';
+            newpath = '*DOCLIBL/Q*';
           }
           else {
             // DSPOBJU
@@ -85,7 +83,7 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
     }
     else if (item instanceof SearchSession) {
       if (commandName === 'DSPSCNSRC') {
-        newpath = `*DOCLIBL/Q*/*ALL.*ALL`;
+        newpath = `*DOCLIBL/Q*`;
       }
       else { newpath = item.searchItem; }
     }
@@ -93,15 +91,16 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
       // Probably came from command palette or second edit attempts 
       newpath = item;
     }
-    let pathParts = parseQSYSPath(newpath);
-    ww.path = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
+    newpath = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
+    ww.path = newpath;
     ww.objType = getSourceObjectType(ww.path, commandName)[0];
     ww.protected = item.readonly;
+    let pathParts = parseQSYSPath(newpath);
     ww.library = pathParts.library;
-    ww.sourceFile = pathParts.file||'';
+    ww.object = pathParts.object||'';
     ww.name = pathParts.name||'';
-    ww.sourceType = pathParts.extension||'';
-    ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.sourceFile >= ''));
+    ww.nameType = pathParts.extension||'';
+    ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
   }
   return ww;
 }

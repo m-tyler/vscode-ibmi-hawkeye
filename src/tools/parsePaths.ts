@@ -1,14 +1,15 @@
 import vscode, { Uri } from 'vscode';
+import path from 'path';
 import { Code4i, scrubLibrary, getSourceObjectType } from "./tools";
-import { MemberItem } from '@halcyontech/vscode-ibmi-types';
+// import { MemberItem, ObjectItem } from '@halcyontech/vscode-ibmi-types';
 import { HitSource } from '../search/HitSource';
 import { LineHit } from '../search/LineHit';
 import { SearchSession } from '../search/SearchSession';
 
 export interface IBMiIdentity {
-  library: string;
-  object?: string;
-  name?: string;
+  library?: string;
+  object: string;
+  member?: string;
   extension?: string;
 }
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -91,52 +92,162 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
       // Probably came from command palette or second edit attempts 
       newpath = item;
     }
+    // TODO: the different command need different values loaded. Come up with a pattern that fits best. 
+    // TODO: for example, DSPOBJU run from right-click on search results needs to use searchItem for object and not library.
     newpath = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
     ww.path = newpath;
     ww.objType = getSourceObjectType(ww.path, commandName)[0];
     ww.protected = item.readonly;
-    let pathParts = parseQSYSPath(newpath);
-    ww.library = pathParts.library;
-    ww.object = pathParts.object||'';
-    ww.name = pathParts.name||'';
-    ww.nameType = pathParts.extension||'';
+    let pathParts = parseQSYSPath(newpath, commandName);
+    ww.library = pathParts.library || '';
+    ww.object = pathParts.object || '';
+    ww.name = pathParts.member || '';
+    ww.nameType = pathParts.extension || '';
     ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
   }
   return ww;
 }
 /**
  * Parses a string representation of a QSYS identity.
- * Format: LIBRARY/FILE/NAME.extension (segments are optional except LIBRARY)
  */
-export function parseQSYSPath(pathStr: string): IBMiIdentity {
-  const segments = pathStr.split('/').filter(Boolean);
+export function parseQSYSPath(pathStr: string, commandName: string): IBMiIdentity {
+  let library: string | null = null;
+  let object: string = '';
+  let member: string | null = null;
+  let type: string | null = null;
 
-  // 1. First segment is always the Library (e.g., PRODLIB)
-  const library = segments[0];
-  // 2. Middle segment, if it exists, is the Source Physical File (e.g., QRPGLESRC)
-  const file = segments.length > 1 ? segments[1] : undefined;
-  // 3. Extract the last segment to check for name and extension
-  const lastSegment = segments.length > 1 ? segments.pop() || "" : "";
-  
-  let name: string | undefined;
-  let extension: string | undefined;
-  if (file !== lastSegment) {
-    // if exists get member and extension
-    if (lastSegment) {
-      const lastDotIndex = lastSegment.lastIndexOf('.');
-      if (lastDotIndex !== -1 && lastDotIndex !== 0) {
-        name = lastSegment.substring(0, lastDotIndex);
-        extension = lastSegment.substring(lastDotIndex + 1);
-      } else {
-        name = lastSegment; // name only, no extension
+  let pathParsed = path.parse(pathStr); // returns ParsedPath object
+  let segments = pathStr.split('/').filter(Boolean); // removes empty element for strings like //dir/dir/etc. 
+  // If DSPSCNSRC path could be [iasp]/[lib]/file/[mbr[.ext]] where file is only value required
+  // if DSPFILSET/DSPFILSETU/DSPOBJU/DSPPGMOBJ the path could be [iasp]/[lib]/object.[ext]
+  // if DSPPRCU the only thing needed is procedure name, which value do I take??
+  // if the number of segments is 1 and ther is s dot then i have an mbr.ext for DSPSCNSRC or obj.ext for others.
+
+  switch (commandName) {
+  case 'DSPSCNSRC':
+    switch (segments.length) {
+    case 4:
+      segments = segments.slice(1); // Remove the IASP drop to next section
+    case 3:
+      library = segments[0];
+      object = segments[1];
+      if (pathParsed.ext.length > 0) {
+        type = pathParsed.ext;
       }
+      member = pathParsed.name;
+      break;
+    case 2:
+      // If received an item with an extension assume its a source member
+      if (pathParsed.ext.length > 0) {
+        library = '*DOCLIBL';
+        object = segments[0];
+        member = pathParsed.name;
+        type = pathParsed.ext;
+      }
+      else {
+        library = segments[0];
+        object = segments[1];
+      }
+      break;
+    default:
+      if (pathParsed.ext.length > 0) {
+        library = '*DOCLIBL';
+        object = 'Q*';
+        member = pathParsed.name;
+        type = pathParsed.ext;
+      }
+      else {
+        library = '*DOCLIBL';
+        object = segments[0];
+        member = '*ALL';
+        type = '*ALL';
+      }
+    }
+    break;
+  case 'DSPPRCU':
+    break;
+
+  default:
+    //DSPFILSET/DSPFILSETU/DSPOBJU/DSPPGMOBJ
+    // [iasp]/[lib]/object.[ext]
+    switch (segments.length) {
+    case 3:
+      segments = segments.slice(1); // Remove the IASP drop to next section
+    case 2:
+      library = segments[0];
+      object = segments[1];
+      if (pathParsed.ext.length > 0) {
+        type = pathParsed.ext;
+      }
+      break;
+    default:
+      library = '*DOCLIBL';
+      object = segments[0];
+      if (pathParsed.ext.length > 0) {
+        type = pathParsed.ext;
+      }
+      break;
     }
   }
 
+
+  // if (segments.length >= 2) {
+  //   library = segments[segments.length - 2];
+  //   pathStr = segments[segments.length - 1];
+  // }
+  // else {
+  //   pathStr = segments[0];
+  // }
+  // const parts = pathStr.split('.');
+  // object = parts[0];
+  // if (parts.length > 1) {
+  //   type = parts[parts.length - 1];
+  // }
+
+  // let lastSegment = '';
+
+  // Slash search
+  // One token = object
+  //   if (segments.length === 1) {
+  //   library = '';
+  //   lastSegment = segments[0];
+  // }
+  // else{
+  //   // two+ tokens equals library + object
+  //   library = segments[0];
+  //   lastSegment = segments.length > 1 ? segments.pop() || "" : "";
+  // }
+
+  // Dot search
+  // one token = object
+  // two tokens = object+type
+  // two+ tokens = object+type, drop thrid token
+
+  // 1. First segment is always the Library (e.g., PRODLIB)
+  // 2. Middle segment, if it exists, is the Source Physical File (e.g., QRPGLESRC)
+  // const object = segments.length > 1 ? segments[1] : undefined;
+  // 3. Extract the last segment to check for name and extension
+  // const lastSegment = segments.length > 1 ? segments.pop() || "" : "";
+
+  // let name: string | undefined;
+  // let extension: string | undefined;
+  // if (object !== lastSegment) {
+  //   // if exists get member and extension
+  //   if (lastSegment) {
+  //     const lastDotIndex = lastSegment.lastIndexOf('.');
+  //     if (lastDotIndex !== -1 && lastDotIndex !== 0) {
+  //       name = lastSegment.substring(0, lastDotIndex);
+  //       extension = lastSegment.substring(lastDotIndex + 1);
+  //     } else {
+  //       name = lastSegment; // name only, no extension
+  //     }
+  //   }
+  // }
+
   return {
-    library: library,
-    ...(file && { file: file }),
-    ...(name && { name: name }),
-    ...(extension && { extension: extension }),
+    object: object,
+    ...(library && { library: library }),
+    ...(member && { name: member }),
+    ...(type && { type: type }),
   };
 }

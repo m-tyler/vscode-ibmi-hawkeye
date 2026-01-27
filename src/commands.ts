@@ -247,7 +247,7 @@ export namespace HwkI {
       return undefined;
     }
     else {
-      if (ww && ww.library !== '' && ww.name !== '' && ww.objType !== '') {
+      if (item) {
         promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
       }
     }
@@ -403,7 +403,9 @@ export namespace HwkI {
       return undefined;
     }
     else {
-      promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
+      if (item) {
+        promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
+      } 
     }
     const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
     // let namePattern: string = config.get<string>('useActions') || '';
@@ -541,7 +543,9 @@ export namespace HwkI {
       return undefined;
     }
     else {
-      promptedValue = `${ww.library}/${ww.object}.${ww.objType}`;
+      if (item) {
+        promptedValue = `${ww.library}/${ww.object?ww.object:ww.name}.${ww.objType}`;
+      } 
     }
     const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
     // let namePattern: string = config.get<string>('useActions') || '';

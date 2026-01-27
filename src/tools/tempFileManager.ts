@@ -1,6 +1,4 @@
-import * as vscode from 'vscode';
 import * as fs from 'fs/promises'; // For async file operations
-import * as path from 'path';
 
 export class TempFileManager {
     private tempFiles: Set<string>; // Stores absolute paths of temp files

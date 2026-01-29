@@ -78,7 +78,7 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
             // DSPPGMOBJ
             newpath = '*ALL/' + ww.searchTerm;
           }
-          console.log('newpath: ', newpath);
+          // console.log('newpath: ', newpath);
         }
       }
     }
@@ -105,6 +105,7 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
     ww.nameType = pathParts.extension || '';
     ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
   }
+  console.log(`${commandName}::`,item);
   return ww;
 }
 /**
@@ -115,6 +116,8 @@ export function parseQSYSPath(pathStr: string, commandName: string): IBMiIdentit
   let object: string = '';
   let member: string | null = null;
   let type: string | null = null;
+  const currIasp = Code4i.getCurrentIAspName();
+  let lastSegment = '';
 
   let pathParsed = path.parse(pathStr); // returns ParsedPath object
   let segments = pathStr.split('/').filter(Boolean); // removes empty element for strings like //dir/dir/etc. 
@@ -167,11 +170,69 @@ export function parseQSYSPath(pathStr: string, commandName: string): IBMiIdentit
   case 'DSPPRCU':
     break;
 
-  default:
-    //DSPFILSET/DSPFILSETU/DSPOBJU/DSPPGMOBJ
-    // [iasp]/[lib]/object.[ext]
+    // The end result is to end with LIB/FILE values
+  case 'DSPFILSET':
+  case 'DSPFILSETU':
+    lastSegment = segments[segments.length - 1];
+    // Remove the iasp reference if found
+    if (currIasp === segments[0]){
+      delete segments[0];
+    }
     switch (segments.length) {
-    case 3:
+    case 4: // [iasp]/[lib]/srcf/[mbr].[ext]
+      // drop iasp and mbr.ext
+      if (lastSegment === pathParsed.base) {
+        library = segments[1];
+        object = segments[2];
+      }
+    case 3: // [iasp]/[lib]/object.[ext]
+            // [lib]/srcf/[mbr].[ext]
+      // drop iasp and.ext
+      if (lastSegment === pathParsed.base) {
+        library = segments[1];
+        object = pathParsed.name; // object without extension for DSPFILSET/U commands
+      }
+      break;
+    case 2:
+      library = segments[0];
+      object = segments[1];
+      if (pathParsed.ext.length > 0) {
+        type = pathParsed.ext;
+      }
+      break;
+    default:
+      library = '*DOCLIBL';
+      object = segments[0];
+      if (pathParsed.ext.length > 0) {
+        type = pathParsed.ext;
+      }
+      break;
+    }
+    break;
+  
+  default: // DSPOBJU,DSPPGMOBJ
+
+    lastSegment = segments[segments.length - 1];
+    // Remove the iasp reference if found
+    if (currIasp === segments[0]){
+      // const segmentIasp = segments.shift();
+      delete segments[0];
+    }
+    switch (segments.length) {
+    case 4: // [iasp]/[lib]/srcf/[mbr].[ext]
+      // drop iasp and mbr.ext
+      if (lastSegment === pathParsed.base) {
+        library = segments[1];
+        object = segments[2];
+      }
+    case 3: // [iasp]/[lib]/object.[ext]
+            // [lib]/srcf/[mbr].[ext]
+      // drop iasp and.ext
+      if (lastSegment === pathParsed.base) {
+        library = segments[1];
+        object = segments[2];
+      }
+
       segments = segments.slice(1); // Remove the IASP drop to next section
     case 2:
       library = segments[0];

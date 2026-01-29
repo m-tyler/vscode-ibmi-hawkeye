@@ -1,0 +1,276 @@
+## Different sources for Hawkeye commands
+
+# From Search Results
+  DSPOBJU:: SearchSession {collapsibleState: 1, label: 'DSPPGMOBJ (1:15:26 PM)', id: 'DSPPGMOBJ_1:15:26 PM', runCommand: 'DSPPGMOBJ', searchItem: 'PRP03L', …}
+    arg1: SearchSession {collapsibleState: 1, label: 'DSPPGMOBJ (1:15:26 PM)', id: 'DSPPGMOBJ_1:15:26 PM', runCommand: 'DSPPGMOBJ', searchItem: 'PRP03L', …}
+    collapsibleState: 1
+    collaspseState: 1
+    contextValue: 'searchSession'
+    description: '(41 results) PRP03L'
+    id: 'DSPPGMOBJ_1:15:26 PM'
+    label: 'DSPPGMOBJ (1:15:26 PM)'
+    runCommand: 'DSPPGMOBJ'
+    searchItem: 'PRP03L'
+    searchTerm: ''
+    tooltip: 'Search results from DSPPGMOBJ\nSearch Item: PRP03L'
+  DSPSCNSRC:: SearchSession {collapsibleState: 1, label: 'DSPPGMOBJ (1:15:26 PM)', id: 'DSPPGMOBJ_1:15:26 PM', runCommand: 'DSPPGMOBJ', searchItem: 'PRP03L', …}
+    arg1: SearchSession {collapsibleState: 1, label: 'DSPPGMOBJ (1:15:26 PM)', id: 'DSPPGMOBJ_1:15:26 PM', runCommand: 'DSPPGMOBJ', searchItem: 'PRP03L', …}
+    collapsibleState: 1
+    collaspseState: 1
+    contextValue: 'searchSession'
+    description: '(41 results) PRP03L'
+    id: 'DSPPGMOBJ_1:15:26 PM'
+    label: 'DSPPGMOBJ (1:15:26 PM)'
+    runCommand: 'DSPPGMOBJ'
+    searchItem: 'PRP03L'
+    searchTerm: ''
+    tooltip: 'Search results from DSPPGMOBJ\nSearch Item: PRP03L'
+  DSPOBJU:: HitSource {collapsibleState: 1, label: 'PRPBATTB.SQL', result: {…}, searchTerm: '', path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', …}
+    arg1: HitSource {collapsibleState: 1, label: 'PRPBATTB.SQL', result: {…}, searchTerm: '', path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', …}
+    _searchTerm: 'PRPBATTB'
+    collapsibleState: 1
+    contextValue: '*DBF:SQL'
+    description: '(6 hits) Payroll Hours Batch File (RPG-FILE)'
+    iconPath: Ti {id: 'file', color: undefined}
+    label: 'PRPBATTB.SQL'
+    path: 'WFISRC/QDDSSRC/PRPBATTB.SQL'
+    readonly: false
+    result: {fileName: 'PRPBATTB', filePath: '/QSYS.LIB/WFISRC.LIB/QDDSSRC.FILE/PRPBATTB.SQL', fileText: 'Payroll Hours Batch File', howUsed: 'RPG-FILE', matchCount: 6, …}
+    searchTerm: ''
+    searchTokens: (1) ['PRPBATTB']
+    sourceName: 'PRPBATTB'
+  DSPFILSETU:: HitSource {collapsibleState: 1, label: 'PRPBATTB.SQL', result: {…}, searchTerm: '', path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', …}
+    arg1: HitSource {collapsibleState: 1, label: 'PRPBATTB.SQL', result: {…}, searchTerm: '', path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', …}
+    _searchTerm: 'PRPBATTB'
+    collapsibleState: 1
+    contextValue: '*DBF:SQL'
+    description: '(6 hits) Payroll Hours Batch File (RPG-FILE)'
+    iconPath: Ti {id: 'file', color: undefined}
+    label: 'PRPBATTB.SQL'
+    path: 'WFISRC/QDDSSRC/PRPBATTB.SQL'
+    readonly: false
+    result: {fileName: 'PRPBATTB', filePath: '/QSYS.LIB/WFISRC.LIB/QDDSSRC.FILE/PRPBATTB.SQL', fileText: 'Payroll Hours Batch File', howUsed: 'RPG-FILE', matchCount: 6, …}
+    searchTerm: ''
+    searchTokens: (1) ['PRPBATTB']
+    sourceName: 'PRPBATTB'
+  DSPSCNSRC:: HitSource {collapsibleState: 1, label: 'PRPBATTB.SQL', result: {…}, searchTerm: '', path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', …}
+    arg1: HitSource {collapsibleState: 1, label: 'PRPBATTB.SQL', result: {…}, searchTerm: '', path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', …}
+    _searchTerm: 'PRPBATTB'
+    collapsibleState: 1
+    contextValue: '*DBF:SQL'
+    description: '(6 hits) Payroll Hours Batch File (RPG-FILE)'
+    iconPath: Ti {id: 'file', color: undefined}
+    label: 'PRPBATTB.SQL'
+    path: 'WFISRC/QDDSSRC/PRPBATTB.SQL'
+    readonly: false
+    result: {fileName: 'PRPBATTB', filePath: '/QSYS.LIB/WFISRC.LIB/QDDSSRC.FILE/PRPBATTB.SQL', fileText: 'Payroll Hours Batch File', howUsed: 'RPG-FILE', matchCount: 6, …}
+    searchTerm: ''
+    searchTokens: (1) ['PRPBATTB']
+    sourceName: 'PRPBATTB'
+  DSPSCNSRC:: HitSource {collapsibleState: 1, label: 'PRPBATTB.SQL', result: {…}, searchTerm: '', path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', …}
+    arg1: HitSource {collapsibleState: 1, label: 'PRPBATTB.SQL', result: {…}, searchTerm: '', path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', …}
+    _searchTerm: 'PRPBATTB'
+    collapsibleState: 1
+    contextValue: '*DBF:SQL'
+    description: '(6 hits) Payroll Hours Batch File (RPG-FILE)'
+    iconPath: Ti {id: 'file', color: undefined}
+    label: 'PRPBATTB.SQL'
+    path: 'WFISRC/QDDSSRC/PRPBATTB.SQL'
+    readonly: false
+    result: {fileName: 'PRPBATTB', filePath: '/QSYS.LIB/WFISRC.LIB/QDDSSRC.FILE/PRPBATTB.SQL', fileText: 'Payroll Hours Batch File', howUsed: 'RPG-FILE', matchCount: 6, …}
+    searchTerm: ''
+    searchTokens: (1) ['PRPBATTB']
+    sourceName: 'PRPBATTB'
+  DSPOBJU:: LineHit {collapsibleState: 0, label: {…}, path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', contextValue: 'lineHit', description: '0014.00', …}
+    arg1: LineHit {collapsibleState: 0, label: {…}, path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', contextValue: 'lineHit', description: '0014.00', …}
+    collapsibleState: 0
+    command: {command: 'code-for-ibmi.openWithDefaultMode', title: 'Open', arguments: Array(3)}
+    contextValue: 'lineHit'
+    description: '0014.00'
+    label: {label: 'CREATE TABLE PRPBATTB (PEBAT, PEEMP, PECON, PEYEAR, PEWKN, PEDAYOW,', highlights: Array(1)}
+    path: 'WFISRC/QDDSSRC/PRPBATTB.SQL'
+  DSPPGMOBJ:: LineHit {collapsibleState: 0, label: {…}, path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', contextValue: 'lineHit', description: '0020.00', …}
+    arg1: LineHit {collapsibleState: 0, label: {…}, path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', contextValue: 'lineHit', description: '0020.00', …}
+    collapsibleState: 0
+    command: {command: 'code-for-ibmi.openWithDefaultMode', title: 'Open', arguments: Array(3)}
+    contextValue: 'lineHit'
+    description: '0020.00'
+    label: {label: 'LABEL ON TABLE PRPBATTB', highlights: Array(1)}
+    path: 'WFISRC/QDDSSRC/PRPBATTB.SQL'
+  DSPPRCU:: LineHit {collapsibleState: 0, label: {…}, path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', contextValue: 'lineHit', description: '0014.00', …}
+    arg1: LineHit {collapsibleState: 0, label: {…}, path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', contextValue: 'lineHit', description: '0014.00', …}
+    collapsibleState: 0
+    command: {command: 'code-for-ibmi.openWithDefaultMode', title: 'Open', arguments: Array(3)}
+    contextValue: 'lineHit'
+    description: '0014.00'
+    label: {label: 'CREATE TABLE PRPBATTB (PEBAT, PEEMP, PECON, PEYEAR, PEWKN, PEDAYOW,', highlights: Array(1)}
+    path: 'WFISRC/QDDSSRC/PRPBATTB.SQL'
+  DSPSCNSRC:: LineHit {collapsibleState: 0, label: {…}, path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', contextValue: 'lineHit', description: '0014.00', …}
+    arg1: LineHit {collapsibleState: 0, label: {…}, path: 'WFISRC/QDDSSRC/PRPBATTB.SQL', contextValue: 'lineHit', description: '0014.00', …}
+    collapsibleState: 0
+    command: {command: 'code-for-ibmi.openWithDefaultMode', title: 'Open', arguments: Array(3)}
+    contextValue: 'lineHit'
+    description: '0014.00'
+    label: {label: 'CREATE TABLE PRPBATTB (PEBAT, PEEMP, PECON, PEYEAR, PEWKN, PEDAYOW,', highlights: Array(1)}
+    path: 'WFISRC/QDDSSRC/PRPBATTB.SQL'
+
+# From within Editor
+  DSPSCNSRC:: lc {scheme: 'member', authority: '', path: '/WFISRC/QRPGSRC/PRP03L.RPGLE', query: 'readonly=true', fragment: '', …}
+    arg1: lc {scheme: 'member', authority: '', path: '/WFISRC/QRPGSRC/PRP03L.RPGLE', query: 'readonly=true', fragment: '', …}
+    _formatted: 'member:/WFISRC/QRPGSRC/PRP03L.RPGLE?readonly%3Dtrue'
+    _fsPath: '\\WFISRC\\QRPGSRC\\PRP03L.RPGLE'
+    path: '/WFISRC/QRPGSRC/PRP03L.RPGLE'
+    query: 'readonly=true'
+    scheme: 'member'
+  DSPOBJU:: lc {scheme: 'member', authority: '', path: '*ALL/PRPPCONT', query: 'readonly=true', fragment: '', …}
+    arg1: lc {scheme: 'member', authority: '', path: '*ALL/PRPPCONT', query: 'readonly=true', fragment: '', …}
+    _formatted: 'member:/WFISRC/QRPGSRC/PRP03L.RPGLE?readonly%3Dtrue'
+    _fsPath: '\\WFISRC\\QRPGSRC\\PRP03L.RPGLE'
+    path: '*ALL/PRPPCONT'
+    query: 'readonly=true'
+    scheme: 'member'
+  DSPFILSETU:: lc {scheme: 'member', authority: '', path: '*DOCLIBL/PRPPCONT', query: 'readonly=true', fragment: '', …}
+    arg1: lc {scheme: 'member', authority: '', path: '*DOCLIBL/PRPPCONT', query: 'readonly=true', fragment: '', …}
+    _formatted: 'member:/WFISRC/QRPGSRC/PRP03L.RPGLE?readonly%3Dtrue'
+    _fsPath: '\\WFISRC\\QRPGSRC\\PRP03L.RPGLE'
+    path: '*DOCLIBL/PRPPCONT'
+    query: 'readonly=true'
+    scheme: 'member'
+  DSPPGMOBJ:: lc {scheme: 'member', authority: '', path: '*ALL/PRPPCONT', query: 'readonly=true', fragment: '', …}
+    arg1: lc {scheme: 'member', authority: '', path: '*ALL/PRPPCONT', query: 'readonly=true', fragment: '', …}
+    _formatted: 'member:/WFISRC/QRPGSRC/PRP03L.RPGLE?readonly%3Dtrue'
+    _fsPath: '\\WFISRC\\QRPGSRC\\PRP03L.RPGLE'
+    path: '*ALL/PRPPCONT'
+    query: 'readonly=true'
+    scheme: 'member'
+  DSPPRCU:: lc {scheme: 'member', authority: '', path: 'PRPPCONT', query: 'readonly=true', fragment: '', …}
+    arg1: lc {scheme: 'member', authority: '', path: 'PRPPCONT', query: 'readonly=true', fragment: '', …}
+    _formatted: 'member:/WFISRC/QRPGSRC/PRP03L.RPGLE?readonly%3Dtrue'
+    _fsPath: '\\WFISRC\\QRPGSRC\\PRP03L.RPGLE'
+    path: 'PRPPCONT'
+    query: 'readonly=true'
+    scheme: 'member'
+
+# From source member list
+  DSPOBJU:: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    command: {command: 'code-for-ibmi.openWithDefaultMode', title: 'Open Member', arguments: Array(2)}
+    contextValue: 'member_readonly'
+    description: 'Return Employee Utility information'
+    filter: {name: 'Hawkeye Testing - source ref', filterType: 'simple', library: 'WFISRC', object: '*', types: Array(1), …}
+    iconPath: Ti {id: 'lock-small', color: undefined}
+    label: 'prp06yrg.rpgle'
+    member: {asp: 'WIASP', library: 'WFISRC', file: 'QRPGSRC', name: 'PRP06YRG', extension: 'RPGLE', …}
+    path: 'WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE'
+    readonly: true
+    resourceUri: lc {scheme: 'member', authority: '', path: '/WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE', query: 'readonly=true', fragment: '', …}
+  DSPPGMOBJ:: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    command: {command: 'code-for-ibmi.openWithDefaultMode', title: 'Open Member', arguments: Array(2)}
+    contextValue: 'member_readonly'
+    description: 'Return Employee Utility information'
+    filter: {name: 'Hawkeye Testing - source ref', filterType: 'simple', library: 'WFISRC', object: '*', types: Array(1), …}
+    iconPath: Ti {id: 'lock-small', color: undefined}
+    label: 'prp06yrg.rpgle'
+    member: {asp: 'WIASP', library: 'WFISRC', file: 'QRPGSRC', name: 'PRP06YRG', extension: 'RPGLE', …}
+    path: 'WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE'
+    readonly: true
+    resourceUri: lc {scheme: 'member', authority: '', path: '/WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE', query: 'readonly=true', fragment: '', …}
+  DSPFILSETU:: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    command: {command: 'code-for-ibmi.openWithDefaultMode', title: 'Open Member', arguments: Array(2)}
+    contextValue: 'member_readonly'
+    description: 'Return Employee Utility information'
+    filter: {name: 'Hawkeye Testing - source ref', filterType: 'simple', library: 'WFISRC', object: '*', types: Array(1), …}
+    iconPath: Ti {id: 'lock-small', color: undefined}
+    label: 'prp06yrg.rpgle'
+    member: {asp: 'WIASP', library: 'WFISRC', file: 'QRPGSRC', name: 'PRP06YRG', extension: 'RPGLE', …}
+    path: 'WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE'
+    readonly: true
+    resourceUri: lc {scheme: 'member', authority: '', path: '/WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE', query: 'readonly=true', fragment: '', …}
+  DSPPRCU:: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    command: {command: 'code-for-ibmi.openWithDefaultMode', title: 'Open Member', arguments: Array(2)}
+    contextValue: 'member_readonly'
+    description: 'Return Employee Utility information'
+    filter: {name: 'Hawkeye Testing - source ref', filterType: 'simple', library: 'WFISRC', object: '*', types: Array(1), …}
+    iconPath: Ti {id: 'lock-small', color: undefined}
+    label: 'prp06yrg.rpgle'
+    member: {asp: 'WIASP', library: 'WFISRC', file: 'QRPGSRC', name: 'PRP06YRG', extension: 'RPGLE', …}
+    path: 'WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE'
+    readonly: true
+    resourceUri: lc {scheme: 'member', authority: '', path: '/WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE', query: 'readonly=true', fragment: '', …}
+  DSPSCNSRC:: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: Ka {collapsibleState: 0, label: 'prp06yrg.rpgle', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    command: {command: 'code-for-ibmi.openWithDefaultMode', title: 'Open Member', arguments: Array(2)}
+    contextValue: 'member_readonly'
+    description: 'Return Employee Utility information'
+    filter: {name: 'Hawkeye Testing - source ref', filterType: 'simple', library: 'WFISRC', object: '*', types: Array(1), …}
+    iconPath: Ti {id: 'lock-small', color: undefined}
+    label: 'prp06yrg.rpgle'
+    member: {asp: 'WIASP', library: 'WFISRC', file: 'QRPGSRC', name: 'PRP06YRG', extension: 'RPGLE', …}
+    path: 'WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE'
+    readonly: true
+    resourceUri: lc {scheme: 'member', authority: '', path: '/WIASP/WFISRC/QRPGSRC/PRP06YRG.RPGLE', query: 'readonly=true', fragment: '', …}
+
+# From object list
+  DSPOBJU:: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    contextValue: 'object.pgm.RPGLE'
+    description: 'Return Employee Utility information (RPGLE)'
+    filter: {name: 'Hawkeye Testing - object ref', filterType: 'simple', library: 'WFIOBJ,WFIDTA', object: 'PRPEAHPF,PRP06YRG,PRP03L,PRP00AFN09, PRP00DRG,PRP00ASP', types: Array(1), …}
+    label: 'prp06yrg.pgm'
+    library: ''
+    object: {library: 'WFIOBJ', name: 'PRP06YRG', type: '*PGM', attribute: 'RPGLE', text: 'Return Employee Utility information', …}
+    path: 'WFIOBJ/PRP06YRG'
+    resourceUri: lc {scheme: 'object', authority: '', path: '/WFIOBJ/PRP06YRG.PGM', query: '', fragment: 'RPGLE', …}
+  DSPPGMOBJ:: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    contextValue: 'object.pgm.RPGLE'
+    description: 'Return Employee Utility information (RPGLE)'
+    filter: {name: 'Hawkeye Testing - object ref', filterType: 'simple', library: 'WFIOBJ,WFIDTA', object: 'PRPEAHPF,PRP06YRG,PRP03L,PRP00AFN09, PRP00DRG,PRP00ASP', types: Array(1), …}
+    label: 'prp06yrg.pgm'
+    library: ''
+    object: {library: 'WFIOBJ', name: 'PRP06YRG', type: '*PGM', attribute: 'RPGLE', text: 'Return Employee Utility information', …}
+    path: 'WFIOBJ/PRP06YRG'
+    resourceUri: lc {scheme: 'object', authority: '', path: '/WFIOBJ/PRP06YRG.PGM', query: '', fragment: 'RPGLE', …}
+  DSPFILSETU:: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    contextValue: 'object.pgm.RPGLE'
+    description: 'Return Employee Utility information (RPGLE)'
+    filter: {name: 'Hawkeye Testing - object ref', filterType: 'simple', library: 'WFIOBJ,WFIDTA', object: 'PRPEAHPF,PRP06YRG,PRP03L,PRP00AFN09, PRP00DRG,PRP00ASP', types: Array(1), …}
+    label: 'prp06yrg.pgm'
+    library: ''
+    object: {library: 'WFIOBJ', name: 'PRP06YRG', type: '*PGM', attribute: 'RPGLE', text: 'Return Employee Utility information', …}
+    path: 'WFIOBJ/PRP06YRG'
+    resourceUri: lc {scheme: 'object', authority: '', path: '/WFIOBJ/PRP06YRG.PGM', query: '', fragment: 'RPGLE', …}
+  DSPPRCU:: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    contextValue: 'object.pgm.RPGLE'
+    description: 'Return Employee Utility information (RPGLE)'
+    filter: {name: 'Hawkeye Testing - object ref', filterType: 'simple', library: 'WFIOBJ,WFIDTA', object: 'PRPEAHPF,PRP06YRG,PRP03L,PRP00AFN09, PRP00DRG,PRP00ASP', types: Array(1), …}
+    label: 'prp06yrg.pgm'
+    library: ''
+    object: {library: 'WFIOBJ', name: 'PRP06YRG', type: '*PGM', attribute: 'RPGLE', text: 'Return Employee Utility information', …}
+    path: 'WFIOBJ/PRP06YRG'
+    resourceUri: lc {scheme: 'object', authority: '', path: '/WFIOBJ/PRP06YRG.PGM', query: '', fragment: 'RPGLE', …}
+  DSPSCNSRC:: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    arg1: za {collapsibleState: 0, label: 'prp06yrg.pgm', params: {…}, iconPath: Ti, filter: {…}, …}
+    collapsibleState: 0
+    contextValue: 'object.pgm.RPGLE'
+    description: 'Return Employee Utility information (RPGLE)'
+    filter: {name: 'Hawkeye Testing - object ref', filterType: 'simple', library: 'WFIOBJ,WFIDTA', object: 'PRPEAHPF,PRP06YRG,PRP03L,PRP00AFN09, PRP00DRG,PRP00ASP', types: Array(1), …}
+    label: 'prp06yrg.pgm'
+    library: ''
+    object: {library: 'WFIOBJ', name: 'PRP06YRG', type: '*PGM', attribute: 'RPGLE', text: 'Return Employee Utility information', …}
+    path: 'WFIOBJ/PRP06YRG'
+    resourceUri: lc {scheme: 'object', authority: '', path: '/WFIOBJ/PRP06YRG.PGM', query: '', fragment: 'RPGLE', …}

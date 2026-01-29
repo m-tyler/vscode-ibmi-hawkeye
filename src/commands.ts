@@ -108,6 +108,7 @@ export namespace HwkI {
         ww.searchTerm = ww.searchTerms.join(',');
       }
     } else {
+      console.log('DSPSCNSRC ::: promptedValue ->',promptedValue);
       let input = await vscode.window.showInputBox({
         prompt: l10n.t(`See the help for DSPSCNSRC for selectable input values`),
         title: l10n.t(`Search source file using DSPSCNSRC`),
@@ -248,7 +249,7 @@ export namespace HwkI {
     }
     else {
       if (item) {
-        promptedValue = `${ww.library}/${ww.name}.${ww.objType}`;
+        promptedValue = `${ww.library}/${ww.object}`;
       }
     }
     const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
@@ -280,6 +281,7 @@ export namespace HwkI {
       }
 
     } else {
+      console.log('DSPFILSETU ::: promptedValue ->',promptedValue);
       const input = await vscode.window.showInputBox({
         prompt: l10n.t(`See the help for DSPFILSETU for selectable input values`),
         title: l10n.t(`Display File Set Where Used`),
@@ -431,6 +433,7 @@ export namespace HwkI {
         ww.searchTerm = keywords.SCAN || '';
       }
     } else {
+      console.log('DSPPGMOBJ ::: promptedValue ->',promptedValue);
       const input = await vscode.window.showInputBox({
         prompt: l10n.t(`See the help for DSPPGMOBJ for selectable input value`),
         title: l10n.t(`Display Program Objects`),
@@ -575,6 +578,7 @@ export namespace HwkI {
         howUsed = keywords.HOWUSED || '';
       }
     } else {
+      console.log('DSPOBJU ::: promptedValue ->',promptedValue);
       const input = await vscode.window.showInputBox({
         prompt: l10n.t(`Find where object is used by. See the help for DSPOBJU for selectable input values`),
         title: l10n.t(`Display Object Where Used`),
@@ -730,6 +734,7 @@ export namespace HwkI {
         // howUsed = keywords.HOWUSED || '';
       }
     } else {
+      console.log('DSPPRCU ::: promptedValue ->',promptedValue);
       const input = await vscode.window.showInputBox({
         prompt: l10n.t(`Find where procedure is used by. See the help for DSPPRCU for selectable input values`),
         title: l10n.t(`Display Procedure Where Used`),

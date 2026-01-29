@@ -312,3 +312,61 @@ export function parseQSYSPath(pathStr: string, commandName: string): IBMiIdentit
     ...(type && { type: type }),
   };
 }
+type ParsedPath = {
+  schema: string | null;
+  item: string;
+  partition: string | null;
+  type: string | null;
+};
+
+function parsePath(path: string, knownDb?: string): ParsedPath {
+  let schema: string | null = null;
+  let item: string;
+  let partition: string | null = null;
+  let type: string | null = null;
+
+  // If a known db name is provided, strip it out
+  if (knownDb && path.startsWith(knownDb + "/")) {
+    path = path.substring(knownDb.length + 1);
+  }
+
+  const segments = path.split("/").filter(s => s.length > 0);
+
+  if (segments.length === 3) {
+    // schema/item/partition.type
+    schema = segments[0];
+    item = segments[1];
+    const [p, t] = segments[2].split(".");
+    partition = p || null;
+    type = t || null;
+  } else if (segments.length === 2) {
+    // schema/item[.type]
+    schema = segments[0];
+    const [i, t] = segments[1].split(".");
+    item = i;
+    type = t || null;
+  } else if (segments.length === 1) {
+    // item[.type]
+    const [i, t] = segments[0].split(".");
+    item = i;
+    type = t || null;
+  } else {
+    throw new Error("Unexpected path format: " + path);
+  }
+
+  return { schema, item, partition, type };
+}
+
+// // Examples
+// const currIasp = Code4i.getCurrentIAspName();
+// console.log(parsePath("db/schema/item.type", "db"));
+// // { schema: 'schema', item: 'item', partition: null, type: 'type' }
+
+// console.log(parsePath("schema/item/partition.type", "db"));
+// // { schema: 'schema', item: 'item', partition: 'partition', type: 'type' }
+
+// console.log(parsePath("schema/item", "db"));
+// // { schema: 'schema', item: 'item', partition: null, type: null }
+
+// console.log(parsePath("item.table", "db"));
+// // { schema: null, item: 'item', partition: null, type: 'table' }

@@ -41,6 +41,7 @@ export class HitSource extends vscode.TreeItem {
     vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:hitSource`, this.contextValue);
   }
   getPath(){return this.path;}
+  getSourceName(){return this.sourceName;}
 
   async getChildren(): Promise<LineHit[]> {
     return this.result.matches.map((match:any) => new LineHit(this.searchTokens, this.path, match, this.readonly));

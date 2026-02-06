@@ -93,6 +93,7 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
     else {
       // Probably came from command palette or second edit attempts 
       newpath = item;
+      ww.searchTerm = searchText ?? '';
     }
     newpath = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
     ww.path = newpath;

@@ -1,7 +1,8 @@
 # Change log
-## Version 1.2.0
+## Version 1.2.1
   * Fix for issue #6, (Search results issue when selecting from search hit element)
   * Minor bug fixes
+  * Fix for issue #15, Hawkeye Pathfinder commands not found. 
 ## Version 1.1.0
   * Added feature where user can select text in editor, right-click on new menu to run a Hawkeye command.
   * Configuration setting to control expanded or collapsed results

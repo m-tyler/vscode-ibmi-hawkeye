@@ -33,7 +33,7 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
   ww.object = '';
   ww.nameType = '';
   ww.protected = false;
-  
+
   if (item && item.object) {
     // Selection from object browser non-source objects
     ww.path = Code4i.sysNameInLocal(item.path);
@@ -55,6 +55,7 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
     ww.searchTerm = searchText ?? ww.name;
   }
   else if (item) {
+    const currIasp = Code4i.getCurrentIAspName();
     let newpath = ``;
     if (item instanceof Uri) {
       // This more than likely comes from right clicking in editor area
@@ -68,19 +69,19 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
     else if (item instanceof HitSource) {
       // This more than likely comes from the search results, right click
       if (commandName === 'DSPSCNSRC') {
-            ww.searchTerm = searchText ?? (item.getSourceName()||'');
-          }
-          else {
-            newpath = item.getPath();
-          }
-        }
-        else if (item instanceof LineHit) {
-          // console.log('item: ', item);
-          if (item.label) {
-            if (typeof item.label !== 'string' && item.label.highlights) {
-              const startValue: number = item.label.highlights[0][0];   // The first number in the tuple
-              const endValue: number = item.label.highlights[0][1];   // The second number in the tuple
-              ww.searchTerm = searchText ?? (item.label.label.substring(startValue, endValue)||'');
+        ww.searchTerm = searchText ?? (item.getSourceName() || '');
+      }
+      else {
+        newpath = item.getPath();
+      }
+    }
+    else if (item instanceof LineHit) {
+      // console.log('item: ', item);
+      if (item.label) {
+        if (typeof item.label !== 'string' && item.label.highlights) {
+          const startValue: number = item.label.highlights[0][0];   // The first number in the tuple
+          const endValue: number = item.label.highlights[0][1];   // The second number in the tuple
+          ww.searchTerm = searchText ?? (item.label.label.substring(startValue, endValue) || '');
         }
       }
     }
@@ -99,15 +100,25 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
     ww.path = newpath;
     ww.objType = getSourceObjectType(ww.path, commandName)[0];
     ww.protected = item.readonly;
-    const currIasp = Code4i.getCurrentIAspName();
+
     let pathParts = parsePath(ww.path, currIasp);
-    ww.library = pathParts.library || '';
-    ww.object = pathParts.object || '';
-    ww.name = pathParts.member || '';
-    ww.nameType = pathParts.type || '';
-    ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
+    // After all that work DSPSCNSRC needs the token in object if only one token passed
+    const filledCount = Object.values(pathParts).filter(value =>
+      value !== undefined && value !== null && value !== "" 
+    ).length;
+    if (commandName === 'DSPSCNSRC' && filledCount === 1) {
+      // This special case if for when DSPSCNSRC is run but only the library is entered in
+      ww.library = pathParts.object || '';
+    }
+    else {
+      ww.library = pathParts.library || '';
+      ww.object = pathParts.object || '';
+      ww.name = pathParts.member || '';
+      ww.nameType = pathParts.type || '';
+      ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
+    }
   }
-  console.log(`${commandName}::`,item);
+  console.log(`${commandName}::`, item);
   return ww;
 }
 

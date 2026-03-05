@@ -49,7 +49,8 @@ export namespace HawkeyeSearch {
       });
       runDSPSCNSRC += ` SCAN(${stringofSearchTokens})`;
       let cmdResult: CommandResult;
-      cmdResult = await Code4i.runCommand({ command: runDSPSCNSRC, environment: `ile`, noLibList: true });
+      // cmdResult = await Code4i.runCommand({ command: runDSPSCNSRC, environment: `ile`, --noLibList: true });
+      cmdResult = await Code4i.runCommand({ command: runDSPSCNSRC, environment: `ile` });
       const resultsExist = await Code4i.checkObject(`${tempLibrary}`, `${tempName1}`, `*FILE`);
       if (!resultsExist) {
         throw new Error(l10n.t('No results for Display Scan Source.'));
@@ -108,7 +109,8 @@ export namespace HawkeyeSearch {
         outfile: `${tempLibrary}/${tempName1}`.toLocaleUpperCase(),
         outmbr: `HWKDSPFSU`,
       });
-      let cmdResult = await Code4i.runCommand({ command: runDSPFILSETU, environment: `ile`, noLibList: true });
+      // let cmdResult = await Code4i.runCommand({ command: runDSPFILSETU, environment: `ile`, --noLibList: true });
+      let cmdResult = await Code4i.runCommand({ command: runDSPFILSETU, environment: `ile` });
       if (cmdResult.code !== 0) { throw new Error(`${connection.sysNameInAmerican(library)}/${connection.sysNameInAmerican(dbFile)}    \n` + cmdResult.stderr); }
       const resultSetQty = await Code4i!.runSQL(`select count(*) as RS_QTY from ${tempLibrary}.${tempName1}`);
       if (resultSetQty.length === 0 || resultSetQty[0].RS_QTY === 0) { throw new Error(`No records found in Hawkeye database.`); }
@@ -184,7 +186,8 @@ export namespace HawkeyeSearch {
         outfile: `${tempLibrary}/${tempName1}`.toLocaleUpperCase(),
         outmbr: `DSPPGMOBJ`,
       });
-      let cmdResult = await Code4i.runCommand({ command: runDSPPGMOBJ, environment: `ile`, noLibList: true });
+      // let cmdResult = await Code4i.runCommand({ command: runDSPPGMOBJ, environment: `ile`, --noLibList: true });
+      let cmdResult = await Code4i.runCommand({ command: runDSPPGMOBJ, environment: `ile` });
       if (cmdResult.code !== 0) { throw new Error(`${connection.sysNameInAmerican(library)}/${connection.sysNameInAmerican(program)}    \n` + cmdResult.stderr); }
       const resultSetQty = await Code4i!.runSQL(`select count(*) as RS_QTY from ${tempLibrary}.${tempName1}`);
       if (resultSetQty.length === 0 || resultSetQty[0].RS_QTY === 0) { throw new Error(`No records found in Hawkeye database.`); }
@@ -278,7 +281,8 @@ export namespace HawkeyeSearch {
         outfile: `${tempLibrary.toLocaleUpperCase()}/${tempName1.toLocaleUpperCase()}`,
         outmbr: `DSPOBJU`,
       });
-      let cmdResult = await Code4i.runCommand({ command: runDSPOBJU, environment: `ile`, noLibList: true });
+      // let cmdResult = await Code4i.runCommand({ command: runDSPOBJU, environment: `ile`, --noLibList: true });
+      let cmdResult = await Code4i.runCommand({ command: runDSPOBJU, environment: `ile` });
       if (cmdResult.code !== 0) { throw new Error(`${connection.sysNameInAmerican(library)}/${connection.sysNameInAmerican(object)}    \n` + cmdResult.stderr); }
       // discover output quantity
       const resultSetQty = await Code4i!.runSQL(`select count(*) as RS_QTY from ${tempLibrary}.${tempName1}`);
@@ -345,7 +349,8 @@ export namespace HawkeyeSearch {
         outfile: `${tempLibrary.toLocaleUpperCase()}/${tempName1.toLocaleUpperCase()}`,
         outmbr: `DSPPRCU`,
       });
-      let cmdResult = await Code4i.runCommand({ command: runDSPPRCU, environment: `ile`, noLibList: true });
+      // let cmdResult = await Code4i.runCommand({ command: runDSPPRCU, environment: `ile`, --noLibList: true });
+      let cmdResult = await Code4i.runCommand({ command: runDSPPRCU, environment: `ile` });
       if (cmdResult.code !== 0) { throw new Error(`${connection.sysNameInAmerican(procedure)}    \n` + cmdResult.stderr); }
       // discover output quantity
       const resultSetQty = await Code4i!.runSQL(`select count(*) as RS_QTY from ${tempLibrary}.${tempName1}`);

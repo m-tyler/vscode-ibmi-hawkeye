@@ -14,7 +14,6 @@ export namespace HwkI {
     let ww = <wItem>{};
     let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
     let promptedValue = ``;
-    ww.searchTerms = [];
     ww = parseItem(item, commandName, searchText);
     if (!ww) {
       vscode.window.showErrorMessage(l10n.t(`No item selected for HAWKEYE/${commandName}.`));
@@ -48,6 +47,7 @@ export namespace HwkI {
       // }
       // promptedValue = '*DOCLIBL/Q*/*ALL';
     }
+    ww.searchTerms = [];
     let keywords: Record<string, string>;
     const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
     // let namePattern: string = config.get<string>('useActions') || '';
@@ -162,12 +162,14 @@ export namespace HwkI {
     if (ww.path) {
 
       if (ww.object !== ` `) {
-
+        
+        if (ww.searchTerm === `` || !ww.searchTerm ) {
         ww.searchTerm = await vscode.window.showInputBox({
           prompt: l10n.t(`Use command ${commandName} to search {0}.`, ww.path),
           placeHolder: l10n.t(`Enter the search for term`),
           value: ww.searchTerm,
         }) || 'searchCanceled';
+      }
 
         if (ww.searchTerm === 'searchCanceled') { } else {
           try {

@@ -14,37 +14,33 @@ export namespace HwkI {
     let ww = <wItem>{};
     let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
     let promptedValue = ``;
+    // Let make up the prompted values from inputs, if we can
     ww = parseItem(item, commandName, searchText);
     if (!ww) {
       vscode.window.showErrorMessage(l10n.t(`No item selected for HAWKEYE/${commandName}.`));
       return undefined;
     }
     else {
-      // if (item) {
-      //   if (!searchText) {
-      //     // Does request come from the OBJECT view if base object browser
-      //     if (/^object\./.test(item.contextValue)) {
-      //       promptedValue = `*DOCLIBL/Q*.*ALL`;
-      //       searchText = ww.name;
-      //       ww.name = '';
-      //     }
-      //     else if (/^member_/.test(item.contextValue)) {
-      //       promptedValue = `${ww.library}/${ww.object}`;
-      //       searchText = ww.name;
-      //       ww.name = '';
-      //     }
-      //     else {
-      //       promptedValue = `${ww.library}/${ww.object !== '' ? ww.object + '/' : ''}${ww.name}.${ww.nameType}`;
-      //     }
-      //   }
-      //   else {
-      //     if (ww.object) {
-      //       promptedValue = `${ww.library}/${ww.object}`;
-      //     } else {
-      //       promptedValue = `${ww.library}/${ww.name}`;
-      //     }
-      //   }
-      // }
+      // From source: what promptedValue should be
+      //    Source filter: Grab library
+      //    Object filter: *DOCLIBL or *LIBL
+      //    URI: *DOCLIBL or *LIBL
+      //    SearchSession: *DOCLIBL or *LIBL
+      //    HitSource: *DOCLIBL or *LIBL
+      //    LineHit: *DOCLIBL or *LIBL
+      //    Anything else like command prompt?: *DOCLIBL or *LIBL
+      if (item && item.member) {
+        ww.library = item.member.library;
+        promptedValue = `${ww.library}`;
+      }
+      else {
+        ww.library = '*DOCLIBL';
+        ww.object = '*ALL';
+        ww.name = '*ALL';
+        ww.nameType = '*ALL';
+        promptedValue = `${ww.library}`;
+      }
+      // else if (item inst
       // promptedValue = '*DOCLIBL/Q*/*ALL';
     }
     ww.searchTerms = [];
@@ -59,6 +55,7 @@ export namespace HwkI {
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCFILE', ww.object);
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCMBR', ww.name);
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'SRCTYPE', ww.nameType);
+      chosenAction.command = replaceCommandDefault(chosenAction.command, 'SCAN1', searchText ?? ww.searchTerm);
       command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
       if (!command) { return undefined; }
 
@@ -111,8 +108,8 @@ export namespace HwkI {
     } else {
       console.log('DSPSCNSRC ::: promptedValue ->', promptedValue);
       let input = await vscode.window.showInputBox({
-        prompt: l10n.t(`See the help for DSPSCNSRC for selectable input values. \nPress Enter for default value of *DOCLIBL/Q*/*ALL`),
         title: l10n.t(`Search source file using DSPSCNSRC`),
+        prompt: l10n.t(`See the help for DSPSCNSRC for selectable input values. \nPress Enter for default value of ${promptedValue}`),
         value: promptedValue,
         placeHolder: l10n.t(`Enter file path (format: SRCLIB/SRCFILE/NAME.ext). Ex. *DOCLIBL/Q*/*ALL`),
         valueSelection: [0, 8],
@@ -123,15 +120,7 @@ export namespace HwkI {
           if (path.length > 3) {
             return l10n.t(`Please enter value in form LIBRARY/FILE/NAME.ext`);
           } else if (path.length > 2) {                 // Check member
-            //   let checkMember = path[2].replace(/[*]/g, ``).split(`.`);
-            //   checkMember[0] = checkMember[0] !== `` ? checkMember[0] : `a`;
-            //   checkPath = path[0] + `/` + path[1] + `/` + checkMember[0] + `.` + (checkMember.length > 1 ? checkMember[1] : ``);
-            // } else if (path.length > 1) {                 // Check filePath
-            //   checkPath = input + (path[path.length - 1] === `` ? `a` : ``) + `/a.b`;
-            // } else {                                      // Check library
-            //   checkPath = input + (path[path.length - 1] === `` ? `a` : ``) + `/a/a.a`;
           }
-          // else if (path.length = 0){input = '*DOCLIBL/Q*/*ALL';}
         }
       });
 
@@ -141,18 +130,13 @@ export namespace HwkI {
       if (input.length > 1) { input = input.replace(/[/\\]+$/, ''); }// remove trailing slash
       ww.path = input;
       ww = parseItem(input, commandName, ww.searchTerm);
-      //   // Does request come from the OBJECT view if base object browser
-      // if (item) {
-      //   if (/^object\./.test(item.contextValue)) {
-      //     ww.name = '';
-      //   }
-      //   else if (/^member_/.test(item.contextValue)) {
-      //     ww.name = '';
-      //   }
-      //   else {
-      //   }
-      // }
       keywords = {};
+      ww.searchTerm = await vscode.window.showInputBox({
+        prompt: l10n.t(`Use command ${commandName} to search {0}.`, ww.path),
+        placeHolder: l10n.t(`Enter the search for term`),
+        value: searchText ?? ww.searchTerm,
+      }) || 'searchCanceled';
+      if (ww.searchTerm === 'searchCanceled') { return undefined; }
     }
 
     ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
@@ -162,77 +146,67 @@ export namespace HwkI {
     if (ww.path) {
 
       if (ww.object !== ` `) {
-        
-        if (ww.searchTerm === `` || !ww.searchTerm ) {
-        ww.searchTerm = await vscode.window.showInputBox({
-          prompt: l10n.t(`Use command ${commandName} to search {0}.`, ww.path),
-          placeHolder: l10n.t(`Enter the search for term`),
-          value: ww.searchTerm,
-        }) || 'searchCanceled';
-      }
 
-        if (ww.searchTerm === 'searchCanceled') { } else {
-          try {
-            searchMatch = await vscode.window.withProgress({
-              location: vscode.ProgressLocation.Notification,
-              title: l10n.t(`Searching`),
-            }, async progress => {
-              progress.report({
-                message: l10n.t(`Fetching member count for {0}`, ww.path)
-              });
-              const memberCount = await getMemberCount({
-                library: ww.library, sourceFile: `${ww.object ? ww.object : `*`}`
-                , members: `${ww.name ? ww.name : `*`}`
-                , extensions: `${ww.nameType || `*ALL`}`
-              });
-              let messageData = loadMessageData(ww, { memberCount: memberCount, commandName: commandName });
-              const searchMessages = setProgressWindowLocalizedMessages(messageData, 8);
+        try {
+          searchMatch = await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: l10n.t(`Searching`),
+          }, async progress => {
+            progress.report({
+              message: l10n.t(`Fetching member count for {0}`, ww.path)
+            });
+            const memberCount = await getMemberCount({
+              library: ww.library, sourceFile: `${ww.object ? ww.object : `*`}`
+              , members: `${ww.name ? ww.name : `*`}`
+              , extensions: `${ww.nameType || `*ALL`}`
+            });
+            let messageData = loadMessageData(ww, { memberCount: memberCount, commandName: commandName });
+            const searchMessages = setProgressWindowLocalizedMessages(messageData, 8);
 
-              if (memberCount > 0) {
-                // NOTE: if more messages are added, lower the timeout interval
-                const timeoutInternal = 9000;
+            if (memberCount > 0) {
+              // NOTE: if more messages are added, lower the timeout interval
+              const timeoutInternal = 9000;
 
-                let currentMessage = 0;
-                const messageTimeout = setInterval(() => {
-                  if (currentMessage < searchMessages.length) {
-                    progress.report({
-                      message: searchMessages[currentMessage]
-                    });
-                    currentMessage++;
-                  } else {
-                    clearInterval(messageTimeout);
-                  }
-                }, timeoutInternal);
-                let resultsSCN = await HawkeyeSearch.searchMembers(ww.library, `${ww.object ? ww.object : `*ALL`}`
-                  , `${ww.name || `*ALL`}.${ww.nameType || `*ALL`}`
-                  , ww.searchTerm, ww.protected);
-
-                if (resultsSCN) {
-                  searchMatch = {
-                    command: `${commandName}`
-                    , searchDescription: `${commandName} ${new Date().toLocaleString()}`
-                    , searchItem: ww.searchTerm
-                    , searchTerm: ww.searchTerm
-                    , files: resultsSCN
-                  };
+              let currentMessage = 0;
+              const messageTimeout = setInterval(() => {
+                if (currentMessage < searchMessages.length) {
+                  progress.report({
+                    message: searchMessages[currentMessage]
+                  });
+                  currentMessage++;
                 } else {
-                  vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' in HAWKEYE/${commandName} {1}.`
-                    , ww.searchTerm, ww.path
-                  ));
+                  clearInterval(messageTimeout);
                 }
+              }, timeoutInternal);
+              let resultsSCN = await HawkeyeSearch.searchMembers(ww.library, `${ww.object ? ww.object : `*ALL`}`
+                , `${ww.name || `*ALL`}.${ww.nameType || `*ALL`}`
+                , ww.searchTerm, ww.protected);
 
+              if (resultsSCN) {
+                searchMatch = {
+                  command: `${commandName}`
+                  , searchDescription: `${commandName} ${new Date().toLocaleString()}`
+                  , searchItem: ww.searchTerm
+                  , searchTerm: ww.searchTerm
+                  , files: resultsSCN
+                };
               } else {
-                vscode.window.showErrorMessage(l10n.t(`No members to search.`));
+                vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' in HAWKEYE/${commandName} {1}.`
+                  , ww.searchTerm, ww.path
+                ));
               }
 
-              return searchMatch;
-            });
-
-          } catch (e: unknown) {
-            if (e instanceof Error) {
-              vscode.window.showErrorMessage(l10n.t(`Error(1): {0}`, e.message));
-              return undefined;
+            } else {
+              vscode.window.showErrorMessage(l10n.t(`No members to search.`));
             }
+
+            return searchMatch;
+          });
+
+        } catch (e: unknown) {
+          if (e instanceof Error) {
+            vscode.window.showErrorMessage(l10n.t(`Error(1): {0}`, e.message));
+            return undefined;
           }
         }
       }
@@ -553,9 +527,14 @@ export namespace HwkI {
       return undefined;
     }
     else {
-      if (item) {
-        promptedValue = `${ww.library}/${ww.object ? ww.object : ww.name}.${ww.objType}`;
-      }
+      // From source: what promptedValue should be
+      //    Source filter: grab selected value
+      //    Object filter: grab selected value
+      //    URI: grab selected value
+      //    SearchSession: grab searched value
+      //    HitSource: grab line item name
+      //    LineHit: grab highlighted value.
+      //    Anything else like command prompt?: undefined??
     }
     const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
     // let namePattern: string = config.get<string>('useActions') || '';
@@ -585,6 +564,14 @@ export namespace HwkI {
         howUsed = keywords.HOWUSED || '';
       }
     } else {
+      if (ww) {
+        if (ww.entryType === 'SOURCE') {
+          promptedValue = `${ww.library?ww.library+'/':''}${ww.name}${ww.nameType?'.'+ww.objType:''}`;
+        }
+        else {
+          promptedValue = `${ww.library?ww.library+'/':''}${ww.object}${ww.objType?'.'+ww.objType:''}`;
+        }
+      }
       console.log('DSPOBJU ::: promptedValue ->', promptedValue);
       const input = await vscode.window.showInputBox({
         prompt: l10n.t(`Find where object is used by. See the help for DSPOBJU for selectable input values`),

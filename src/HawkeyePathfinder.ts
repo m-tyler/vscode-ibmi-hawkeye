@@ -44,10 +44,10 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (fileItem) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileSetsUsed`, async (fileItem, searchText: string) => {
       if (!await checkPathfinderExistence()) { return; }
       try {
-        const searchResults = await HwkI.displayFileSetsUsed(fileItem);
+        const searchResults = await HwkI.displayFileSetsUsed(fileItem, searchText);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
@@ -73,10 +73,10 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (anyItem) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (anyItem, searchText: string) => {
       if (!await checkPathfinderExistence()) { return; }
       try {
-        const searchResults = await HwkI.displayProgramObjects(anyItem);
+        const searchResults = await HwkI.displayProgramObjects(anyItem, searchText);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
@@ -98,7 +98,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         if (!selection.isEmpty) {
           const selectedText = editor.document.getText(selection);
           anyItem.path = `*ALL/${selectedText}`;
-          vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProgramObjects`, anyItem);
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProgramObjects`, anyItem, selectedText);
         }
       }
     }),
@@ -131,10 +131,10 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
-    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, async (anyItem) => {
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, async (anyItem, searchText: string) => {
       if (!await checkPathfinderExistence()) { return; }
       try {
-        const searchResults = await HwkI.displayProcedureUsed(anyItem);
+        const searchResults = await HwkI.displayProcedureUsed(anyItem, searchText);
         if (searchResults) {
           searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
           vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
@@ -156,7 +156,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         if (!selection.isEmpty) {
           const selectedText = editor.document.getText(selection);
           anyItem.path = `${selectedText}`;
-          vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, anyItem);
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayProcedureUsed`, anyItem,selectedText);
         }
       }
     }),

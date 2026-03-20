@@ -332,7 +332,7 @@ export namespace HawkeyeSearch {
     }
     return searchMatches;
   }
-  export async function displayProcedureUsed(library: string, procedure: string, searchTerm: string, readOnly?: boolean): Promise<SourceFileMatch[]> {
+  export async function displayProcedureUsed(procedure: string, searchTerm: string, readOnly?: boolean): Promise<SourceFileMatch[]> {
     const connection = Code4i.getConnection();
     const tempLibrary = Code4i.getTempLibrary();
     const tempName1 = Code4i.makeid();
@@ -342,7 +342,6 @@ export namespace HawkeyeSearch {
     if (connection) {
       Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName1} MBR(HWKDSPPRCU)`, noLibList: true });
       Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName2} MBR(HWKDSPPRCU)`, noLibList: true });
-      let asp = await Code4i.getLibraryIAsp(library);
       let runDSPPRCU = Code4i.getContent().toCl(`DSPPRCU`, {
         prc: `${connection.sysNameInAmerican(procedure)}`.toLocaleUpperCase(),
         output: `*OUTFILE`,

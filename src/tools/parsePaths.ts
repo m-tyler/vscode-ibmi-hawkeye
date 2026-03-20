@@ -60,7 +60,6 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
     ww.entryType = 'SOURCE';
   }
   else if (item) {
-    // ww.entryType = 'SOURCE';
     ww.protected = item.readonly;
     const currIasp = Code4i.getCurrentIAspName();
     let newpath = ``;
@@ -71,12 +70,16 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
       // For DSPPGMOBJ we just want to use the searchTerm
       // For DSPPRCU we just want to use the searchTerm
       // For DSPFILSETU we just want to use the searchTerm
-      if (commandName === 'DSPSCNSRC') {
-      }
-      else {
-        // newpath = item.path;
-      }
+      ww.entryType = 'OBJECT';
       ww.searchTerm = searchText ?? '';
+      ww.object = ww.searchTerm;
+      // if (commandName === 'DSPSCNSRC') {
+      //   ww.entryType = 'SOURCE';
+      //   // ww.library = '*DOCLIBL';
+      //   ww.name = ww.searchTerm;
+      // }
+      // else {
+      // }
     }
     else if (item instanceof HitSource) {
       // This more than likely comes from the search results, right click
@@ -90,36 +93,41 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
       // For DSPPRCU we just want to use the searchTerm
       // For DSPFILSETU we just want to use the searchTerm
 
+      ww.entryType = 'OBJECT';
       ww.searchTerm = searchText ?? (item.getSourceName() || '');
+      ww.object = ww.searchTerm;
       if (commandName === 'DSPSCNSRC') {
-        ww.library = '*DOCLIBL';
+        ww.entryType = 'SOURCE';
+        // ww.library = '*DOCLIBL';
       }
       else {
-        newpath = item.getPath();
-        newpath = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
-        ww.path = newpath;
-        ww.objType = getSourceObjectType(ww.path, commandName)[0];
+        // newpath = item.getPath();
+        // newpath = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
+        // ww.path = newpath;
+        // ww.objType = getSourceObjectType(ww.path, commandName)[0];
         ww.searchTerm = searchText ?? '';
-        let pathParts = parsePath(ww.path, currIasp);
-        const filledCount = Object.values(pathParts).filter(value =>
-          value !== undefined && value !== null && value !== ""
-        ).length;
-        if (commandName === 'DSPSCNSRC' && filledCount === 1) {
-          // This special case if for when DSPSCNSRC is run but only the library is entered in
-          ww.library = pathParts.object || '';
-        }
-        else {
-          ww.library = pathParts.library || '';
-          ww.object = pathParts.object || '';
-          ww.name = pathParts.member || '';
-          ww.nameType = pathParts.type || '';
-          ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
-        }
+        // let pathParts = parsePath(ww.path, currIasp);
+        // const filledCount = Object.values(pathParts).filter(value =>
+        //   value !== undefined && value !== null && value !== ""
+        // ).length;
+        // if (commandName === 'DSPSCNSRC' && filledCount === 1) {
+        //   // This special case if for when DSPSCNSRC is run but only the library is entered in
+        //   ww.library = pathParts.object || '';
+        // }
+        // else {
+        //   ww.library = pathParts.library || '';
+        //   ww.object = pathParts.object || '';
+        //   ww.name = pathParts.member || '';
+        //   ww.nameType = pathParts.type || '';
+        //   ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
+        // }
       }
     }
     else if (item instanceof LineHit) {
       // console.log('item: ', item);
       if (item.label) {
+        // LineHit is the source line that matches prior search and we want to do Hawkeye searches
+        //   over this search match value.  This means grabbing from the label
         if (typeof item.label !== 'string' && item.label.highlights) {
           const startValue: number = item.label.highlights[0][0];   // The first number in the tuple
           const endValue: number = item.label.highlights[0][1];   // The second number in the tuple
@@ -130,31 +138,34 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
         // For DSPPGMOBJ we just want to use the searchTerm
         // For DSPPRCU we just want to use the searchTerm
         // For DSPFILSETU we just want to use the searchTerm
+        ww.entryType = 'OBJECT';
         ww.object = ww.searchTerm;
         if (commandName === 'DSPSCNSRC') {
-          ww.library = '*DOCLIBL';
+          ww.entryType = 'SOURCE';
+          // ww.library = '*DOCLIBL';
         }
         else {
-          // newpath = item.getPath();
+          newpath = ww.searchTerm;
           newpath = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
           ww.path = newpath;
-          ww.objType = getSourceObjectType(ww.path, commandName)[0];
+          // ww.objType = getSourceObjectType(ww.path, commandName)[0];
           ww.searchTerm = searchText ?? '';
-          let pathParts = parsePath(ww.path, currIasp);
-          const filledCount = Object.values(pathParts).filter(value =>
-            value !== undefined && value !== null && value !== ""
-          ).length;
-          if (commandName === 'DSPSCNSRC' && filledCount === 1) {
-            // This special case if for when DSPSCNSRC is run but only the library is entered in
-            ww.library = pathParts.object || '';
-          }
-          else {
-            ww.library = pathParts.library || '';
-            ww.object = pathParts.object || '';
-            ww.name = pathParts.member || '';
-            ww.nameType = pathParts.type || '';
-            ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
-          }
+          // let pathParts = parsePath(ww.path, currIasp);
+          // const filledCount = Object.values(pathParts).filter(value =>
+          //   value !== undefined && value !== null && value !== ""
+          // ).length;
+          // if (commandName === 'DSPSCNSRC' && filledCount === 1) {
+          //   // This special case if for when DSPSCNSRC is run but only the library is entered in
+          //   ww.entryType = 'SOURCE';
+          //   ww.library = pathParts.object || '';
+          // }
+          // else {
+          // ww.library = pathParts.library || '';
+          // ww.object = pathParts.object || '';
+          // ww.name = pathParts.member || '';
+          // ww.nameType = pathParts.type || '';
+          // ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
+          // }
         }
       }
     }
@@ -164,32 +175,33 @@ export function parseItem(item: any, commandName: string, searchText?: string): 
       // For DSPPGMOBJ we just want to use the searchTerm for object
       // For DSPPRCU we just want to use the searchTerm for object
       // For DSPFILSETU we just want to use the searchTerm for object
+      ww.entryType = 'OBJECT';
       ww.searchTerm = searchText ?? item.searchItem;
       ww.object = ww.searchTerm;
       if (commandName === 'DSPSCNSRC') {
-        ww.library = '*DOCLIBL';
+        // ww.library = '*DOCLIBL';
       }
       else {
         // newpath = item.getPath();
-          // newpath = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
-          // ww.path = newpath;
-          // ww.objType = getSourceObjectType(ww.path, commandName)[0];
-          // ww.searchTerm = searchText ?? '';
-          // let pathParts = parsePath(ww.path, currIasp);
-          // const filledCount = Object.values(pathParts).filter(value =>
-          //   value !== undefined && value !== null && value !== ""
-          // ).length;
-          // if (commandName === 'DSPSCNSRC' && filledCount === 1) {
-          //   // This special case if for when DSPSCNSRC is run but only the library is entered in
-          //   ww.library = pathParts.object || '';
-          // }
-          // else {
-          //   ww.library = pathParts.library || '';
-          //   ww.object = pathParts.object || '';
-          //   ww.name = pathParts.member || '';
-          //   ww.nameType = pathParts.type || '';
-          //   ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
-          // }
+        // newpath = Code4i.upperCaseName(Code4i.sysNameInLocal(newpath));
+        // ww.path = newpath;
+        // ww.objType = getSourceObjectType(ww.path, commandName)[0];
+        // ww.searchTerm = searchText ?? '';
+        // let pathParts = parsePath(ww.path, currIasp);
+        // const filledCount = Object.values(pathParts).filter(value =>
+        //   value !== undefined && value !== null && value !== ""
+        // ).length;
+        // if (commandName === 'DSPSCNSRC' && filledCount === 1) {
+        //   // This special case if for when DSPSCNSRC is run but only the library is entered in
+        //   ww.library = pathParts.object || '';
+        // }
+        // else {
+        //   ww.library = pathParts.library || '';
+        //   ww.object = pathParts.object || '';
+        //   ww.name = pathParts.member || '';
+        //   ww.nameType = pathParts.type || '';
+        //   ww.library = scrubLibrary(ww.library, `${commandName}`, (ww.object >= ''));
+        // }
       }
     }
     else {

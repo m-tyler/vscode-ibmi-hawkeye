@@ -1,4 +1,6 @@
 # Change log
+## Version 1.2.2
+  * Fixing various bugs when running commands from different points.
 ## Version 1.2.1
   * Fix for issue #6, (Search results issue when selecting from search hit element)
   * Minor bug fixes

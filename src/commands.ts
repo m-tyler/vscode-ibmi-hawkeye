@@ -681,7 +681,7 @@ export namespace HwkI {
       return undefined;
     }
     else {
-      if (ww.searchTerm !== '') {
+      if (ww.searchTerm && ww.searchTerm !== '') {
         promptedValue = `${ww.searchTerm}`;
       }
     }

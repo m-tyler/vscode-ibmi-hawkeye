@@ -73,6 +73,34 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       }
     }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileKeys`, async (fileItem, searchText: string) => {
+      if (!await checkPathfinderExistence()) { return; }
+      try {
+        const searchResults = await HwkI.displayFileKeys(fileItem, searchText);
+        if (searchResults) {
+          searchTreeProvider.addSearchSession(searchResults.command, searchResults, searchResults.searchTerm > '' ? searchResults.searchTerm : '');
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.setViewVisible`, true);
+        } else {
+          vscode.window.showInformationMessage(l10n.t(`Hawkeye Display File Set Used canceled`));
+        }
+      } catch (e) {
+        if (e instanceof Error) {
+          vscode.window.showErrorMessage(l10n.t(`Error(12): {0}`, e.message));
+        }
+      }
+    }),
+    vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayFileKeysEditorSelection`, async (fileItem) => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const selection = editor.selection;
+
+        // Check if there is a non-empty selection
+        if (!selection.isEmpty) {
+          const selectedText = editor.document.getText(selection);
+          vscode.commands.executeCommand(`Hawkeye-Pathfinder.displayFileKeys`, fileItem, selectedText);
+        }
+      }
+    }),
     vscode.commands.registerCommand(`Hawkeye-Pathfinder.displayProgramObjects`, async (anyItem, searchText: string) => {
       if (!await checkPathfinderExistence()) { return; }
       try {

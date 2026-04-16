@@ -234,7 +234,7 @@ export namespace HwkI {
 
       // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
       let command: string = '';
-      let chosenAction = getHawkeyeAction(1); // DSPFILSET
+      let chosenAction = getHawkeyeAction(1); // DSPFILSETU
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILELIB', ww.library);
       chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILE', ww.name);
       command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
@@ -334,6 +334,162 @@ export namespace HwkI {
               }, timeoutInternal);
               // returns results member name with member type as extension
               let resultsFSU = await HawkeyeSearch.displayFileSetsUsed(ww.library.toLocaleUpperCase(), ww.name.toLocaleUpperCase(), ww.searchTerm, ww.protected, wwResultSequence);
+
+              if (resultsFSU) {
+                searchMatch = {
+                  command: `${commandName}`
+                  , searchDescription: `${commandName} ${new Date().toLocaleString()}`
+                  , searchItem: ww.name.toLocaleUpperCase()
+                  , searchTerm: ww.searchTerm
+                  , files: resultsFSU
+                };
+              } else {
+                vscode.window.showInformationMessage(l10n.t(`No results found searching for '{0}' using HAWKEYE/${commandName} {1}.`
+                  , ww.searchTerm, ww.path
+                ));
+              }
+              return searchMatch;
+            });
+
+          } catch (e) {
+            if (e instanceof Error) {
+              vscode.window.showErrorMessage(l10n.t(`Error(2): {0}`, e.message));
+              return undefined;
+            }
+          }
+      }
+
+    } else {
+      //Running from command.
+    };
+    return searchMatch.command ? searchMatch : undefined;
+  };
+  export async function displayFileKeys(item: any, searchText: string): Promise<HawkeyeSearchMatches | undefined> {
+    const commandName = 'DSPFILSET';
+    let ww = <wItem>{};
+    let wwResultSequence: string = '*PGM';
+    let searchMatch: HawkeyeSearchMatches = {} as HawkeyeSearchMatches;
+    let promptedValue;
+
+    ww = parseItem(item, commandName, searchText);
+    if (!ww) {
+      vscode.window.showErrorMessage(l10n.t(`No item selected for HAWKEYE/${commandName}.`));
+      return undefined;
+    }
+    else {
+      if (ww.entryType === 'SOURCE') {
+        promptedValue = `${ww.library?ww.library+'/':''}${ww.name}${ww.nameType?'.'+ww.objType:''}`;
+      }
+      else {
+        promptedValue = `${ww.library?ww.library+'/':''}${ww.object}${ww.objType?'.'+ww.objType:''}`;
+      }
+    }
+    const config = vscode.workspace.getConfiguration('vscode-ibmi-hawkeye');
+    // let namePattern: string = config.get<string>('useActions') || '';
+    if (config.useActions) {
+
+      // Prompt for process inputs.  Prompted command will not run, it is just for user data collection.
+      let command: string = '';
+      let chosenAction = getHawkeyeAction(5); // DSPFILSET
+      chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILELIB', ww.library);
+      chosenAction.command = replaceCommandDefault(chosenAction.command, 'FILE', ww.name);
+      command = await showCustomInputs(`Run Command`, chosenAction.command, chosenAction.name || `Command`);
+      if (!command) { vscode.window.showErrorMessage(l10n.t(`Search canceled.`)); return undefined; }
+
+      // Parse user input into values to pass on to secondary tools. 
+      let keywords = parseCommandString(command);
+      if (!keywords) {
+        vscode.window.showErrorMessage(l10n.t(`Search canceled.`));
+        return undefined;
+      } else {
+        ww.path = keywords.FILELIB + '/' + keywords.FILE;
+        ww.library = keywords.FILELIB;
+        ww.object = keywords.FILE;
+        ww.name = keywords.FILE;
+        ww.nameType = ww.nameType ? ww.nameType : 'PF';
+        ww.objType = ww.objType ? ww.objType : '*FILE';
+        ww.searchTerm = keywords.SCAN || '';
+        wwResultSequence = keywords.SEQUNCE || '*PGM';
+      }
+
+    } else {
+      console.log('DSPFILSETU ::: promptedValue ->', promptedValue);
+      const input = await vscode.window.showInputBox({
+        prompt: l10n.t(`See the help for DSPFILSETU for selectable input values`),
+        title: l10n.t(`Display File Set Where Used`),
+        value: promptedValue,
+        placeHolder: l10n.t(`Enter LIBRARY/FILE to search for references.`),
+        validateInput: (input) => {
+          input = input.trim();
+          const path = input.split(`/`);
+          let checkPath;
+          if (path.length > 2) {
+            return l10n.t(`Please enter value in form LIBRARY/FILE`);
+          }
+        }
+      })|| 'inputCanceled';
+      if (input === 'inputCanceled') { return undefined; } 
+
+      const wpath = input.trim().toUpperCase().split(/[/.]/);
+      if (wpath.length === 1 || wpath[1] === ``) { wpath[1] = wpath[0]; wpath[0] = `*DOCLIBL`; }
+      ww.path = [wpath[0], wpath[1]].join('/');
+      ww.library = wpath[0];
+      ww.name = wpath[1];
+      if (wpath[2]) {
+        ww.nameType = wpath[2] ? wpath[2] : 'PF';
+      } else {
+        ww.nameType = 'PF';
+      }
+      ww.path += '.' + ww.nameType;
+      ww.searchTerm = await vscode.window.showInputBox({
+        prompt: l10n.t(`Select token to search results from ${commandName}`),
+        value: `*NONE`,
+        placeHolder: l10n.t(`Enter the search for term`),
+      }) || 'searchCanceled';
+      if (ww.searchTerm === 'searchCanceled') { return undefined; } 
+    }
+
+    // Hawkeye-Pathfinder
+    if (ww.path) {
+      if (ww.nameType === 'SQL' && (/.*(tb|pf|v.*)/gi.test(ww.name))
+        || ww.nameType === 'PF' || ww.objType === '*FILE') {
+      } else {
+        // if (ww && !(/.*(tb.*\.sql|pf.*\.pf|v.*\.sql)/.test(ww.path))) {
+        vscode.window.showErrorMessage(l10n.t(`Display File Set Used is only value for database tables or views.`));
+        return undefined;
+      }
+
+      if (ww.name !== ` `) {
+
+          try {
+            ww.searchTerm = ww.searchTerm !== '*NONE' ? ww.searchTerm : '';
+            searchMatch = await vscode.window.withProgress({
+              location: vscode.ProgressLocation.Notification,
+              title: l10n.t(`Searching`),
+            }, async progress => {
+              progress.report({
+                message: l10n.t(`Starting process to find file sets used.`, ww.path)
+              });
+              const memberCount = await getMemberCount({ library: ww.library });
+              let messageData = loadMessageData(ww, { memberCount: memberCount, commandName: commandName });
+              const searchMessages = setProgressWindowLocalizedMessages(messageData, 8);
+
+              // NOTE: if more messages are added, lower the timeout interval
+              const timeoutInternal = 9000;
+
+              let currentMessage = 0;
+              const messageTimeout = setInterval(() => {
+                if (currentMessage < searchMessages.length) {
+                  progress.report({
+                    message: searchMessages[currentMessage]
+                  });
+                  currentMessage++;
+                } else {
+                  clearInterval(messageTimeout);
+                }
+              }, timeoutInternal);
+              // returns results member name with member type as extension
+              let resultsFSU = await HawkeyeSearch.displayFileKeys(ww.library.toLocaleUpperCase(), ww.name.toLocaleUpperCase(), ww.searchTerm, ww.protected, wwResultSequence);
 
               if (resultsFSU) {
                 searchMatch = {

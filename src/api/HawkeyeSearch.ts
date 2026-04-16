@@ -109,7 +109,6 @@ export namespace HawkeyeSearch {
         outfile: `${tempLibrary}/${tempName1}`.toLocaleUpperCase(),
         outmbr: `HWKDSPFSU`,
       });
-      // let cmdResult = await Code4i.runCommand({ command: runDSPFILSETU, environment: `ile`, --noLibList: true });
       let cmdResult = await Code4i.runCommand({ command: runDSPFILSETU, environment: `ile` });
       if (cmdResult.code !== 0) { throw new Error(`${connection.sysNameInAmerican(library)}/${connection.sysNameInAmerican(dbFile)}    \n` + cmdResult.stderr); }
       const resultSetQty = await Code4i!.runSQL(`select count(*) as RS_QTY from ${tempLibrary}.${tempName1}`);
@@ -123,6 +122,94 @@ export namespace HawkeyeSearch {
       if (fsuSourceScanResults && fsuSourceScanResults.length > 0) {
         // get distinct list of db items used for DSPFILSETU results
         const distinctNames: string[] = [...new Set(fsuSourceScanResults.map(item => String(item.TUDFL) || ''))];
+        let statement = `with HOW_USED_CONDENSED (HOW_USED, TUDSFL, TUDSLB, TUDSMB, TUDTXT) 
+                      as (select min(trim(left(TUDHOW, ( case locate('-', TUDHOW) when 0 then length(TUDHOW) else locate('-', TUDHOW) end))))||''||
+                                  listagg( distinct  (trim(right(TUDHOW, locate('-', TUDHOW) + 2))),  ':') within group (order by TUDPGM, TUDLIB, TUDATR) as HOW_USED
+                                , TUDSFL, TUDSLB, TUDSMB, TUDTXT from ${tempLibrary}.${tempName1} group by TUDSFL, TUDSLB, TUDSMB, TUDTXT)
+                    ,  SEARCHMATCHES (SEARCHMATCH) 
+                      as ( select JSON_OBJECT('fileName' : trim(SCDMBR)
+                                            , 'filePath' : '/QSYS.LIB/'||trim(SCDLIB)||'.LIB/'||trim(SCDFIL)||'.FILE/'||trim(SCDMBR)||'.'
+                                                            ||(case when SP.SRCTYPE is not NULL then SP.SRCTYPE when SP.SRCTYPE is NULL and SCDFIL='QSQDSRC' then 'SQL' else 'MBR' end)
+                                            , 'howUsed' : ifnull(min(HOW_USED),'')
+                                            , 'fileText' : ifnull(min(trim(TUDTXT)),'')
+                                            , 'matches' : JSON_ARRAYAGG(JSON_OBJECT('lineNumber': SCDSEQ, 'content': rtrim(SCDSTM)) order by SCDLIB,SCDFIL,SCDMBR,SCDSEQ) returning clob format json)
+                        from ${tempLibrary}.${tempName2}
+                        left join HOW_USED_CONDENSED on TUDSFL=SCDFIL and TUDSLB=SCDLIB and TUDSMB=SCDMBR
+                        left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=SCDLIB and SP.SYS_TNAME=SCDFIL and SP.SYS_MNAME=SCDMBR
+                        group by SCDLIB,SCDFIL,SCDMBR,SP.SRCTYPE,SCDFIL)
+                    select cast( SEARCHMATCH as varchar(32000)) SEARCHMATCH from SEARCHMATCHES order by SEARCHMATCH`.replace(/\n\s*/g, ' ');
+        let queryResults = await Code4i.runSQL(statement, { forceSafe: true });
+        const parsedRows = queryResults.map(row => parseSearchMatch(row.SEARCHMATCH));
+        searchMatches = parsedRows
+          .filter(row => row && Object.keys(row).length > 0) // filter out empty objects
+          .map(row => ({
+            fileName: row.fileName,
+            filePath: row.filePath,
+            fileText: row.fileText,
+            howUsed: row.howUsed,
+            matchCount: Array.isArray(row.matches) ? row.matches.length : 0,
+            matches: Array.isArray(row.matches) ? row.matches : [],
+            searchTokens: distinctNames
+          } as SourceFileMatch));
+      } else {
+        throw new Error(l10n.t('No results for Display File Set Used.'));
+      }
+    }
+    else {
+      throw new Error(l10n.t('Please connect to your IBM i.'));
+    }
+    return searchMatches;
+  }
+  export async function displayFileKeys(library: string, dbFile: string, searchTerm: string, readOnly?: boolean, resultSequence?: string): Promise<SourceFileMatch[]> {
+    // Function steps.
+    // 1. run main command, DSPFILSET, to produce initial results
+    // 2. pass items from DSPFILSET into DSPSCNSRC to find the source used to display in search results.
+    // 3. reprocess the results from DSPFILSET and DSPSCNSRC into presentable results in the custom search view. 
+    const connection = Code4i.getConnection();
+    library = (library !== '*ALL' ? library : '*ALL');
+    dbFile = (dbFile !== '*ALL' ? dbFile : '*ALL');
+    const tempLibrary = Code4i.getTempLibrary();
+    const tempName1 = Code4i.makeid();
+    const tempName2 = Code4i.makeid();
+    searchTerm = searchTerm === `*NONE` ? `` : searchTerm;
+    let searchMatches: SourceFileMatch[] = {} as SourceFileMatch[];
+
+    if (connection) {
+      await Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName1} MBR(HWKDSPFKY)`, noLibList: true });
+      await Code4i.runCommand({ command: `CLRPFM ${tempLibrary}/${tempName2} MBR(HWKDSPFKY)`, noLibList: true });
+      let runDSPFILSET = Code4i.getContent().toCl(`DSPFILSET`, {
+        file: `${connection.sysNameInAmerican(library)}/${connection.sysNameInAmerican(dbFile)}`.toLocaleUpperCase(),
+        output: `*OUTFILE`,
+        outfile: `${tempLibrary}/${tempName1}`.toLocaleUpperCase(),
+        outmbr: `HWKDSPFSKY`,
+      });
+      let cmdResult = await Code4i.runCommand({ command: runDSPFILSET, environment: `ile` });
+      if (cmdResult.code !== 0) { throw new Error(`${connection.sysNameInAmerican(library)}/${connection.sysNameInAmerican(dbFile)}    \n` + cmdResult.stderr); }
+      const resultSetQty = await Code4i!.runSQL(`select count(*) as RS_QTY from ${tempLibrary}.${tempName1}`);
+      if (resultSetQty.length === 0 || resultSetQty[0].RS_QTY === 0) { throw new Error(`No records found in Hawkeye database.`); }
+      // TODO: THIS NEEDS TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      let keySourceScanResults = await Code4i.runSQL(`select  TFHLIB SRC_LIB,TFHFIL SRC_FILE ,trim(TFDLIB) REF_LIB ,trim(TFDFIL) REF_FILE
+          ,TFDKEY REF_KEYS ,TFDTXT REF_TEXT
+          ,APISTS xAPISTS
+          ,case when APISTS='1' then APISF when TFDSFL=' ' then TFHSFL else TFDSFL end xTFDSFL
+          ,case when APISTS='1' then APISFL when TFDSLB=' ' then TFHSLB else TFDSLB end xTFDSLB
+          ,case when APISTS='1' then APISFM when TFDSMB=' ' then TFHSMB else TFDSMB end xTFDSMB
+          from ${tempLibrary}.${tempName1} 
+          left join TABLE ( QSYS2.OBJECT_STATISTICS ( OBJECT_SCHEMA => TFDLIB , OBJTYPELIST => '*ALL' , OBJECT_NAME => TFDFIL ) ) X on 1=1
+          left join table ( ILEDITOR.HWK_GetObjectSourceInfo(APITYP => '10', APIOPT => '80', APIOB => TFDFIL, APIOBL => TFDLIB, APIOBM => ' ',APIOBA => X.OBJTYPE )) HWKF on 1=1 
+          `.replace(/\n\s*/g, ' '));
+          // /*with t1 as (select distinct THDFLL,THDFL,THDSLB,THDSFL,THDSMB 
+          // from ${tempLibrary}.${tempName1} 
+          // left join QSYS2.SYSPSTAT SP on SP.SYS_DNAME=THDSLB and SP.SYS_TNAME=THDSFL and SP.SYS_MNAME=THDSMB where THDSLB > '     ' ) 
+          // select THDFLL,THDFL,qcmdexc('DSPSCNSRC SRCFILE('||trim(THDSLB)||'/'||trim(THDSFL)||') SRCMBR('||trim(THDSMB)||') TYPE(*ALL) OUTPUT(*OUTFILE) OUTFILE(${tempLibrary}/${tempName2}) 
+          //  OUTMBR(HWKDSPFSKY *ADD) SCAN(${sanitizeSearchTerm(searchTerm) ? `''${sanitizeSearchTerm(searchTerm)}''  ` : `'''||trim(THDFL)||'''`}) CASE(*IGNORE) BEGPOS(001) ENDPOS(240)') 
+          // from T1 order by THDFLL,THDSLB,THDSFL*/
+          // */
+      if (keySourceScanResults && keySourceScanResults.length > 0) {
+        // get distinct list of db items used for DSPFILSETU results
+        const distinctNames: string[] = [...new Set(keySourceScanResults.map(item => String(item.TUDFL) || ''))];
+        // TODO: Normally we use DSPSCNSRC to retrieve the actual source for the matches in first query but in this case I don tthink we need this second one, we just need to reformat the first query into the return results expected. 
+        // TODO: THIS NEEDS TO BE MODIFIED?????????!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         let statement = `with HOW_USED_CONDENSED (HOW_USED, TUDSFL, TUDSLB, TUDSMB, TUDTXT) 
                       as (select min(trim(left(TUDHOW, ( case locate('-', TUDHOW) when 0 then length(TUDHOW) else locate('-', TUDHOW) end))))||''||
                                   listagg( distinct  (trim(right(TUDHOW, locate('-', TUDHOW) + 2))),  ':') within group (order by TUDPGM, TUDLIB, TUDATR) as HOW_USED

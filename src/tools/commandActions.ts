@@ -1,14 +1,13 @@
 import { Action } from '@halcyontech/vscode-ibmi-types';
 
-export function getHawkeyeAction(id:number): Action {
+export function getHawkeyeAction(id: number): Action {
   let workAction: Action = {} as Action;
-  if (id >= 0 && id <= 4 ) {
+  if (id >= 0 && id <= 4) {
     // workAction = hawkeyeActions[id];
     // return workAction;
-    return {...hawkeyeActions[id]};
+    return { ...hawkeyeActions[id] };
   }
-  else 
-  {
+  else {
     return {} as Action;
   }
 }
@@ -26,8 +25,9 @@ const hawkeyeActions: Action[] =
         "DSPSCNSRC.txt",
         "tmp/"
       ]
-    }, {
-      "name": `DSPFILSET`,
+    },
+    {
+      "name": `DSPFILSETU`,
       "command": "DSPFILSETU FILELIB(${FILELIB|File Library . . . : <b>Name, *ALL, *CURLIB, *DOCLIBL</b>|*DOCLIBL}) FILE(${FILE|File name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) HOWUSED(${HOWUSED|How used . . . . . :|*ALL,RPG-COPY,RPG-FILE,RPG-INP,RPG-OUT,RPG-UPD,RPG-CMB,RPG-INP/AD,RPG-OUT/AD,RPG-UPD/AD,RPG-CMB/AD,RPG-***/AD,RPG-WRITE,SQL-CALL,SQL-INP,SQL-OUT,SQL-UPD,SQL-I-O,SQL-INP/AD,SQL-OUT/AD,SQL-UPD/AD,SQL-I-O/AD,SQL-***/AD,DFUFILE,QRYFILE}) SEQUENCE(${SEQUENCE|Sequence results by <b>*PGM</b> or <b>*FILE</b>|*PGM, *FILE}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
       "environment": "ile",
       "type": "file",
@@ -35,11 +35,11 @@ const hawkeyeActions: Action[] =
         "GLOBAL"
       ],
       "postDownload": [
-        "DSPPGMOBJ.txt",
+        "DSPFILSETU.txt",
         "tmp/"
       ]
-    }
-  , {
+    },
+    {
       "name": `DSPPGMOBJ`,
       "command": "DSPPGMOBJ OBJLIB(${OBJLIB|Object Library . . . : <b>Name, *ALL, *CURLIB</b>|*ALL}) OBJ(${OBJ|Object name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) OBJTYPE(${OBJTYPE|Object Type  . . . . : |*PGM,*MENU,*MODULE,*QRYDFN,*SRVPGM,*CMD,*JOBD,*SBSD,*USRPRF,*EXT}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
       "environment": "ile",
@@ -51,8 +51,8 @@ const hawkeyeActions: Action[] =
         "DSPPGMOBJ.txt",
         "tmp/"
       ]
-    }
-  , {
+    },
+    {
       "name": `DSPOBJU`,
       "command": "DSPOBJU OBJLIB(${OBJLIB|Object Library . . . : <b>Name, *ALL, *CURLIB, *VARIABLE</b>|*ALL}) OBJ(${OBJ|Object name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) OBJTYPE(${OBJTYPE|Object Type  . . . . : |*ALL ,*PGM ,*CMD ,*FILE ,*MODULE ,*SRVPGM ,*BNDDIR ,*DTAARA ,*DTAQ ,*PNLGRP ,*LIB ,*MENU ,*MSGF ,*MSGQ ,*OUTQ ,*JRN ,*JRNRCV ,*AUTL ,*EXITRG ,*OVL ,*PAGDFN ,*PAGSEG ,*QMFORM ,*QMQRY ,*SQLPKG ,*USRIDX ,*USRPRF ,*USRQ ,*USRSPC ,*WSCST}) HOWUSED(${HOWUSED|How used . . . . . . :|*ALL ,RPG-COPY ,RPG-FILE ,RPG-INP ,RPG-OUT ,RPG-UPD ,RPG-CMB ,RPG-INP/AD ,RPG-OUT/AD ,RPG-UPD/AD ,RPG-CMB/AD ,RPG-***/AD ,RPG-WRITE ,SQL-CALL ,SQL-INP ,SQL-OUT ,SQL-UPD ,SQL-I-O ,SQL-INP/AD ,SQL-OUT/AD ,SQL-UPD/AD ,SQL-I-O/AD ,SQL-***/AD ,DFUFILE ,QRYFILE}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
       "environment": "ile",
@@ -64,8 +64,8 @@ const hawkeyeActions: Action[] =
         "DSPOBJU.txt",
         "tmp/"
       ]
-    }
-    , {
+    },
+    {
       "name": `DSPPRCU`,
       "command": "DSPPRCU PRC(${PRC|Procedure  . . . . . : <b>Name, generic*, *ALL</b>|*ALL}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
       "environment": "ile",
@@ -75,6 +75,19 @@ const hawkeyeActions: Action[] =
       ],
       "postDownload": [
         "DSPPRCU.txt",
+        "tmp/"
+      ]
+    },
+    {
+      "name": `DSPFILSET`,
+      "command": "DSPFILSET FILELIB(${FILELIB|File Library . . . : <b>Name, *LIBL,*USRLIBL,*ALL,*ALLUSR,*DOCLIBL,*CURLIB</b>|*DOCLIBL}) FILE(${FILE|File name  . . . . : <b>Name, generic*, *ALL</b>|*ALL}) SCAN(${SCAN|Scan for value . . . : <b>value, *NONE</b>|*NONE})",
+      "environment": "ile",
+      "type": "file",
+      "extensions": [
+        "GLOBAL"
+      ],
+      "postDownload": [
+        "DSPFILSET.txt",
         "tmp/"
       ]
     }

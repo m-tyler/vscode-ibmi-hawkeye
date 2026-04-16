@@ -302,6 +302,20 @@
         "icon": "$(search-fuzzy)"
       },
       {
+        "command": "Hawkeye-Pathfinder.displayFileKeys",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display File Key List (DSPFILSET)",
+        "category": "Hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "Hawkeye-Pathfinder.displayFileKeysEditorSelection",
+        "enablement": "code-for-ibmi:connected == true",
+        "title": "Display File Key List (DSPFILSET)",
+        "category": "Hawkeye",
+        "icon": "$(search-fuzzy)"
+      },
+      {
         "command": "Hawkeye-Pathfinder.displayProgramObjects",
         "enablement": "code-for-ibmi:connected == true",
         "title": "Display Program Objects (DSPPGMOBJ)",

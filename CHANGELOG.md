@@ -1,5 +1,5 @@
 # Change log
-## Version 1.2.3
+## Version 1.2.4
   * Created new command DSPFILKEYS to show related indexes/views and key lists
 ## Version 1.2.3
   * Fixed command DSPPRCU, when run from F1 (Command Pallette), showing undefined in search for procedure input.

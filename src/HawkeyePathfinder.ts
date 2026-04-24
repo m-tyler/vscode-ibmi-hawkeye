@@ -85,7 +85,7 @@ export function initializeHawkeyePathfinder(context: vscode.ExtensionContext) {
         }
       } catch (e) {
         if (e instanceof Error) {
-          vscode.window.showErrorMessage(l10n.t(`Error(12): {0}`, e.message));
+          vscode.window.showErrorMessage(l10n.t(`Error(16): {0}`, e.message));
         }
       }
     }),

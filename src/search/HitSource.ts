@@ -28,14 +28,15 @@ export class HitSource extends vscode.TreeItem {
       this.description = `${result.fileText} (${hits} hit${hits === 1 ? `` : `s`}) (${result.howUsed})`;
     }
     this.readonly = false;
-    this.tooltip = new vscode.MarkdownString(`<table>`
-        .concat(`<thead>${this.path}</thead><hr>`)
-        .concat(`<tr><td style="text-align: right;">${l10n.t(`Source Object Type:`)}</td><td>&nbsp;${l10n.t(this.contextValue)}</td></tr>`)
-        .concat(`<tr><td style="text-align: right;">${l10n.t(`How Used:`)}</td><td>&nbsp;${l10n.t(result.howUsed)}</td></tr>`)
-        .concat(`<tr><td style="text-align: right;">${l10n.t(`Text:`)}</td><td>&nbsp;${l10n.t(result.fileText)}</td></tr>`)
-        .concat(`<tr><td style="text-align: right;">${l10n.t(`Matches:`)}</td><td>&nbsp;${l10n.t(String(hits))}</td></tr>`)
-        .concat(`<tr><td style="text-align: right;">${l10n.t(`Search Tokens:`)}</td><td>&nbsp;${l10n.t(String(this.searchTokens))}</td></tr>`)
-        .concat(`</table>`) 
+    let safeString = result.howUsed?result.howUsed:'';
+    this.tooltip = new vscode.MarkdownString(`<table>
+        <thead>${this.path}</thead><hr>
+        <tr><td style="text-align: right;">${l10n.t(`Source Object Type:`)}</td><td>&nbsp;${l10n.t(this.contextValue?? "")}</td></tr>
+        <tr><td style="text-align: right;">${l10n.t(`How Used:`)}</td><td>&nbsp;${l10n.t(safeString)}</td></tr>
+        <tr><td style="text-align: right;">${l10n.t(`Text:`)}</td><td>&nbsp;${l10n.t(result.fileText?? "")}</td></tr>
+        <tr><td style="text-align: right;">${l10n.t(`Matches:`)}</td><td>&nbsp;${l10n.t(String(hits))}</td></tr>
+        <tr><td style="text-align: right;">${l10n.t(`Search Tokens:`)}</td><td>&nbsp;${l10n.t(String(this.searchTokens))}</td></tr>
+        </table>`
     );
     this.tooltip.supportHtml = true;
     vscode.commands.executeCommand(`setContext`, `Hawkeye-Pathfinder:hitSource`, this.contextValue);

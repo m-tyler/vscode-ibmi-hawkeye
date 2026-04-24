@@ -99,10 +99,10 @@ export namespace HwkI {
         ww.searchTerm = ww.searchTerms.join(',');
       }
     } else {
-      console.log('DSPSCNSRC ::: promptedValue ->', promptedValue);
+      console.log(`${commandName} ::: promptedValue ->`, promptedValue);
       let input = await vscode.window.showInputBox({
-        title: l10n.t(`Search source files using DSPSCNSRC`),
-        prompt: l10n.t(`Enter values for which LIB[/SRCF[/MBR]] to search over. See the help for DSPSCNSRC for selectable input values.`),
+        title: l10n.t(`Search source files using ${commandName}`),
+        prompt: l10n.t(`Enter values for which LIB[/SRCF[/MBR]] to search over. See the help for ${commandName} for selectable input values.`),
         value: promptedValue,
         placeHolder: l10n.t(`Enter file path (format: SRCLIB/SRCFILE/NAME.ext). Default is *DOCLIBL/Q*/*ALL.*ALL`),
         valueSelection: [0, 8],
@@ -257,9 +257,9 @@ export namespace HwkI {
       }
 
     } else {
-      console.log('DSPFILSETU ::: promptedValue ->', promptedValue);
+      console.log(`${commandName} ::: promptedValue ->`, promptedValue);
       const input = await vscode.window.showInputBox({
-        prompt: l10n.t(`See the help for DSPFILSETU for selectable input values`),
+        prompt: l10n.t(`See the help for ${commandName} for selectable input values`),
         title: l10n.t(`Display File Set Where Used`),
         value: promptedValue,
         placeHolder: l10n.t(`Enter LIBRARY/FILE to search for references.`),
@@ -413,9 +413,9 @@ export namespace HwkI {
       }
 
     } else {
-      console.log('DSPFILSETU ::: promptedValue ->', promptedValue);
+      console.log(`${commandName} ::: promptedValue ->`, promptedValue);
       const input = await vscode.window.showInputBox({
-        prompt: l10n.t(`See the help for DSPFILSETU for selectable input values`),
+        prompt: l10n.t(`See the help for ${commandName} for selectable input values`),
         title: l10n.t(`Display File Set Where Used`),
         value: promptedValue,
         placeHolder: l10n.t(`Enter LIBRARY/FILE to search for references.`),
@@ -563,9 +563,9 @@ export namespace HwkI {
         ww.searchTerm = keywords.SCAN || '';
       }
     } else {
-      console.log('DSPPGMOBJ ::: promptedValue ->', promptedValue);
+      console.log(`${commandName} ::: promptedValue ->`, promptedValue);
       const input = await vscode.window.showInputBox({
-        prompt: l10n.t(`See the help for DSPPGMOBJ for selectable input value`),
+        prompt: l10n.t(`See the help for ${commandName} for selectable input value`),
         title: l10n.t(`Display Program Objects`),
         value: promptedValue,
         placeHolder: l10n.t(`Enter LIBRARY/PROGRAM to list objects used by program.`),
@@ -722,9 +722,9 @@ export namespace HwkI {
           promptedValue = `${ww.library?ww.library+'/':''}${ww.object}${ww.objType?'.'+ww.objType:''}`;
         }
       }
-      console.log('DSPOBJU ::: promptedValue ->', promptedValue);
+      console.log(`${commandName} ::: promptedValue ->`, promptedValue);
       const input = await vscode.window.showInputBox({
-        prompt: l10n.t(`Find where object is used by. See the help for DSPOBJU for selectable input values`),
+        prompt: l10n.t(`Find where object is used by. See the help for ${commandName} for selectable input values`),
         title: l10n.t(`Display Object Where Used`),
         // value: preloadvalue,
         value: promptedValue,
@@ -739,7 +739,6 @@ export namespace HwkI {
       });
 
       if (!input) { return undefined; } else {
-        // ww = scrubInput(input, ww, `DSPOBJU`);
         let wpath = input.trim().toUpperCase().split(`/`);
         if (wpath.length === 1 || wpath[1] === ``) { wpath[1] = wpath[0]; wpath[0] = `*ALL`; }
         ww.path = [wpath[0], wpath[1]].join('/');
@@ -864,9 +863,9 @@ export namespace HwkI {
         ww.searchTerm = keywords.SCAN || '';
       }
     } else {
-      console.log('DSPPRCU ::: promptedValue ->', promptedValue);
+      console.log(`${commandName} ::: promptedValue ->`, promptedValue);
       const input = await vscode.window.showInputBox({
-        prompt: l10n.t(`Find where procedure is used by. See the help for DSPPRCU for selectable input values`),
+        prompt: l10n.t(`Find where procedure is used by. See the help for ${commandName} for selectable input values`),
         title: l10n.t(`Display Procedure Where Used`),
         // value: preloadvalue,
         value: promptedValue,
